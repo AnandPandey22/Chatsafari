@@ -296,11 +296,8 @@ export const useStore = create<ChatStore>()(
           notifications: {}
         });
 
-        // Clear localStorage
+        // Clear localStorage explicitly
         localStorage.removeItem('chat-storage');
-        
-        // Force page reload to clear any remaining state
-        window.location.href = '/login';
       },
 
       clearNotifications: (userId: string) => {
@@ -329,14 +326,7 @@ export const useStore = create<ChatStore>()(
         chatRooms: state.chatRooms,
         selectedUser: state.selectedUser,
         activeUsers: state.activeUsers
-      }),
-      onRehydrateStorage: () => (state) => {
-        if (state?.currentUser) {
-          setTimeout(() => {
-            state.initializeSocket();
-          }, 0);
-        }
-      }
+      })
     }
   )
 );
