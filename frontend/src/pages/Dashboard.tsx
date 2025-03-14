@@ -2,17 +2,33 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import UserList from '../components/UserList';
 import ChatWindow from '../components/ChatWindow';
-import { LogOut, Menu, X, Bell } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { format } from 'date-fns';
+import { LogOut, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { User } from '../types';
 
 const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const location = useLocation();
-  const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, initializeSocket } = useStore();
+  
+  const { 
+    currentUser, 
+    logout, 
+    selectedUser, 
+    notifications, 
+    setSelectedUser, 
+    activeUsers, 
+    initializeSocket 
+  } = useStore(state => ({
+    currentUser: state.currentUser,
+    logout: state.logout,
+    selectedUser: state.selectedUser,
+    notifications: state.notifications,
+    setSelectedUser: state.setSelectedUser,
+    activeUsers: state.activeUsers,
+    initializeSocket: state.initializeSocket
+  }));
 
   useEffect(() => {
     if (!currentUser) {
@@ -50,9 +66,6 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     // Function to handle back button press
     const handleBackButton = (event: PopStateEvent) => {
-      // Prevent default behavior
-      event.preventDefault();
-      
       if (selectedUser) {
         setSelectedUser(null);
       } else {
@@ -103,7 +116,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleNotificationClick = (userId: string) => {
-    const user = activeUsers.find(u => u.id === userId);
+    const user = activeUsers.find((u: User) => u.id === userId);
     if (user) {
       setSelectedUser(user);
       setShowNotifications(false);
@@ -111,7 +124,7 @@ const Dashboard: React.FC = () => {
   };
 
   // Calculate total notifications
-  const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
+  const totalNotifications = Object.values(notifications).reduce((sum: number, count: number) => sum + count, 0);
 
   if (!currentUser) {
     return (
