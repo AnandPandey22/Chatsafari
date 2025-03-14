@@ -27,7 +27,6 @@ export interface ChatStore {
   clearNotifications: (userId: string) => void;
   sendMessage: (message: Message) => void;
   initializeSocket: () => void;
-  clearState: () => void;
 }
 
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
@@ -43,29 +42,17 @@ type SetState = {
 
 type GetState = () => ChatStore;
 
-const initialState = {
-  socket: null,
-  currentUser: null,
-  users: [],
-  messages: [],
-  selectedUser: null,
-  chatRooms: [],
-  activeUsers: [],
-  notifications: {},
-};
-
 export const useStore = create<ChatStore>()(
   persist(
     (set: SetState, get: GetState) => ({
-      ...initialState,
-
-      clearState: () => {
-        const { socket } = get();
-        if (socket) {
-          socket.disconnect();
-        }
-        set(initialState);
-      },
+      socket: null,
+      currentUser: null,
+      users: [],
+      messages: [],
+      selectedUser: null,
+      chatRooms: [],
+      activeUsers: [],
+      notifications: {},
 
       initializeSocket: () => {
         const { currentUser, socket } = get();
@@ -287,7 +274,7 @@ export const useStore = create<ChatStore>()(
       },
 
       logout: () => {
-        const { socket, clearState } = get();
+        const { socket } = get();
         
         // First disconnect socket
         if (socket) {
@@ -295,12 +282,21 @@ export const useStore = create<ChatStore>()(
         }
 
         // Clear all state
-        clearState();
-        
+        set({
+          socket: null,
+          currentUser: null,
+          users: [],
+          messages: [],
+          selectedUser: null,
+          chatRooms: [],
+          activeUsers: [],
+          notifications: {}
+        });
+
         // Clear localStorage
         localStorage.removeItem('chat-storage');
         
-        // Redirect to login
+        // Redirect to login with replace to prevent back navigation
         window.location.replace('/login');
       },
 
