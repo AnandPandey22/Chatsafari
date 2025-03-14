@@ -3,7 +3,7 @@ import { useStore } from '../store/useStore';
 import UserList from '../components/UserList';
 import ChatWindow from '../components/ChatWindow';
 import { LogOut, Menu, X, Bell } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
 
 const Dashboard: React.FC = () => {
@@ -11,16 +11,81 @@ const Dashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers } = useStore();
+  const location = useLocation();
+  const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, initializeSocket } = useStore();
 
   useEffect(() => {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    // Initialize socket connection
+    initializeSocket();
+
+    // Handle window resize
     const handleResize = () => {
       const newIsMobile = window.innerWidth < 768;
       setIsMobile(newIsMobile);
     };
+
+    // Handle page visibility
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && currentUser) {
+        initializeSocket();
+      }
+    };
+
+    // Add event listeners
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [currentUser, navigate, initializeSocket]);
+
+  // Handle back button and chat state
+  useEffect(() => {
+    // Function to handle back button press
+    const handleBackButton = (event: PopStateEvent) => {
+      // Prevent default behavior
+      event.preventDefault();
+      
+      if (selectedUser) {
+        setSelectedUser(null);
+      } else {
+        // If no chat is open, redirect to browser's homepage
+        window.location.href = '/';
+      }
+    };
+
+    // Function to handle page refresh
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!selectedUser) {
+        // Clear any existing history state
+        window.history.replaceState(null, '', window.location.href);
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('popstate', handleBackButton);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Add history entry only when component mounts
+    if (!selectedUser) {
+      // Clear existing history first
+      window.history.replaceState(null, '', window.location.href);
+      // Add new history entry
+      window.history.pushState({ page: 'dashboard' }, '', window.location.href);
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [selectedUser, setSelectedUser]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -34,7 +99,7 @@ const Dashboard: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/', { replace: true });
+    navigate('/login');
   };
 
   const handleNotificationClick = (userId: string) => {
@@ -62,8 +127,9 @@ const Dashboard: React.FC = () => {
       <header className="bg-white border-b border-gray-200 shadow-sm flex-none z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Left section - Empty to help with centering */}
-            <div className="w-20"></div>
+            {/* Left section - Empty now since we removed the back button */}
+            <div className="w-20 flex items-center">
+            </div>
 
             {/* Center section - Brand */}
             <div className="flex-1 flex justify-center">
