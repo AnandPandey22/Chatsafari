@@ -32,7 +32,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (!currentUser) {
-      window.location.replace('/login');
+      window.location.href = '/login';
       return;
     }
 
@@ -56,11 +56,6 @@ const Dashboard: React.FC = () => {
     window.addEventListener('resize', handleResize);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Add history entry when component mounts
-    if (!selectedUser) {
-      window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
-    }
-
     return () => {
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -73,12 +68,16 @@ const Dashboard: React.FC = () => {
       if (selectedUser) {
         setSelectedUser(null);
       } else {
-        // If no chat is open, go to browser's homepage
-        window.location.replace('/');
+        window.location.href = '/';
       }
     };
 
     window.addEventListener('popstate', handleBackButton);
+
+    // Add history entry when component mounts
+    if (!selectedUser) {
+      window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
+    }
 
     return () => {
       window.removeEventListener('popstate', handleBackButton);
@@ -95,14 +94,15 @@ const Dashboard: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    setShowNotifications(false);
-    // First clear the local storage
-    localStorage.removeItem('chat-storage');
-    // Then call logout
-    logout();
-    // Force redirect to login
-    window.location.replace('/login');
+  const handleLogout = async () => {
+    try {
+      setShowNotifications(false);
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Fallback: force redirect to login
+      window.location.href = '/login';
+    }
   };
 
   const handleNotificationClick = (userId: string) => {
@@ -129,7 +129,7 @@ const Dashboard: React.FC = () => {
       <header className="bg-white border-b border-gray-200 shadow-sm flex-none z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Left section - Empty now since we removed the back button */}
+            {/* Left section */}
             <div className="w-20 flex items-center">
             </div>
 
@@ -212,9 +212,9 @@ const Dashboard: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content Area - Fixed Height */}
+      {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* User List - Scrollable */}
+        {/* User List */}
         <div 
           className={`${
             isMobile && selectedUser ? 'hidden' : 'block'
@@ -225,18 +225,17 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Chat Window and Bottom Ad Container */}
+        {/* Chat Window */}
         <div 
           className={`${
             isMobile && !selectedUser ? 'hidden' : 'flex'
           } flex-1 flex-col overflow-hidden`}
         >
-          {/* Chat Window Container */}
           <div className="flex-1 overflow-hidden">
             <ChatWindow isMobile={isMobile} />
           </div>
 
-          {/* Large Banner Ad below chat - Fixed Height */}
+          {/* Ad Space */}
           <div className="h-48 bg-white border-t border-gray-200 flex-none">
             <div className="h-full flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
               <span>Large Banner Ad (728x90)</span>
@@ -244,7 +243,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Sidebar - Ad Space (desktop only) */}
+        {/* Right Sidebar */}
         <div className="hidden lg:block w-96 border-l border-gray-200 bg-white p-4 flex-none">
           <div className="h-full flex flex-col justify-center">
             <div className="bg-gray-50 rounded-xl shadow-sm p-4 h-[calc(100vh-8rem)] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
