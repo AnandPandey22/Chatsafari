@@ -5,12 +5,11 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 const manager = new Manager(SOCKET_URL, {
   autoConnect: false,
   reconnection: true,
-  transports: ['websocket', 'polling']
-});
-
-export const socket = manager.socket('/', {
+  transports: ['websocket', 'polling'],
   withCredentials: true
 });
+
+export const socket = manager.socket('/');
 
 export const connectSocket = (userId: string) => {
   if (!socket.connected) {
