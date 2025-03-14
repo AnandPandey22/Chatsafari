@@ -75,8 +75,8 @@ const Dashboard: React.FC = () => {
         setSelectedUser(null);
         window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
       } else {
-        // If no chat is open, go to browser's homepage
-        window.location.href = document.referrer || '/';
+        // If no chat is open, go to browser's homepage without clearing state
+        window.location.href = '/';
       }
     };
 
