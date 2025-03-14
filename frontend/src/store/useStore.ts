@@ -23,10 +23,11 @@ export interface ChatStore {
   setNotifications: (notifications: { [userId: string]: number }) => void;
   connect: () => void;
   disconnect: () => void;
-  logout: () => Promise<void>;
+  logout: () => void;
   clearNotifications: (userId: string) => void;
   sendMessage: (message: Message) => void;
   initializeSocket: () => void;
+  clearState: () => void;
 }
 
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
@@ -42,54 +43,287 @@ type SetState = {
 
 type GetState = () => ChatStore;
 
+const initialState = {
+  socket: null,
+  currentUser: null,
+  users: [],
+  messages: [],
+  selectedUser: null,
+  chatRooms: [],
+  activeUsers: [],
+  notifications: {},
+};
+
 export const useStore = create<ChatStore>()(
   persist(
     (set: SetState, get: GetState) => ({
-      socket: null,
-      currentUser: null,
-      users: [],
-      messages: [],
-      selectedUser: null,
-      chatRooms: [],
-      activeUsers: [],
-      notifications: {},
+      ...initialState,
 
-      // ... (keep all other functions the same until logout)
-
-      logout: async () => {
+      clearState: () => {
         const { socket } = get();
         if (socket) {
           socket.disconnect();
         }
+        set(initialState);
+      },
 
-        // Clear all state
+      initializeSocket: () => {
+        const { currentUser, socket } = get();
+        if (currentUser && (!socket || !socket.connected)) {
+          const { connect } = get();
+          connect();
+        }
+      },
+
+      setCurrentUser: (user: User) => {
         set({
-          socket: null,
-          currentUser: null,
           users: [],
           messages: [],
           selectedUser: null,
           chatRooms: [],
           activeUsers: [],
-          notifications: {}
+          notifications: {},
+          currentUser: user
         });
-
-        // Clear localStorage
-        localStorage.clear();
-        sessionStorage.clear();
-
-        // Small delay to ensure state is cleared
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        // Redirect to login
-        window.location.href = '/login';
+        
+        const { connect } = get();
+        connect();
       },
 
-      // ... (keep all other functions the same)
+      setUsers: (users: User[]) => {
+        set({ users, activeUsers: users });
+        const currentUser = get().currentUser;
+        if (currentUser) {
+          const rooms = users
+            .filter((user) => user.id !== currentUser.id)
+            .map((user) => ({
+              id: [currentUser.id, user.id].sort().join('-'),
+              participants: [currentUser, user],
+              messages: []
+            }));
+          
+          set({ chatRooms: rooms });
+        }
+      },
+
+      addMessage: (message: Message) => {
+        set((state: ChatStore) => {
+          const roomId = [message.senderId, message.receiverId].sort().join('-');
+          
+          let updatedRooms = [...state.chatRooms];
+          const roomIndex = updatedRooms.findIndex(room => room.id === roomId);
+          
+          if (roomIndex === -1) {
+            const sender = state.users.find(u => u.id === message.senderId);
+            const receiver = state.users.find(u => u.id === message.receiverId);
+            
+            if (sender && receiver) {
+              updatedRooms.push({
+                id: roomId,
+                participants: [sender, receiver],
+                messages: [message],
+                lastMessage: message
+              });
+            }
+          } else {
+            updatedRooms[roomIndex] = {
+              ...updatedRooms[roomIndex],
+              messages: [...updatedRooms[roomIndex].messages, message],
+              lastMessage: message
+            };
+          }
+
+          const selectedUser = state.selectedUser;
+          const currentUser = state.currentUser;
+          
+          if (selectedUser && currentUser) {
+            const currentRoomId = [currentUser.id, selectedUser.id].sort().join('-');
+            if (currentRoomId === roomId) {
+              return {
+                chatRooms: updatedRooms,
+                messages: [...state.messages, message]
+              };
+            }
+          }
+
+          return { chatRooms: updatedRooms };
+        });
+      },
+
+      updateMessages: (messages: Message[]) => set({ messages }),
+
+      setSelectedUser: (user: User | null) => {
+        if (user) {
+          set(state => {
+            const currentUser = state.currentUser;
+            if (!currentUser) return { selectedUser: user };
+
+            const roomId = [currentUser.id, user.id].sort().join('-');
+            
+            const room = state.chatRooms.find(r => r.id === roomId);
+            const messages = room?.messages || [];
+            
+            state.socket?.emit('get:messages', roomId);
+            
+            return {
+              selectedUser: user,
+              messages,
+              notifications: {
+                ...state.notifications,
+                [user.id]: 0
+              }
+            };
+          });
+        } else {
+          set({ selectedUser: null, messages: [] });
+        }
+      },
+
+      setChatRooms: (rooms: ChatRoom[]) => set({ chatRooms: rooms }),
+      setActiveUsers: (users: User[]) => set({ activeUsers: users }),
+      setNotifications: (notifications: { [userId: string]: number }) => set({ notifications }),
+
+      connect: () => {
+        const { socket: existingSocket, currentUser } = get();
+        if (existingSocket?.connected && currentUser) {
+          return;
+        }
+
+        if (existingSocket) {
+          existingSocket.disconnect();
+          set({ socket: null });
+        }
+
+        const newSocket = io(import.meta.env.VITE_API_URL, {
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+          timeout: 5000,
+          autoConnect: false,
+          transports: ['websocket', 'polling']
+        });
+
+        newSocket.on('connect', () => {
+          const currentUser = get().currentUser;
+          if (currentUser) {
+            newSocket.emit('user:join', currentUser);
+          }
+        });
+
+        newSocket.on('connect_error', (error: Error) => {
+          console.error('Connection error:', error);
+        });
+
+        newSocket.on('disconnect', (reason: string) => {
+          if (reason === 'io client disconnect') {
+            set({ socket: null });
+          }
+        });
+
+        newSocket.on('users:update', (users: User[]) => {
+          const { currentUser } = get();
+          set({ 
+            activeUsers: users.filter(u => u.isOnline && u.id !== currentUser?.id),
+            users: users
+          });
+        });
+
+        newSocket.on('messages:history', ({ roomId, messages }: { roomId: string, messages: Message[] }) => {
+          set(state => {
+            const updatedRooms = [...state.chatRooms];
+            const roomIndex = updatedRooms.findIndex(room => room.id === roomId);
+            
+            if (roomIndex !== -1) {
+              updatedRooms[roomIndex] = {
+                ...updatedRooms[roomIndex],
+                messages
+              };
+            }
+
+            const selectedUser = state.selectedUser;
+            const currentUser = state.currentUser;
+            if (selectedUser && currentUser) {
+              const currentRoomId = [currentUser.id, selectedUser.id].sort().join('-');
+              if (currentRoomId === roomId) {
+                return {
+                  chatRooms: updatedRooms,
+                  messages
+                };
+              }
+            }
+
+            return {
+              chatRooms: updatedRooms
+            };
+          });
+        });
+
+        newSocket.on('message:receive', ({ roomId, message }: { roomId: string, message: Message }) => {
+          const { currentUser, selectedUser } = get();
+          
+          get().addMessage(message);
+
+          if (message.senderId !== currentUser?.id && selectedUser?.id !== message.senderId) {
+            notificationSound.play().catch(console.error);
+            set(state => ({
+              notifications: {
+                ...state.notifications,
+                [message.senderId]: (state.notifications[message.senderId] || 0) + 1
+              }
+            }));
+          }
+        });
+
+        set({ socket: newSocket });
+        newSocket.connect();
+      },
+
+      disconnect: () => {
+        const { socket } = get();
+        if (socket) {
+          socket.disconnect();
+          set({ socket: null });
+        }
+      },
+
+      logout: () => {
+        const { socket, clearState } = get();
+        
+        // First disconnect socket
+        if (socket) {
+          socket.disconnect();
+        }
+
+        // Clear all state
+        clearState();
+        
+        // Clear localStorage
+        localStorage.removeItem('chat-storage');
+        
+        // Redirect to login
+        window.location.replace('/login');
+      },
+
+      clearNotifications: (userId: string) => {
+        set(state => ({
+          notifications: {
+            ...state.notifications,
+            [userId]: 0
+          }
+        }));
+      },
+
+      sendMessage: (message: Message) => {
+        const { socket } = get();
+        if (socket) {
+          socket.emit('message:send', message);
+          get().addMessage(message);
+        }
+      }
     }),
     {
       name: 'chat-storage',
-      partialize: (state) => ({
+      partialize: (state) => ({ 
         currentUser: state.currentUser,
         users: state.users,
         chatRooms: state.chatRooms,
