@@ -8,11 +8,7 @@ const manager = new Manager(SOCKET_URL, {
   transports: ['websocket', 'polling']
 });
 
-export const socket = manager.socket('/', {
-  auth: {
-    withCredentials: true
-  }
-});
+export const socket = manager.socket('/');
 
 export const connectSocket = (userId: string) => {
   if (!socket.connected) {
