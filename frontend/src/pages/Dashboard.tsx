@@ -32,7 +32,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (!currentUser) {
-      window.location.href = '/login';
+      window.location.replace('/login');
       return;
     }
 
@@ -69,14 +69,12 @@ const Dashboard: React.FC = () => {
 
   // Handle back button and chat state
   useEffect(() => {
-    const handleBackButton = (event: PopStateEvent) => {
+    const handleBackButton = () => {
       if (selectedUser) {
-        event.preventDefault();
         setSelectedUser(null);
-        window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
       } else {
         // If no chat is open, go to browser's homepage
-        window.location.href = '/';
+        window.location.replace('/');
       }
     };
 
@@ -99,7 +97,12 @@ const Dashboard: React.FC = () => {
 
   const handleLogout = () => {
     setShowNotifications(false);
+    // First clear the local storage
+    localStorage.removeItem('chat-storage');
+    // Then call logout
     logout();
+    // Force redirect to login
+    window.location.replace('/login');
   };
 
   const handleNotificationClick = (userId: string) => {
