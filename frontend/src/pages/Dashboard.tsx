@@ -76,7 +76,12 @@ const Dashboard: React.FC = () => {
         window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
       } else {
         // If no chat is open, go to browser's homepage without clearing state
-        window.location.href = '/';
+        const homepageUrl = document.referrer || '/';
+        if (homepageUrl === window.location.href) {
+          window.history.back();
+        } else {
+          window.location.href = homepageUrl;
+        }
       }
     };
 
