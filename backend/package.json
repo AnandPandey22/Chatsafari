@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "npm install && tsc",
+    "build": "npm install && npm install --save-dev @types/express @types/cors @types/node @types/socket.io && tsc",
     "start": "node dist/index.js"
   },
   "dependencies": {
