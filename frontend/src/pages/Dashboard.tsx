@@ -32,7 +32,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate('/login');
+      window.location.href = '/login';
       return;
     }
 
@@ -56,47 +56,34 @@ const Dashboard: React.FC = () => {
     window.addEventListener('resize', handleResize);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Add history entry when component mounts
+    if (!selectedUser) {
+      window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
+    }
+
     return () => {
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [currentUser, navigate, initializeSocket]);
+  }, [currentUser, initializeSocket]);
 
   // Handle back button and chat state
   useEffect(() => {
-    // Function to handle back button press
     const handleBackButton = (event: PopStateEvent) => {
       if (selectedUser) {
+        event.preventDefault();
         setSelectedUser(null);
+        window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
       } else {
-        // If no chat is open, redirect to browser's homepage
+        // If no chat is open, go to browser's homepage
         window.location.href = '/';
       }
     };
 
-    // Function to handle page refresh
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!selectedUser) {
-        // Clear any existing history state
-        window.history.replaceState(null, '', window.location.href);
-      }
-    };
-
-    // Add event listeners
     window.addEventListener('popstate', handleBackButton);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    // Add history entry only when component mounts
-    if (!selectedUser) {
-      // Clear existing history first
-      window.history.replaceState(null, '', window.location.href);
-      // Add new history entry
-      window.history.pushState({ page: 'dashboard' }, '', window.location.href);
-    }
 
     return () => {
       window.removeEventListener('popstate', handleBackButton);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [selectedUser, setSelectedUser]);
 
@@ -111,8 +98,8 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
+    setShowNotifications(false);
     logout();
-    navigate('/login');
   };
 
   const handleNotificationClick = (userId: string) => {
@@ -123,7 +110,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum: number, count: number) => sum + count, 0);
 
   if (!currentUser) {
