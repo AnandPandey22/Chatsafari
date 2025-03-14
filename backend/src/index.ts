@@ -12,7 +12,7 @@ const httpServer = createServer(app);
 
 // Configure CORS for production
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [process.env.FRONTEND_URL || 'http://localhost:5173', 'https://chatsafari.netlify.app'],
   methods: ['GET', 'POST'],
   credentials: true,
 };
