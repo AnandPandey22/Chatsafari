@@ -29,10 +29,9 @@ export interface ChatStore {
   initializeSocket: () => void;
 }
 
-// Using a CDN-hosted notification sound
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
 const notificationSound = new Audio(NOTIFICATION_SOUND_URL);
-notificationSound.volume = 0.08; // Set volume to 8%
+notificationSound.volume = 0.08;
 
 type SetState = {
   (
@@ -201,7 +200,6 @@ export const useStore = create<ChatStore>()(
 
         newSocket.on('connect_error', (error: Error) => {
           console.error('Connection error:', error);
-          // Don't clear the socket on connection error, let it retry
         });
 
         newSocket.on('disconnect', (reason: string) => {
@@ -285,6 +283,8 @@ export const useStore = create<ChatStore>()(
         if (socket) {
           socket.disconnect();
         }
+        
+        // Clear all state
         set({
           socket: null,
           currentUser: null,
@@ -295,6 +295,12 @@ export const useStore = create<ChatStore>()(
           activeUsers: [],
           notifications: {}
         });
+
+        // Clear localStorage
+        localStorage.removeItem('chat-storage');
+        
+        // Force page reload to clear any remaining state
+        window.location.href = '/login';
       },
 
       clearNotifications: (userId: string) => {
@@ -325,9 +331,10 @@ export const useStore = create<ChatStore>()(
         activeUsers: state.activeUsers
       }),
       onRehydrateStorage: () => (state) => {
-        // Reconnect socket when store is rehydrated
         if (state?.currentUser) {
-          state.initializeSocket();
+          setTimeout(() => {
+            state.initializeSocket();
+          }, 0);
         }
       }
     }
