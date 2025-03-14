@@ -293,11 +293,11 @@ export const useStore = create<ChatStore>()(
           notifications: {}
         });
 
-        // Clear localStorage
-        localStorage.removeItem('chat-storage');
+        // Clear localStorage completely
+        localStorage.clear();
         
-        // Redirect to login with replace to prevent back navigation
-        window.location.replace('/login');
+        // Force redirect to login
+        window.location.href = '/login';
       },
 
       clearNotifications: (userId: string) => {
