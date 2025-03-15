@@ -23,7 +23,7 @@ export interface ChatStore {
   setNotifications: (notifications: { [userId: string]: number }) => void;
   connect: () => void;
   disconnect: () => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   clearNotifications: (userId: string) => void;
   sendMessage: (message: Message) => void;
   initializeSocket: () => void;
@@ -201,7 +201,6 @@ export const useStore = create<ChatStore>()(
 
         newSocket.on('connect_error', (error: Error) => {
           console.error('Connection error:', error);
-          // Don't clear the socket on connection error, let it retry
         });
 
         newSocket.on('disconnect', (reason: string) => {
@@ -280,43 +279,53 @@ export const useStore = create<ChatStore>()(
         }
       },
 
-      logout: () => {
-        try {
-          const socket = get().socket;
-          // Disconnect socket if it exists and is connected
-          if (socket?.connected) {
-            socket.disconnect();
-          }
-          
-          // Clear all state
-          set({
-            currentUser: null,
-            users: [],
-            messages: [],
-            notifications: {},
-            selectedUser: null,
-            socket: null,
-            activeUsers: [],
-            chatRooms: []
-          });
+      logout: async () => {
+        return new Promise<void>((resolve) => {
+          try {
+            const socket = get().socket;
+            // Disconnect socket if it exists and is connected
+            if (socket?.connected) {
+              socket.disconnect();
+            }
+            
+            // Clear all state
+            set({
+              currentUser: null,
+              users: [],
+              messages: [],
+              notifications: {},
+              selectedUser: null,
+              socket: null,
+              activeUsers: [],
+              chatRooms: []
+            });
 
-          // Clear storage
-          localStorage.clear();
-          sessionStorage.clear();
-        } catch (error) {
-          console.error('Error during logout:', error);
-          // Ensure state is cleared even if there's an error
-          set({
-            currentUser: null,
-            users: [],
-            messages: [],
-            notifications: {},
-            selectedUser: null,
-            socket: null,
-            activeUsers: [],
-            chatRooms: []
-          });
-        }
+            // Clear all storage immediately
+            localStorage.removeItem('chat-storage');
+            sessionStorage.clear();
+            localStorage.clear();
+            
+            resolve();
+          } catch (error) {
+            console.error('Error during logout:', error);
+            // Ensure state is cleared even in error case
+            set({
+              currentUser: null,
+              users: [],
+              messages: [],
+              notifications: {},
+              selectedUser: null,
+              socket: null,
+              activeUsers: [],
+              chatRooms: []
+            });
+            // Clear storage even in error case
+            localStorage.removeItem('chat-storage');
+            sessionStorage.clear();
+            localStorage.clear();
+            resolve();
+          }
+        });
       },
 
       clearNotifications: (userId: string) => {
