@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import UserList from '../components/UserList';
 import ChatWindow from '../components/ChatWindow';
-import { LogOut, Bell } from 'lucide-react';
+import { LogOut, Menu, X, Bell } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { format } from 'date-fns';
 import { User } from '../types';
 
 const Dashboard: React.FC = () => {
@@ -70,20 +71,36 @@ const Dashboard: React.FC = () => {
         setSelectedUser(null);
         window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
       } else {
-        // Store current state
-        sessionStorage.setItem('lastPath', window.location.pathname);
-        // Get the homepage URL
-        const homepageUrl = window.location.origin;
-        // Redirect to homepage
-        window.location.replace(homepageUrl);
+        // Prevent default navigation
+        event.preventDefault();
+        
+        // Save current state to maintain session
+        const currentState = {
+          path: window.location.pathname,
+          isLoggedIn: true,
+          timestamp: Date.now(),
+          userId: currentUser?.id
+        };
+        sessionStorage.setItem('chatSafariState', JSON.stringify(currentState));
+        
+        // Redirect to browser's homepage
+        window.location.href = window.location.origin.replace(/\/$/, '');
       }
     };
 
-    // Check if returning from homepage
-    const lastPath = sessionStorage.getItem('lastPath');
-    if (lastPath === '/dashboard') {
-      sessionStorage.removeItem('lastPath');
-      initializeSocket();
+    // Check if we're returning with saved state
+    const savedState = sessionStorage.getItem('chatSafariState');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        const isStateValid = Date.now() - state.timestamp < 24 * 60 * 60 * 1000; // 24 hours
+        if (state.isLoggedIn && isStateValid && state.userId === currentUser?.id) {
+          // Don't remove the state, keep it for future returns
+          initializeSocket();
+        }
+      } catch (error) {
+        console.error('Error parsing saved state:', error);
+      }
     }
 
     // Add event listeners
@@ -97,7 +114,7 @@ const Dashboard: React.FC = () => {
     return () => {
       window.removeEventListener('popstate', handleBackButton);
     };
-  }, [selectedUser, setSelectedUser, initializeSocket]);
+  }, [selectedUser, setSelectedUser, initializeSocket, currentUser]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -109,18 +126,16 @@ const Dashboard: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      setShowNotifications(false);
-      // First clear all state and storage
-      await logout();
-      // Force a complete page reload and redirect
-      window.location.replace('/login');
-    } catch (error) {
-      console.error('Error during logout:', error);
-      // Fallback redirect
-      window.location.href = '/login';
-    }
+  const handleLogout = () => {
+    setShowNotifications(false);
+    // Clear session state first
+    sessionStorage.removeItem('chatSafariState');
+    // Then perform logout
+    logout();
+    // Force a full page reload to the login page
+    window.location.href = `${window.location.origin}/login`;
+    // Prevent any further execution
+    return;
   };
 
   const handleNotificationClick = (userId: string) => {
