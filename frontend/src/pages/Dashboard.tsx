@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import UserList from '../components/UserList';
 import ChatWindow from '../components/ChatWindow';
-import { LogOut, Bell } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { LogOut, Menu, X, Bell } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { format } from 'date-fns';
 import { User } from '../types';
 
 const Dashboard: React.FC = () => {
@@ -11,7 +12,7 @@ const Dashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  
+  const location = useLocation();
   const { 
     currentUser, 
     logout, 
@@ -32,7 +33,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (!currentUser) {
-      window.location.replace('/login');
+      navigate('/login');
       return;
     }
 
@@ -56,16 +57,11 @@ const Dashboard: React.FC = () => {
     window.addEventListener('resize', handleResize);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Add history entry when component mounts
-    if (!selectedUser) {
-      window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
-    }
-
     return () => {
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [currentUser, initializeSocket]);
+  }, [currentUser, navigate, initializeSocket]);
 
   // Handle back button and chat state
   useEffect(() => {
@@ -75,22 +71,32 @@ const Dashboard: React.FC = () => {
         setSelectedUser(null);
         window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
       } else {
-        // If no chat is open, go to browser's homepage without clearing state
-        const homepageUrl = document.referrer || '/';
-        if (homepageUrl === window.location.href) {
-          window.history.back();
-        } else {
-          window.location.href = homepageUrl;
-        }
+        // Store the current path before navigating
+        sessionStorage.setItem('lastPath', window.location.pathname);
+        // If no chat is open, redirect to browser's homepage
+        window.location.href = '/';
       }
     };
 
+    // Check if we're returning from homepage
+    const lastPath = sessionStorage.getItem('lastPath');
+    if (lastPath === '/dashboard') {
+      sessionStorage.removeItem('lastPath');
+      initializeSocket();
+    }
+
+    // Add event listeners
     window.addEventListener('popstate', handleBackButton);
+
+    // Add history entry when component mounts
+    if (!selectedUser) {
+      window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
+    }
 
     return () => {
       window.removeEventListener('popstate', handleBackButton);
     };
-  }, [selectedUser, setSelectedUser]);
+  }, [selectedUser, setSelectedUser, initializeSocket]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -103,8 +109,8 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
-    setShowNotifications(false);
     logout();
+    navigate('/login');
   };
 
   const handleNotificationClick = (userId: string) => {
@@ -115,6 +121,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  // Calculate total notifications with proper typing
   const totalNotifications = Object.values(notifications).reduce((sum: number, count: number) => sum + count, 0);
 
   if (!currentUser) {
