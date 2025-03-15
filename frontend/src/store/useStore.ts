@@ -201,7 +201,6 @@ export const useStore = create<ChatStore>()(
 
         newSocket.on('connect_error', (error: Error) => {
           console.error('Connection error:', error);
-          // Don't clear the socket on connection error, let it retry
         });
 
         newSocket.on('disconnect', (reason: string) => {
@@ -282,13 +281,13 @@ export const useStore = create<ChatStore>()(
 
       logout: () => {
         try {
+          // First, disconnect the socket if it exists
           const socket = get().socket;
-          // Disconnect socket if it exists and is connected
           if (socket?.connected) {
             socket.disconnect();
           }
           
-          // Clear all state
+          // Clear all state immediately
           set({
             currentUser: null,
             users: [],
@@ -306,14 +305,15 @@ export const useStore = create<ChatStore>()(
           localStorage.clear();
           sessionStorage.clear();
 
-          // Emit a custom event to notify other components
+          // Emit logout event
           window.dispatchEvent(new Event('userLoggedOut'));
           
-          // Force navigation to homepage
-          window.location.replace(window.location.origin);
+          // Ensure redirection to homepage
+          window.location.replace('https://chatsafari.com');
           
         } catch (error) {
           console.error('Error during logout:', error);
+          
           // Ensure state is cleared even if there's an error
           set({
             currentUser: null,
@@ -325,14 +325,15 @@ export const useStore = create<ChatStore>()(
             activeUsers: [],
             chatRooms: []
           });
+          
           // Clear storage even in error case
           localStorage.removeItem('chat-storage');
           sessionStorage.removeItem('chatSafariState');
           localStorage.clear();
           sessionStorage.clear();
           
-          // Ensure we're on the homepage even in error case
-          window.location.replace(window.location.origin);
+          // Force redirect to homepage even in error case
+          window.location.replace('https://chatsafari.com');
         }
       },
 
@@ -364,7 +365,6 @@ export const useStore = create<ChatStore>()(
         activeUsers: state.activeUsers
       }),
       onRehydrateStorage: () => (state) => {
-        // Reconnect socket when store is rehydrated
         if (state?.currentUser) {
           state.initializeSocket();
         }
