@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useStore } from '../store/useStore';
 import UserList from '../components/UserList';
 import ChatWindow from '../components/ChatWindow';
-import { LogOut, Menu, X, Bell } from 'lucide-react';
+import { LogOut, Bell } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { format } from 'date-fns';
 import { User } from '../types';
 
 const Dashboard: React.FC = () => {
@@ -13,6 +12,7 @@ const Dashboard: React.FC = () => {
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  
   const { 
     currentUser, 
     logout, 
@@ -71,14 +71,16 @@ const Dashboard: React.FC = () => {
         setSelectedUser(null);
         window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
       } else {
-        // Store the current path before navigating
+        // Store current state
         sessionStorage.setItem('lastPath', window.location.pathname);
-        // If no chat is open, redirect to browser's homepage
-        window.location.href = '/';
+        // Get the homepage URL
+        const homepageUrl = window.location.origin;
+        // Redirect to homepage
+        window.location.href = homepageUrl;
       }
     };
 
-    // Check if we're returning from homepage
+    // Check if returning from homepage
     const lastPath = sessionStorage.getItem('lastPath');
     if (lastPath === '/dashboard') {
       sessionStorage.removeItem('lastPath');
@@ -109,8 +111,12 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
+    // First clear notifications
+    setShowNotifications(false);
+    // Call logout from store
     logout();
-    navigate('/login');
+    // Force redirect to login page
+    window.location.href = '/login';
   };
 
   const handleNotificationClick = (userId: string) => {
