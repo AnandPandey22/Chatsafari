@@ -74,44 +74,15 @@ const Dashboard: React.FC = () => {
         // Prevent default navigation
         event.preventDefault();
         
-        // Save current state to maintain session
-        const currentState = {
-          path: window.location.pathname,
-          isLoggedIn: true,
-          timestamp: Date.now(),
-          userId: currentUser?.id,
-          username: currentUser?.username
-        };
+        // Perform full logout
+        setShowNotifications(false);
+        sessionStorage.removeItem('chatSafariState');
+        logout();
         
-        try {
-          // Save state to maintain session
-          sessionStorage.setItem('chatSafariState', JSON.stringify(currentState));
-          
-          // Redirect to browser's homepage while keeping session alive
-          const homepageUrl = window.location.origin.replace(/\/$/, '');
-          window.location.replace(homepageUrl);
-        } catch (error) {
-          console.error('Error handling back button:', error);
-          // Fallback to simple navigation
-          window.location.href = window.location.origin;
-        }
+        // Redirect to homepage and ensure a clean state
+        window.location.replace(window.location.origin);
       }
     };
-
-    // Check if we're returning with saved state
-    const savedState = sessionStorage.getItem('chatSafariState');
-    if (savedState) {
-      try {
-        const state = JSON.parse(savedState);
-        const isStateValid = Date.now() - state.timestamp < 24 * 60 * 60 * 1000; // 24 hours
-        if (state.isLoggedIn && isStateValid && state.userId === currentUser?.id) {
-          // Keep the socket connection alive
-          initializeSocket();
-        }
-      } catch (error) {
-        console.error('Error parsing saved state:', error);
-      }
-    }
 
     // Add event listeners
     window.addEventListener('popstate', handleBackButton);
@@ -124,7 +95,7 @@ const Dashboard: React.FC = () => {
     return () => {
       window.removeEventListener('popstate', handleBackButton);
     };
-  }, [selectedUser, setSelectedUser, initializeSocket, currentUser]);
+  }, [selectedUser, setSelectedUser, logout]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
