@@ -20,7 +20,8 @@ const Dashboard: React.FC = () => {
     notifications, 
     setSelectedUser, 
     activeUsers, 
-    initializeSocket 
+    initializeSocket,
+    socket 
   } = useStore(state => ({
     currentUser: state.currentUser,
     logout: state.logout,
@@ -28,7 +29,8 @@ const Dashboard: React.FC = () => {
     notifications: state.notifications,
     setSelectedUser: state.setSelectedUser,
     activeUsers: state.activeUsers,
-    initializeSocket: state.initializeSocket
+    initializeSocket: state.initializeSocket,
+    socket: state.socket
   }));
 
   useEffect(() => {
@@ -65,7 +67,7 @@ const Dashboard: React.FC = () => {
 
   // Handle back button and chat state
   useEffect(() => {
-    const handleBackButton = (event: PopStateEvent) => {
+    const handleBackButton = async (event: PopStateEvent) => {
       event.preventDefault();
       
       if (selectedUser) {
@@ -73,10 +75,31 @@ const Dashboard: React.FC = () => {
         setSelectedUser(null);
         window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
       } else {
-        // If no chat window is open, perform full logout and redirect
+        // If no chat window is open, perform full logout
         setShowNotifications(false);
+        
+        // Emit force logout event to server before disconnecting
+        if (socket) {
+          socket.emit('user:force-logout', currentUser?.id);
+          
+          // Wait for server acknowledgment or timeout after 1 second
+          await new Promise(resolve => {
+            const timeout = setTimeout(resolve, 1000);
+            socket.once('force-logout:acknowledged', () => {
+              clearTimeout(timeout);
+              resolve(true);
+            });
+          });
+        }
+
+        // Clear all session state
         sessionStorage.removeItem('chatSafariState');
+        localStorage.removeItem('chat-storage');
+        
+        // Perform complete logout
         logout();
+        
+        // Force redirect to homepage
         window.location.replace('https://chatsafari.com');
       }
     };
@@ -85,12 +108,14 @@ const Dashboard: React.FC = () => {
     window.addEventListener('popstate', handleBackButton);
 
     // Add history entry when component mounts
-    window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
+    if (!selectedUser) {
+      window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
+    }
 
     return () => {
       window.removeEventListener('popstate', handleBackButton);
     };
-  }, [selectedUser, setSelectedUser, logout]);
+  }, [selectedUser, setSelectedUser, logout, socket, currentUser]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -102,13 +127,31 @@ const Dashboard: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setShowNotifications(false);
-    // Clear all session state first
+    
+    // Emit force logout event to server before disconnecting
+    if (socket) {
+      socket.emit('user:force-logout', currentUser?.id);
+      
+      // Wait for server acknowledgment or timeout after 1 second
+      await new Promise(resolve => {
+        const timeout = setTimeout(resolve, 1000);
+        socket.once('force-logout:acknowledged', () => {
+          clearTimeout(timeout);
+          resolve(true);
+        });
+      });
+    }
+
+    // Clear all session state
     sessionStorage.removeItem('chatSafariState');
-    // Perform logout which will clear all other storage
+    localStorage.removeItem('chat-storage');
+    
+    // Perform complete logout
     logout();
-    // Force a full page reload to the homepage
+    
+    // Force redirect to homepage
     window.location.replace('https://chatsafari.com');
   };
 
