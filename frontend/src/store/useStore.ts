@@ -300,16 +300,17 @@ export const useStore = create<ChatStore>()(
             chatRooms: []
           });
 
-          // Clear all storage
+          // Clear all storage immediately
           localStorage.removeItem('chat-storage');
           sessionStorage.removeItem('chatSafariState');
           localStorage.clear();
           sessionStorage.clear();
+
+          // Emit a custom event to notify other components
+          window.dispatchEvent(new Event('userLoggedOut'));
           
-          // Ensure we're on the homepage
-          if (window.location.pathname !== '/') {
-            window.location.replace(window.location.origin);
-          }
+          // Force navigation to homepage
+          window.location.replace(window.location.origin);
           
         } catch (error) {
           console.error('Error during logout:', error);
