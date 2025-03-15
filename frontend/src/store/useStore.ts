@@ -306,6 +306,11 @@ export const useStore = create<ChatStore>()(
           localStorage.clear();
           sessionStorage.clear();
           
+          // Ensure we're on the homepage
+          if (window.location.pathname !== '/') {
+            window.location.replace(window.location.origin);
+          }
+          
         } catch (error) {
           console.error('Error during logout:', error);
           // Ensure state is cleared even if there's an error
@@ -324,6 +329,9 @@ export const useStore = create<ChatStore>()(
           sessionStorage.removeItem('chatSafariState');
           localStorage.clear();
           sessionStorage.clear();
+          
+          // Ensure we're on the homepage even in error case
+          window.location.replace(window.location.origin);
         }
       },
 
