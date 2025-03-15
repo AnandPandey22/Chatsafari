@@ -33,7 +33,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate('/');
+      window.location.replace('https://chatsafari.com');
       return;
     }
 
@@ -66,21 +66,18 @@ const Dashboard: React.FC = () => {
   // Handle back button and chat state
   useEffect(() => {
     const handleBackButton = (event: PopStateEvent) => {
+      event.preventDefault();
+      
       if (selectedUser) {
-        event.preventDefault();
+        // If chat window is open, just close it
         setSelectedUser(null);
         window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
       } else {
-        // Prevent default navigation
-        event.preventDefault();
-        
-        // Perform full logout
+        // If no chat window is open, perform full logout and redirect
         setShowNotifications(false);
         sessionStorage.removeItem('chatSafariState');
         logout();
-        
-        // Redirect to homepage and ensure a clean state
-        window.location.replace(window.location.origin);
+        window.location.replace('https://chatsafari.com');
       }
     };
 
@@ -88,9 +85,7 @@ const Dashboard: React.FC = () => {
     window.addEventListener('popstate', handleBackButton);
 
     // Add history entry when component mounts
-    if (!selectedUser) {
-      window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
-    }
+    window.history.pushState({ page: 'dashboard' }, '', window.location.pathname);
 
     return () => {
       window.removeEventListener('popstate', handleBackButton);
@@ -114,7 +109,7 @@ const Dashboard: React.FC = () => {
     // Perform logout which will clear all other storage
     logout();
     // Force a full page reload to the homepage
-    window.location.replace(window.location.origin);
+    window.location.replace('https://chatsafari.com');
   };
 
   const handleNotificationClick = (userId: string) => {
