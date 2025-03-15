@@ -79,12 +79,22 @@ const Dashboard: React.FC = () => {
           path: window.location.pathname,
           isLoggedIn: true,
           timestamp: Date.now(),
-          userId: currentUser?.id
+          userId: currentUser?.id,
+          username: currentUser?.username
         };
-        sessionStorage.setItem('chatSafariState', JSON.stringify(currentState));
         
-        // Redirect to browser's homepage
-        window.location.href = window.location.origin.replace(/\/$/, '');
+        try {
+          // Save state to maintain session
+          sessionStorage.setItem('chatSafariState', JSON.stringify(currentState));
+          
+          // Redirect to browser's homepage while keeping session alive
+          const homepageUrl = window.location.origin.replace(/\/$/, '');
+          window.location.replace(homepageUrl);
+        } catch (error) {
+          console.error('Error handling back button:', error);
+          // Fallback to simple navigation
+          window.location.href = window.location.origin;
+        }
       }
     };
 
@@ -95,7 +105,7 @@ const Dashboard: React.FC = () => {
         const state = JSON.parse(savedState);
         const isStateValid = Date.now() - state.timestamp < 24 * 60 * 60 * 1000; // 24 hours
         if (state.isLoggedIn && isStateValid && state.userId === currentUser?.id) {
-          // Don't remove the state, keep it for future returns
+          // Keep the socket connection alive
           initializeSocket();
         }
       } catch (error) {
@@ -128,14 +138,12 @@ const Dashboard: React.FC = () => {
 
   const handleLogout = () => {
     setShowNotifications(false);
-    // Clear session state first
+    // Clear all session state first
     sessionStorage.removeItem('chatSafariState');
-    // Then perform logout
+    // Perform logout which will clear all other storage
     logout();
     // Force a full page reload to the login page
-    window.location.href = `${window.location.origin}/login`;
-    // Prevent any further execution
-    return;
+    window.location.replace(`${window.location.origin}/login`);
   };
 
   const handleNotificationClick = (userId: string) => {
