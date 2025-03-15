@@ -12,7 +12,6 @@ const Dashboard: React.FC = () => {
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
-  
   const { 
     currentUser, 
     logout, 
@@ -76,7 +75,7 @@ const Dashboard: React.FC = () => {
         // Get the homepage URL
         const homepageUrl = window.location.origin;
         // Redirect to homepage
-        window.location.href = homepageUrl;
+        window.location.replace(homepageUrl);
       }
     };
 
@@ -111,12 +110,9 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
-    // First clear notifications
     setShowNotifications(false);
-    // Call logout from store
     logout();
-    // Force redirect to login page
-    window.location.href = '/login';
+    window.location.replace('/login');
   };
 
   const handleNotificationClick = (userId: string) => {
