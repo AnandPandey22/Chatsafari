@@ -33,7 +33,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (!currentUser) {
-      navigate('/login');
+      navigate('/');
       return;
     }
 
@@ -142,8 +142,8 @@ const Dashboard: React.FC = () => {
     sessionStorage.removeItem('chatSafariState');
     // Perform logout which will clear all other storage
     logout();
-    // Force a full page reload to the login page
-    window.location.replace(`${window.location.origin}/login`);
+    // Force a full page reload to the homepage
+    window.location.replace(window.location.origin);
   };
 
   const handleNotificationClick = (userId: string) => {
