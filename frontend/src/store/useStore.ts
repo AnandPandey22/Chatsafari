@@ -205,9 +205,29 @@ export const useStore = create<ChatStore>()(
 
         newSocket.on('disconnect', (reason: string) => {
           console.log('Disconnected from server:', reason);
-          if (reason === 'io client disconnect') {
+          if (reason === 'io client disconnect' || reason === 'force-logout') {
             set({ socket: null });
+            // Clear all state and storage on force logout
+            if (reason === 'force-logout') {
+              localStorage.removeItem('chat-storage');
+              sessionStorage.removeItem('chatSafariState');
+              window.location.replace('https://chatsafari.com');
+            }
           }
+        });
+
+        newSocket.on('force-logout:acknowledged', () => {
+          // Handle force logout acknowledgment
+          set({
+            currentUser: null,
+            users: [],
+            messages: [],
+            notifications: {},
+            selectedUser: null,
+            socket: null,
+            activeUsers: [],
+            chatRooms: []
+          });
         });
 
         newSocket.on('users:update', (users: User[]) => {
@@ -274,6 +294,11 @@ export const useStore = create<ChatStore>()(
       disconnect: () => {
         const { socket } = get();
         if (socket) {
+          // Emit force logout before disconnecting
+          const currentUser = get().currentUser;
+          if (currentUser) {
+            socket.emit('user:force-logout', currentUser.id);
+          }
           socket.disconnect();
           set({ socket: null });
         }
@@ -281,40 +306,67 @@ export const useStore = create<ChatStore>()(
 
       logout: () => {
         try {
-          // First, disconnect the socket if it exists
           const socket = get().socket;
-          if (socket?.connected) {
-            socket.disconnect();
+          const currentUser = get().currentUser;
+          
+          // First, emit force logout to server if socket exists
+          if (socket?.connected && currentUser) {
+            socket.emit('user:force-logout', currentUser.id);
+            
+            // Wait briefly for server to process the logout
+            setTimeout(() => {
+              // Disconnect socket
+              socket.disconnect();
+              
+              // Clear all state
+              set({
+                currentUser: null,
+                users: [],
+                messages: [],
+                notifications: {},
+                selectedUser: null,
+                socket: null,
+                activeUsers: [],
+                chatRooms: []
+              });
+
+              // Clear all storage
+              localStorage.removeItem('chat-storage');
+              sessionStorage.removeItem('chatSafariState');
+              localStorage.clear();
+              sessionStorage.clear();
+
+              // Emit logout event
+              window.dispatchEvent(new Event('userLoggedOut'));
+              
+              // Redirect to homepage
+              window.location.replace('https://chatsafari.com');
+            }, 100);
+          } else {
+            // If no socket connection, just clear everything
+            set({
+              currentUser: null,
+              users: [],
+              messages: [],
+              notifications: {},
+              selectedUser: null,
+              socket: null,
+              activeUsers: [],
+              chatRooms: []
+            });
+
+            localStorage.removeItem('chat-storage');
+            sessionStorage.removeItem('chatSafariState');
+            localStorage.clear();
+            sessionStorage.clear();
+
+            window.dispatchEvent(new Event('userLoggedOut'));
+            window.location.replace('https://chatsafari.com');
           }
-          
-          // Clear all state immediately
-          set({
-            currentUser: null,
-            users: [],
-            messages: [],
-            notifications: {},
-            selectedUser: null,
-            socket: null,
-            activeUsers: [],
-            chatRooms: []
-          });
-
-          // Clear all storage immediately
-          localStorage.removeItem('chat-storage');
-          sessionStorage.removeItem('chatSafariState');
-          localStorage.clear();
-          sessionStorage.clear();
-
-          // Emit logout event
-          window.dispatchEvent(new Event('userLoggedOut'));
-          
-          // Ensure redirection to homepage
-          window.location.replace('https://chatsafari.com');
-          
         } catch (error) {
           console.error('Error during logout:', error);
           
-          // Ensure state is cleared even if there's an error
+          // Ensure state and storage are cleared even if there's an error
           set({
             currentUser: null,
             users: [],
@@ -326,13 +378,11 @@ export const useStore = create<ChatStore>()(
             chatRooms: []
           });
           
-          // Clear storage even in error case
           localStorage.removeItem('chat-storage');
           sessionStorage.removeItem('chatSafariState');
           localStorage.clear();
           sessionStorage.clear();
           
-          // Force redirect to homepage even in error case
           window.location.replace('https://chatsafari.com');
         }
       },
