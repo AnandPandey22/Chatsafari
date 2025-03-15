@@ -281,20 +281,42 @@ export const useStore = create<ChatStore>()(
       },
 
       logout: () => {
-        const { socket } = get();
-        if (socket) {
-          socket.disconnect();
+        try {
+          const socket = get().socket;
+          // Disconnect socket if it exists and is connected
+          if (socket?.connected) {
+            socket.disconnect();
+          }
+          
+          // Clear all state
+          set({
+            currentUser: null,
+            users: [],
+            messages: [],
+            notifications: {},
+            selectedUser: null,
+            socket: null,
+            activeUsers: [],
+            chatRooms: []
+          });
+
+          // Clear storage
+          localStorage.clear();
+          sessionStorage.clear();
+        } catch (error) {
+          console.error('Error during logout:', error);
+          // Ensure state is cleared even if there's an error
+          set({
+            currentUser: null,
+            users: [],
+            messages: [],
+            notifications: {},
+            selectedUser: null,
+            socket: null,
+            activeUsers: [],
+            chatRooms: []
+          });
         }
-        set({
-          socket: null,
-          currentUser: null,
-          users: [],
-          messages: [],
-          selectedUser: null,
-          chatRooms: [],
-          activeUsers: [],
-          notifications: {}
-        });
       },
 
       clearNotifications: (userId: string) => {
