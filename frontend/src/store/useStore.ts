@@ -29,9 +29,10 @@ export interface ChatStore {
   initializeSocket: () => void;
 }
 
+// Using a CDN-hosted notification sound
 const NOTIFICATION_SOUND_URL = 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3';
 const notificationSound = new Audio(NOTIFICATION_SOUND_URL);
-notificationSound.volume = 0.08;
+notificationSound.volume = 0.08; // Set volume to 8%
 
 type SetState = {
   (
@@ -191,6 +192,7 @@ export const useStore = create<ChatStore>()(
         });
 
         newSocket.on('connect', () => {
+          console.log('Connected to server');
           const currentUser = get().currentUser;
           if (currentUser) {
             newSocket.emit('user:join', currentUser);
@@ -199,15 +201,18 @@ export const useStore = create<ChatStore>()(
 
         newSocket.on('connect_error', (error: Error) => {
           console.error('Connection error:', error);
+          // Don't clear the socket on connection error, let it retry
         });
 
         newSocket.on('disconnect', (reason: string) => {
+          console.log('Disconnected from server:', reason);
           if (reason === 'io client disconnect') {
             set({ socket: null });
           }
         });
 
         newSocket.on('users:update', (users: User[]) => {
+          console.log('Received users update:', users);
           const { currentUser } = get();
           set({ 
             activeUsers: users.filter(u => u.isOnline && u.id !== currentUser?.id),
@@ -216,6 +221,7 @@ export const useStore = create<ChatStore>()(
         });
 
         newSocket.on('messages:history', ({ roomId, messages }: { roomId: string, messages: Message[] }) => {
+          console.log('Received message history for room:', roomId, 'messages:', messages.length);
           set(state => {
             const updatedRooms = [...state.chatRooms];
             const roomIndex = updatedRooms.findIndex(room => room.id === roomId);
@@ -246,6 +252,7 @@ export const useStore = create<ChatStore>()(
         });
 
         newSocket.on('message:receive', ({ roomId, message }: { roomId: string, message: Message }) => {
+          console.log('Received message:', message);
           const { currentUser, selectedUser } = get();
           
           get().addMessage(message);
@@ -275,13 +282,9 @@ export const useStore = create<ChatStore>()(
 
       logout: () => {
         const { socket } = get();
-        
-        // First disconnect socket
         if (socket) {
           socket.disconnect();
         }
-
-        // Clear all state
         set({
           socket: null,
           currentUser: null,
@@ -292,12 +295,6 @@ export const useStore = create<ChatStore>()(
           activeUsers: [],
           notifications: {}
         });
-
-        // Clear localStorage completely
-        localStorage.clear();
-        
-        // Force redirect to login
-        window.location.href = '/login';
       },
 
       clearNotifications: (userId: string) => {
@@ -312,6 +309,7 @@ export const useStore = create<ChatStore>()(
       sendMessage: (message: Message) => {
         const { socket } = get();
         if (socket) {
+          console.log('Sending message:', message);
           socket.emit('message:send', message);
           get().addMessage(message);
         }
@@ -325,7 +323,13 @@ export const useStore = create<ChatStore>()(
         chatRooms: state.chatRooms,
         selectedUser: state.selectedUser,
         activeUsers: state.activeUsers
-      })
+      }),
+      onRehydrateStorage: () => (state) => {
+        // Reconnect socket when store is rehydrated
+        if (state?.currentUser) {
+          state.initializeSocket();
+        }
+      }
     }
   )
 );
