@@ -109,10 +109,18 @@ const Dashboard: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    setShowNotifications(false);
-    logout();
-    window.location.replace('/login');
+  const handleLogout = async () => {
+    try {
+      setShowNotifications(false);
+      // First clear all state and storage
+      await logout();
+      // Force a complete page reload and redirect
+      window.location.replace('/login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Fallback redirect
+      window.location.href = '/login';
+    }
   };
 
   const handleNotificationClick = (userId: string) => {
