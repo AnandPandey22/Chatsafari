@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useStore } from '../store/useStore';
+import { useStore } from '../Store/useStore';
 import UserList from '../components/UserList';
 import ChatWindow from '../components/ChatWindow';
 import { LogOut, Menu, X, Bell } from 'lucide-react';
