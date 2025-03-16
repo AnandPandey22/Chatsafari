@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useStore } from '../store/useStore';
+import { useStore } from '../Store/useStore';
 import { User } from '../types';
 import { Search, Users } from 'lucide-react';
 import { toast } from 'react-hot-toast';
