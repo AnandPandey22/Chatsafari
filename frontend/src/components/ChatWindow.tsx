@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useStore } from '../store/useStore';
+import { useStore } from '../Store/useStore';
 import { Image, Smile, Send, ArrowLeft, Paperclip } from 'lucide-react';
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { toast } from 'react-hot-toast';
