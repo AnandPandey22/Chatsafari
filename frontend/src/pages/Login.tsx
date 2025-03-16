@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useStore } from '../store/useStore';
+import { useStore } from '../Store/useStore';
 import { User } from '../types';
 import { toast } from 'react-hot-toast';
 import { UserCircle, Calendar, Heart } from 'lucide-react';
