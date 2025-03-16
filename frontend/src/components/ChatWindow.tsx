@@ -79,7 +79,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   };
 
   const handleSend = () => {
-    if (message.trim() && currentUser && selectedUser) {
+    if (message.trim() && currentUser && selectedUser && socket) {
       try {
         const newMessage: Message = {
           id: crypto.randomUUID(),
@@ -117,7 +117,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && currentUser && selectedUser && socket) {
       try {
         // Check file size (limit to 5MB)
         if (file.size > 5 * 1024 * 1024) {
