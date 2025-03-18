@@ -1,6 +1,16 @@
 import io from "socket.io-client";
 import type { Socket } from "socket.io-client";
 
+// Define types for our users
+interface User {
+  id: string;
+  isOnline: boolean;
+}
+
+interface ActiveUsers {
+  [key: string]: User;
+}
+
 const SOCKET_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3000";
 
 // Check if we're in production and using secure protocol
@@ -28,11 +38,11 @@ socket.on('connect_error', (error: Error) => {
   console.log('Attempting connection to:', SOCKET_URL);
 });
 
-socket.on('disconnect', (reason) => {
+socket.on('disconnect', (reason: string) => {
   console.log('Socket disconnected:', reason);
 });
 
-socket.on('reconnect_attempt', (attemptNumber) => {
+socket.on('reconnect_attempt', (attemptNumber: number) => {
   console.log('Attempting to reconnect:', attemptNumber);
 });
 
@@ -46,7 +56,7 @@ export const connectSocket = (userId: string) => {
     });
 
     // Listen for active users update
-    socket.on('active:users', (users) => {
+    socket.on('active:users', (users: ActiveUsers) => {
       console.log('Received active users:', users);
     });
   } else {
@@ -67,7 +77,7 @@ socket.on('error', (error: Error) => {
 });
 
 // Add reconnect event listeners
-socket.on('reconnect', (attemptNumber) => {
+socket.on('reconnect', (attemptNumber: number) => {
   console.log('Successfully reconnected after', attemptNumber, 'attempts');
 });
 
