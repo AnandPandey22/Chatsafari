@@ -92,14 +92,57 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
       }
     };
 
+    // Advanced screenshot prevention
+    const preventScreenshot = (e: KeyboardEvent) => {
+      // Detect print screen attempt (common screenshot key combinations)
+      const isPrintScreen = e.key === 'PrintScreen';
+      const isCtrlShiftI = e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I');
+      const isCtrlShiftC = e.ctrlKey && e.shiftKey && (e.key === 'c' || e.key === 'C');
+      const isF12 = e.key === 'F12';
+      const isMacScreenshot = (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === '5'));
+      
+      if (isPrintScreen || isCtrlShiftI || isCtrlShiftC || isF12 || isMacScreenshot) {
+        e.preventDefault();
+        
+        // Option 1: Add visual distortion during attempt
+        const messagesContainer = document.querySelector('.chat-messages');
+        if (messagesContainer) {
+          messagesContainer.classList.add('blur-content');
+          setTimeout(() => {
+            messagesContainer.classList.remove('blur-content');
+          }, 1000);
+        }
+        
+        // Display warning
+        toast.error("Screenshots are not allowed for privacy reasons.");
+        return false;
+      }
+    };
+
+    const preventRightClick = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const preventDrag = (e: DragEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocusChange);
     window.addEventListener('blur', handleFocusChange);
+    document.addEventListener('keydown', preventScreenshot);
+    document.addEventListener('contextmenu', preventRightClick);
+    document.addEventListener('dragstart', preventDrag);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocusChange);
       window.removeEventListener('blur', handleFocusChange);
+      document.removeEventListener('keydown', preventScreenshot);
+      document.removeEventListener('contextmenu', preventRightClick);
+      document.removeEventListener('dragstart', preventDrag);
     };
   }, []);
 
@@ -305,45 +348,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
       }
     }
   };
-
-  // Add event listeners for screenshot prevention
-  useEffect(() => {
-    const preventScreenshot = (e: KeyboardEvent) => {
-      // Prevent common screenshot shortcuts
-      if (
-        (e.ctrlKey && e.key === 'p') || // Print screen
-        (e.ctrlKey && e.key === 's') || // Save
-        (e.ctrlKey && e.key === 'u') || // View source
-        (e.ctrlKey && e.shiftKey && e.key === 'i') || // Developer tools
-        (e.ctrlKey && e.shiftKey && e.key === 'j') || // Developer console
-        (e.ctrlKey && e.shiftKey && e.key === 'c') || // Developer inspect
-        (e.ctrlKey && e.shiftKey && e.key === 'k') || // Developer console
-        (e.ctrlKey && e.key === 'u') || // View source
-        (e.key === 'PrintScreen') || // Print screen key
-        (e.altKey && e.key === 'PrintScreen') // Alt + Print screen
-      ) {
-        e.preventDefault();
-      }
-    };
-
-    const preventRightClick = (e: MouseEvent) => {
-      e.preventDefault();
-    };
-
-    const preventDrag = (e: DragEvent) => {
-      e.preventDefault();
-    };
-
-    window.addEventListener('keydown', preventScreenshot);
-    window.addEventListener('contextmenu', preventRightClick);
-    window.addEventListener('dragstart', preventDrag);
-
-    return () => {
-      window.removeEventListener('keydown', preventScreenshot);
-      window.removeEventListener('contextmenu', preventRightClick);
-      window.removeEventListener('dragstart', preventDrag);
-    };
-  }, []);
 
   const renderMessage = (message: Message) => {
     const isCurrentUser = message.senderId === currentUser?.id;
