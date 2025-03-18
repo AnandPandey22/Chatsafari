@@ -4,11 +4,8 @@ import type { Socket } from "socket.io-client";
 // Define types for our users
 interface User {
   id: string;
+  username: string;
   isOnline: boolean;
-}
-
-interface ActiveUsers {
-  [key: string]: User;
 }
 
 const SOCKET_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3000";
@@ -31,11 +28,12 @@ export const socket = io(SOCKET_URL, {
 socket.on('connect', () => {
   console.log('Socket connected successfully');
   console.log('Socket ID:', socket.id);
+  console.log('Connected to URL:', SOCKET_URL);
 });
 
 socket.on('connect_error', (error: Error) => {
   console.error('Socket connection error:', error);
-  console.log('Attempting connection to:', SOCKET_URL);
+  console.log('Failed connecting to:', SOCKET_URL);
 });
 
 socket.on('disconnect', (reason: string) => {
@@ -46,21 +44,17 @@ socket.on('reconnect_attempt', (attemptNumber: number) => {
   console.log('Attempting to reconnect:', attemptNumber);
 });
 
-export const connectSocket = (userId: string) => {
+export const connectSocket = (user: { id: string; username: string }) => {
   if (!socket.connected) {
-    console.log('Connecting socket for user:', userId);
+    console.log('Connecting socket for user:', user.username);
     socket.connect();
     socket.emit("user:join", {
-      id: userId,
+      id: user.id,
+      username: user.username,
       isOnline: true
     });
-
-    // Listen for active users update
-    socket.on('active:users', (users: ActiveUsers) => {
-      console.log('Received active users:', users);
-    });
   } else {
-    console.log('Socket already connected for user:', userId);
+    console.log('Socket already connected for user:', user.username);
   }
 };
 
