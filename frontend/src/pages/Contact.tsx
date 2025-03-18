@@ -54,7 +54,7 @@ const Contact: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-medium text-gray-900">Our Location</h3>
                   <p className="mt-1 text-gray-600">
-                    22, Jaipur, Rajasthan, India
+                    Jaipur, Rajasthan, India
                   </p>
                 </div>
               </div>
@@ -69,8 +69,8 @@ const Contact: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-medium text-gray-900">Email Us</h3>
                   <p className="mt-1 text-gray-600">
-                    <a href="mailto:support@chatsafari.com" className="text-violet-600 hover:text-violet-700">
-                      support@chatsafari.com
+                    <a href="mailto:contact@chatsafari.com" className="text-violet-600 hover:text-violet-700">
+                      contact@chatsafari.com
                     </a>
                   </p>
                 </div>
