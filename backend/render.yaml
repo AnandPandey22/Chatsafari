@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: chatsafari-backend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: CORS_ORIGIN
+        value: https://chatsafari.netlify.app
+    healthCheckPath: /health
+    autoDeploy: true
