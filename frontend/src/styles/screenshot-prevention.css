@@ -1,0 +1,27 @@
+/* Screenshot prevention styles */
+@media only screen and (max-width: 768px) {
+  .chat-window,
+  .message-content,
+  .chat-messages,
+  .message-image {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    pointer-events: none;
+  }
+
+  /* Allow specific interactions */
+  .message-input,
+  .send-button,
+  .back-button,
+  .logout-button {
+    pointer-events: auto !important;
+  }
+
+  /* Prevent image saving */
+  img {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+  }
+}
