@@ -65,23 +65,21 @@ setInterval(() => {
       handleUserDisconnect(socketId);
     }
   });
-}, 30000); // Run every 30 seconds
+}, 30000);
 
-// Helper function to get or create a chat room
+// Helper function to get or create a chat room ID
 function getOrCreateChatRoom(userId1: string, userId2: string): string {
   const roomId = [userId1, userId2].sort().join('-');
   if (!chatRooms.has(roomId)) {
     chatRooms.set(roomId, []);
+    
+    // Add room to both users' chat rooms
+    [userId1, userId2].forEach(userId => {
+      const userRooms = userChatRooms.get(userId) || new Set();
+      userRooms.add(roomId);
+      userChatRooms.set(userId, userRooms);
+    });
   }
-  
-  // Track this room for both users
-  [userId1, userId2].forEach(userId => {
-    if (!userChatRooms.has(userId)) {
-      userChatRooms.set(userId, new Set());
-    }
-    userChatRooms.get(userId)?.add(roomId);
-  });
-  
   return roomId;
 }
 
@@ -240,24 +238,26 @@ io.on('connection', (socket: Socket) => {
     socket.emit('messages:history', { roomId, messages: roomMessages });
   });
 
-  // Handle typing indicator
+  // Handle typing indicators
   socket.on('typing:start', (receiverId: string) => {
+    const senderId = socketUserMap.get(socket.id);
+    if (!senderId) return;
+
     const sender = users.get(socket.id);
     if (!sender) return;
 
-    // Add to typing users map
-    if (!typingUsers.has(receiverId)) {
-      typingUsers.set(receiverId, new Set());
-    }
-    typingUsers.get(receiverId)?.add(sender.id);
+    // Add to typing users
+    const typingToUser = typingUsers.get(receiverId) || new Set();
+    typingToUser.add(senderId);
+    typingUsers.set(receiverId, typingToUser);
 
-    // Notify receiver
+    // Notify the receiver
     const receiverSocketId = userSocketMap.get(receiverId);
     if (receiverSocketId) {
       const receiverSocket = io.sockets.sockets.get(receiverSocketId);
       if (receiverSocket) {
         receiverSocket.emit('typing:status', {
-          userId: sender.id,
+          userId: senderId,
           username: sender.username,
           isTyping: true
         });
@@ -266,25 +266,28 @@ io.on('connection', (socket: Socket) => {
   });
 
   socket.on('typing:stop', (receiverId: string) => {
+    const senderId = socketUserMap.get(socket.id);
+    if (!senderId) return;
+
     const sender = users.get(socket.id);
     if (!sender) return;
 
-    // Remove from typing users map
-    const typingSet = typingUsers.get(receiverId);
-    if (typingSet) {
-      typingSet.delete(sender.id);
-      if (typingSet.size === 0) {
+    // Remove from typing users
+    const typingToUser = typingUsers.get(receiverId);
+    if (typingToUser) {
+      typingToUser.delete(senderId);
+      if (typingToUser.size === 0) {
         typingUsers.delete(receiverId);
       }
     }
 
-    // Notify receiver
+    // Notify the receiver
     const receiverSocketId = userSocketMap.get(receiverId);
     if (receiverSocketId) {
       const receiverSocket = io.sockets.sockets.get(receiverSocketId);
       if (receiverSocket) {
         receiverSocket.emit('typing:status', {
-          userId: sender.id,
+          userId: senderId,
           username: sender.username,
           isTyping: false
         });

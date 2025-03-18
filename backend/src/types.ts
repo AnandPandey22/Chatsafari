@@ -3,8 +3,8 @@ export interface User {
   username: string;
   gender: 'male' | 'female';
   age: number;
-  isOnline: boolean;
   avatar: string;
+  isOnline: boolean;
 }
 
 export interface Message {
@@ -22,4 +22,5 @@ export interface Message {
 export interface MessageReaction {
   userId: string;
   emoji: string;
+  timestamp: number;
 }

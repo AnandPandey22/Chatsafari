@@ -79,7 +79,6 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
   },
 
   setUsers: (users: User[]) => {
-    set({ users, activeUsers: users });
     const currentUser = get().currentUser;
     if (currentUser) {
       // Create chat rooms for all users, ensuring messages can be received from anyone
@@ -91,7 +90,11 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
           messages: []
         }));
       
-      set({ chatRooms: rooms });
+      set({ 
+        users,
+        activeUsers: users.filter(user => user.id !== currentUser.id && user.isOnline),
+        chatRooms: rooms 
+      });
     }
   },
 
@@ -205,63 +208,82 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
     localStorage.setItem('chatRooms', JSON.stringify(rooms));
     set({ chatRooms: rooms });
   },
+
   setActiveUsers: (users: User[]) => {
     console.log('Setting active users:', users);
-    set({ activeUsers: users });
+    const currentUser = get().currentUser;
+    if (currentUser) {
+      const otherActiveUsers = users.filter(user => 
+        user.id !== currentUser.id && user.isOnline
+      );
+      console.log('Filtered active users:', otherActiveUsers);
+      set({ activeUsers: otherActiveUsers });
+    }
   },
+
   setNotifications: (notifications: { [userId: string]: number }) => set({ notifications }),
 
   connect: () => {
     // If there's already a connected socket with the same user, don't create a new one
     const { socket: existingSocket, currentUser } = get();
     if (existingSocket?.connected && currentUser) {
+      console.log('Already connected with user:', currentUser);
       return;
     }
 
     // If there's a disconnected socket, clean it up
     if (existingSocket) {
+      console.log('Cleaning up existing socket');
       existingSocket.disconnect();
       set({ socket: null });
     }
 
+    console.log('Creating new socket connection to:', import.meta.env.VITE_WS_URL);
     // Create new socket with specific configuration
-    const newSocket = io(import.meta.env.VITE_API_URL, {
+    const newSocket = io(import.meta.env.VITE_WS_URL, {
       reconnection: true,
       reconnectionAttempts: 3,
       reconnectionDelay: 1000,
       timeout: 5000,
-      autoConnect: false
+      autoConnect: false,
+      transports: ['websocket', 'polling']
     });
 
     newSocket.on('connect', () => {
       console.log('Connected to server');
       const currentUser = get().currentUser;
       if (currentUser) {
+        console.log('Emitting user:join with data:', currentUser);
         newSocket.emit('user:join', currentUser);
       }
     });
 
     newSocket.on('connect_error', (error: Error) => {
       console.error('Connection error:', error);
-      set({ socket: null });
+      console.log('Connection URL:', import.meta.env.VITE_WS_URL);
     });
 
     newSocket.on('disconnect', (reason: string) => {
       console.log('Disconnected from server:', reason);
       if (reason === 'io client disconnect') {
-        // Intentional disconnect, clean up the socket
         set({ socket: null });
       }
     });
 
     newSocket.on('users:update', (users: User[]) => {
-      console.log('Received users update:', users);
-      // Only show online users that are not the current user
-      const { currentUser } = get();
-      set({ 
-        activeUsers: users.filter(u => u.isOnline && u.id !== currentUser?.id),
-        users: users // Store all users for reference
-      });
+      console.log('Received users:update:', users);
+      const currentUser = get().currentUser;
+      if (currentUser) {
+        // Filter out current user and offline users
+        const otherActiveUsers = users.filter(user => 
+          user.id !== currentUser.id && user.isOnline
+        );
+        console.log('Setting active users:', otherActiveUsers);
+        set({ 
+          activeUsers: otherActiveUsers,
+          users: users // Store all users for reference
+        });
+      }
     });
 
     newSocket.on('messages:history', ({ roomId, messages }: { roomId: string, messages: Message[] }) => {
@@ -360,32 +382,22 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
     });
 
     set({ socket: newSocket });
-    newSocket.connect(); // Manually connect after setup
+    newSocket.connect();
   },
 
   disconnect: () => {
-    const { socket } = get();
-    if (socket) {
-      socket.emit('user:leave', get().currentUser?.id);
-      socket.disconnect();
+    const { socket: currentSocket } = get();
+    if (currentSocket) {
+      currentSocket.disconnect();
       set({ socket: null });
     }
   },
 
   logout: () => {
-    const { socket } = get();
-    if (socket) {
-      socket.emit('user:leave', get().currentUser?.id);
-      socket.disconnect();
-    }
-    // Clear localStorage
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('chatRooms');
-    localStorage.removeItem('messages');
-    localStorage.removeItem('selectedUser');
-    
+    const { disconnect } = get();
+    disconnect();
+    localStorage.clear();
     set({
-      socket: null,
       currentUser: null,
       users: [],
       messages: [],
@@ -394,8 +406,6 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
       activeUsers: [],
       notifications: {}
     });
-    // Redirect to Chatsafari homepage
-    window.location.href = 'https://chatsafari.com';
   },
 
   clearNotifications: (userId: string) => {
@@ -453,9 +463,7 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
         connect();
       } catch (error) {
         console.error('Error restoring session:', error);
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('chatRooms');
-        localStorage.removeItem('selectedUser');
+        localStorage.clear();
       }
     }
   }
