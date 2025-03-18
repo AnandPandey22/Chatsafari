@@ -86,13 +86,13 @@ const Advertise: React.FC = () => {
             <p className="text-gray-600 mb-6">Ready to advertise with ChatSafari? Contact us to discuss your campaign.</p>
             <div className="flex flex-col items-center space-y-4">
               <a
-                href="mailto:advertise@chatsafari.com"
+                href="mailto:contact@chatsafari.com"
                 className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition duration-150 ease-in-out"
               >
                 <Mail className="h-5 w-5 mr-2" />
                 Contact Us
               </a>
-              <p className="text-sm text-gray-500">advertise@chatsafari.com</p>
+              <p className="text-sm text-gray-500">contact@chatsafari.com</p>
             </div>
           </div>
         </div>
