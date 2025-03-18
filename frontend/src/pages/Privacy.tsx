@@ -180,7 +180,7 @@ const Privacy: React.FC = () => {
             <p className="text-gray-600">
               If you have any questions about this Privacy Policy, please contact us at:
             </p>
-            <p className="text-violet-600 mt-1">privacy@chatsafari.com</p>
+            <p className="text-violet-600 mt-1">contact@chatsafari.com</p>
           </section>
 
           <div className="text-sm text-gray-500 mt-6">
