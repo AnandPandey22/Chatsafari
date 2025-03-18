@@ -1,24 +1,76 @@
-import { io } from "socket.io-client";
+import io from "socket.io-client";
+import type { Socket } from "socket.io-client";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const SOCKET_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3000";
+
+// Check if we're in production and using secure protocol
+if (window.location.protocol === 'https:' && !SOCKET_URL.startsWith('wss://')) {
+  console.error('Warning: WebSocket must use WSS when page is served over HTTPS');
+}
 
 export const socket = io(SOCKET_URL, {
   autoConnect: false,
   reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+  transports: ['websocket', 'polling'],
+  path: '/socket.io'
+});
+
+// Add debug logs
+socket.on('connect', () => {
+  console.log('Socket connected successfully');
+  console.log('Socket ID:', socket.id);
+});
+
+socket.on('connect_error', (error: Error) => {
+  console.error('Socket connection error:', error);
+  console.log('Attempting connection to:', SOCKET_URL);
+});
+
+socket.on('disconnect', (reason) => {
+  console.log('Socket disconnected:', reason);
+});
+
+socket.on('reconnect_attempt', (attemptNumber) => {
+  console.log('Attempting to reconnect:', attemptNumber);
 });
 
 export const connectSocket = (userId: string) => {
   if (!socket.connected) {
+    console.log('Connecting socket for user:', userId);
     socket.connect();
     socket.emit("user:join", {
       id: userId,
       isOnline: true
     });
+
+    // Listen for active users update
+    socket.on('active:users', (users) => {
+      console.log('Received active users:', users);
+    });
+  } else {
+    console.log('Socket already connected for user:', userId);
   }
 };
 
 export const disconnectSocket = () => {
   if (socket.connected) {
+    console.log('Disconnecting socket');
     socket.disconnect();
   }
 };
+
+// Add error event listener
+socket.on('error', (error: Error) => {
+  console.error('Socket error:', error);
+});
+
+// Add reconnect event listeners
+socket.on('reconnect', (attemptNumber) => {
+  console.log('Successfully reconnected after', attemptNumber, 'attempts');
+});
+
+socket.on('reconnect_failed', () => {
+  console.error('Failed to reconnect after maximum attempts');
+});
