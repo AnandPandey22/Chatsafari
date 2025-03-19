@@ -185,7 +185,7 @@ const Login: React.FC = () => {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-violet-600">Real-time Communication</h3>
                 <p className="text-gray-600">
-                  Experience seamless real-time messaging with instant delivery indicators, typing status, and read receipts. 
+                  Experience seamless real-time messaging on chat safari with instant delivery indicators, typing status, and read receipts. 
                   Share images and connect with users worldwide through our modern, responsive interface.
                 </p>
               </div>
@@ -193,7 +193,7 @@ const Login: React.FC = () => {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-violet-600">Security & Privacy</h3>
                 <p className="text-gray-600">
-                  Enjoy secure end-to-end encrypted messaging, customizable profiles with avatars, and user presence indicators. 
+                  Enjoy secure end-to-end encrypted messaging, customizable profiles with avatars, and user presence indicators on chat safari. 
                   Your privacy and security are our top priorities.
                 </p>
               </div>
@@ -201,8 +201,8 @@ const Login: React.FC = () => {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-violet-600">Free & Community-Driven</h3>
                 <p className="text-gray-600">
-                  ChatSafari is completely free to use, supported by our generous community through donations. Join thousands 
-                  of users enjoying safe, fun, and meaningful conversations every day.
+                  ChatSafari and chat safari is completely free to use, supported by our generous community through donations. Join thousands 
+                  of users enjoying safe, fun, and meaningful conversations every day on chat safari.
                 </p>
               </div>
             </div>
