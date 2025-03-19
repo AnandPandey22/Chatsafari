@@ -1,6 +1,8 @@
 {
   "name": "Chatsafari",
   "short_name": "Chatsafari",
+ "description": "Chatsafari - Anonymous chat without registration.",
+  "start_url": "/",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
