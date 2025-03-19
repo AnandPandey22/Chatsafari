@@ -7,6 +7,11 @@ Allow: /advertise
 Allow: /donate
 Allow: /terms
 Allow: /contact
+Allow: /favicon.ico
+Allow: /favicon.png
+Allow: /favicon.svg
+Allow: /apple-touch-icon.png
+Allow: /site.webmanifest
 
 # Sitemaps
 Sitemap: https://chatsafari.com/sitemap.xml
