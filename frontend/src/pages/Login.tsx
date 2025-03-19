@@ -162,21 +162,7 @@ const Login: React.FC = () => {
                 <p>By joining, you agree to our Terms of Service and Privacy Policy</p>
               </div>
 
-              {/* Bottom Ad Space - Visible on mobile and tablet */}
-              <div className="mt-8 lg:hidden">
-                <div className="bg-white rounded-xl shadow-md p-4 h-24 flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
-                  <span>Advertisement</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right side - Ad Space */}
-            <div className="hidden lg:block flex-1">
-              <div className="bg-white rounded-xl shadow-md p-4 h-[400px] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
-                <span>Advertisement</span>
-              </div>
-            </div>
-          </div>
+             
 
           {/* Features Section - Full Width */}
           <div className="bg-white rounded-xl shadow-md p-8">
@@ -193,7 +179,7 @@ const Login: React.FC = () => {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-violet-600">Security & Privacy</h3>
                 <p className="text-gray-600">
-                  Enjoy secure end-to-end encrypted messaging, customizable profiles with avatars, and user presence indicators on chat safari. 
+                  On Chat safari Enjoy secure end-to-end encrypted messaging, customizable profiles with avatars, and user presence indicators on chat safari. 
                   Your privacy and security are our top priorities.
                 </p>
               </div>
