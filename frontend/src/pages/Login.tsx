@@ -162,8 +162,6 @@ const Login: React.FC = () => {
                 <p>By joining, you agree to our Terms of Service and Privacy Policy</p>
               </div>
 
-             
-
           {/* Features Section - Full Width */}
           <div className="bg-white rounded-xl shadow-md p-8">
             <h2 className="text-2xl font-semibold text-violet-600 mb-4 text-center">Why Choose ChatSafari?</h2>
