@@ -4,6 +4,8 @@ User-agent: *
 Allow: /
 Allow: /about
 Allow: /privacy
+Allow: /advertise
+Allow: /donate
 Allow: /terms
 Allow: /contact
 
