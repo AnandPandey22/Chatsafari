@@ -2,8 +2,6 @@
 
 User-agent: *
 Allow: /
-Allow: /chat
-Allow: /rooms
 Allow: /about
 Allow: /privacy
 Allow: /terms
@@ -18,6 +16,8 @@ Disallow: /admin/
 Disallow: /dashboard/
 Disallow: /login/
 Disallow: /signup/
+Disallow: /chat
+Disallow: /rooms
 Disallow: /*?*
 
 # Crawl-delay
