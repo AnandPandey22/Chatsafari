@@ -24,6 +24,7 @@ Disallow: /login/
 Disallow: /signup/
 Disallow: /chat
 Disallow: /rooms
+Disallow: /about
 Disallow: /*?*
 
 # Crawl-delay
