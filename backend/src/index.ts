@@ -4,6 +4,7 @@ import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { User, Message } from './types.js';
+import { allBotUsers, updateBotUsersStatus } from './botUsers.js';
 
 dotenv.config();
 
@@ -65,21 +66,23 @@ setInterval(() => {
       handleUserDisconnect(socketId);
     }
   });
-}, 30000);
+}, 30000); // Run every 30 seconds
 
-// Helper function to get or create a chat room ID
+// Helper function to get or create a chat room
 function getOrCreateChatRoom(userId1: string, userId2: string): string {
   const roomId = [userId1, userId2].sort().join('-');
   if (!chatRooms.has(roomId)) {
     chatRooms.set(roomId, []);
-    
-    // Add room to both users' chat rooms
-    [userId1, userId2].forEach(userId => {
-      const userRooms = userChatRooms.get(userId) || new Set();
-      userRooms.add(roomId);
-      userChatRooms.set(userId, userRooms);
-    });
   }
+  
+  // Track this room for both users
+  [userId1, userId2].forEach(userId => {
+    if (!userChatRooms.has(userId)) {
+      userChatRooms.set(userId, new Set());
+    }
+    userChatRooms.get(userId)?.add(roomId);
+  });
+  
   return roomId;
 }
 
@@ -182,21 +185,40 @@ io.on('connection', (socket: Socket) => {
       cleanupUserData(userData.id);
     }
 
-    // Clean up any existing data for this user
-    cleanupUserData(userData.id);
-
     // Add new user connection
     const updatedUser = { ...userData, isOnline: true };
     users.set(socket.id, updatedUser);
     userSocketMap.set(userData.id, socket.id);
     socketUserMap.set(socket.id, userData.id);
     
-    // Broadcast updated user list (excluding any disconnected users)
-    const activeUsers = Array.from(users.values()).filter(u => 
-      Array.from(socketUserMap.keys()).includes(userSocketMap.get(u.id) || '')
-    );
+    // Get all active real users, ensuring no duplicates
+    const activeRealUsers = Array.from(users.values())
+      .filter(u => !u.id.startsWith('bot-'))
+      .reduce((unique: User[], user: User) => {
+        if (!unique.some(u => u.id === user.id)) {
+          unique.push(user);
+        }
+        return unique;
+      }, []);
+
+    // Get bot users - they are always present and online
+    const botUsers = allBotUsers.map((bot: User) => ({ ...bot, isOnline: true }));
+    
+    // Combine real users and bots
+    const activeUsers = [
+      ...activeRealUsers, // Real users first
+      ...botUsers        // Then bots
+    ];
+
+    // Send the updated list to all clients
     io.emit('users:update', activeUsers);
-    console.log('Active users after join:', activeUsers.map(u => u.username));
+
+    // Send a one-time refresh signal to the new user after a short delay
+    setTimeout(() => {
+      socket.emit('users:refresh');
+    }, 200);
+
+    console.log('Active users after join:', activeRealUsers.map(u => u.username));
   });
 
   // Handle message send
@@ -238,26 +260,24 @@ io.on('connection', (socket: Socket) => {
     socket.emit('messages:history', { roomId, messages: roomMessages });
   });
 
-  // Handle typing indicators
+  // Handle typing indicator
   socket.on('typing:start', (receiverId: string) => {
-    const senderId = socketUserMap.get(socket.id);
-    if (!senderId) return;
-
     const sender = users.get(socket.id);
     if (!sender) return;
 
-    // Add to typing users
-    const typingToUser = typingUsers.get(receiverId) || new Set();
-    typingToUser.add(senderId);
-    typingUsers.set(receiverId, typingToUser);
+    // Add to typing users map
+    if (!typingUsers.has(receiverId)) {
+      typingUsers.set(receiverId, new Set());
+    }
+    typingUsers.get(receiverId)?.add(sender.id);
 
-    // Notify the receiver
+    // Notify receiver
     const receiverSocketId = userSocketMap.get(receiverId);
     if (receiverSocketId) {
       const receiverSocket = io.sockets.sockets.get(receiverSocketId);
       if (receiverSocket) {
         receiverSocket.emit('typing:status', {
-          userId: senderId,
+          userId: sender.id,
           username: sender.username,
           isTyping: true
         });
@@ -266,28 +286,25 @@ io.on('connection', (socket: Socket) => {
   });
 
   socket.on('typing:stop', (receiverId: string) => {
-    const senderId = socketUserMap.get(socket.id);
-    if (!senderId) return;
-
     const sender = users.get(socket.id);
     if (!sender) return;
 
-    // Remove from typing users
-    const typingToUser = typingUsers.get(receiverId);
-    if (typingToUser) {
-      typingToUser.delete(senderId);
-      if (typingToUser.size === 0) {
+    // Remove from typing users map
+    const typingSet = typingUsers.get(receiverId);
+    if (typingSet) {
+      typingSet.delete(sender.id);
+      if (typingSet.size === 0) {
         typingUsers.delete(receiverId);
       }
     }
 
-    // Notify the receiver
+    // Notify receiver
     const receiverSocketId = userSocketMap.get(receiverId);
     if (receiverSocketId) {
       const receiverSocket = io.sockets.sockets.get(receiverSocketId);
       if (receiverSocket) {
         receiverSocket.emit('typing:status', {
-          userId: senderId,
+          userId: sender.id,
           username: sender.username,
           isTyping: false
         });
@@ -327,6 +344,22 @@ io.on('connection', (socket: Socket) => {
           socketUserMap.delete(sid);
         }
       });
+
+      // Get remaining real users
+      const activeRealUsers = Array.from(users.values())
+        .filter(u => !u.id.startsWith('bot-'));
+
+      // Get bot users - they are always present and online
+      const botUsers = allBotUsers.map((bot: User) => ({ ...bot, isOnline: true }));
+      
+      // Combine real users and bots
+      const activeUsers = [
+        ...activeRealUsers,
+        ...botUsers
+      ];
+
+      // Broadcast updated user list to all clients
+      io.emit('users:update', activeUsers);
     }
     handleUserDisconnect(socket.id);
   });
