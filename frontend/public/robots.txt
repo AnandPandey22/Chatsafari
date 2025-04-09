@@ -4,7 +4,7 @@ User-agent: *
 Allow: /
 Allow: /privacy
 Allow: /advertise
-Allow: /donate
+Allow: /Blogs
 Allow: /terms
 Allow: /contact
 Allow: /favicon.ico
@@ -12,20 +12,18 @@ Allow: /favicon.png
 Allow: /favicon.svg
 Allow: /apple-touch-icon.png
 Allow: /site.webmanifest
+Allow: /blogs
+Allow: /blog/
+Allow: /blogs?page=
 
 # Sitemaps
 Sitemap: https://chatsafari.com/sitemap.xml
 
-# Disallow private or dynamic URLs
+# Block private pages
+Disallow: /login
+Disallow: /dashboard
 Disallow: /api/
 Disallow: /admin/
-Disallow: /dashboard/
-Disallow: /login/
-Disallow: /signup/
-Disallow: /chat
-Disallow: /rooms
-Disallow: /about
-Disallow: /*?*
 
 # Crawl-delay
-Crawl-delay: 1 
+Crawl-delay: 1
