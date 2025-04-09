@@ -48,26 +48,26 @@ const Dashboard: React.FC = () => {
       // If chat window is open, close it
       if (selectedUser) {
         setSelectedUser(null);
+        // Push a new state to maintain history stack
+        window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
       } else {
         // If on main dashboard, show logout confirmation
         setShowLogoutConfirm(true);
+        // Push a new state to maintain history stack
+        window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
       }
-      
-      // Push a new state to prevent immediate back button press
-      window.history.pushState({ chatOpen: selectedUser ? true : false }, '');
     };
 
     // Function to handle beforeunload event
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!selectedUser) {
-        event.preventDefault();
-        event.returnValue = '';
-        return '';
-      }
+      event.preventDefault();
+      event.returnValue = '';
+      return '';
     };
 
-    // Add initial state when component mounts
-    window.history.pushState({ chatOpen: selectedUser ? true : false }, '');
+    // Add initial states when component mounts
+    window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
+    window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
 
     // Add event listeners
     window.addEventListener('popstate', handlePopState);
@@ -80,6 +80,32 @@ const Dashboard: React.FC = () => {
     };
   }, [selectedUser, setSelectedUser]);
 
+  // Handle Alt+Left arrow key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check for Alt + Left Arrow (browser back shortcut)
+      if (event.altKey && event.key === 'ArrowLeft') {
+        event.preventDefault();
+        if (selectedUser) {
+          setSelectedUser(null);
+          // Push a new state to maintain history stack
+          window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
+        } else {
+          setShowLogoutConfirm(true);
+          // Push a new state to maintain history stack
+          window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedUser, setSelectedUser]);
+
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
   const handleLogout = () => {
     setShowLogoutConfirm(false);
     logout();
@@ -87,8 +113,8 @@ const Dashboard: React.FC = () => {
 
   const handleCancelLogout = () => {
     setShowLogoutConfirm(false);
-    // Push a new state to prevent immediate back button press
-    window.history.pushState({ chatOpen: selectedUser ? true : false }, '');
+    // Push a new state to maintain history stack
+    window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
   };
 
   const handleNotificationClick = (userId: string) => {
@@ -101,24 +127,6 @@ const Dashboard: React.FC = () => {
 
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
-
-  // Add effect to handle browser back button
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      // Check for Alt + Left Arrow (browser back shortcut)
-      if (event.altKey && event.key === 'ArrowLeft') {
-        event.preventDefault();
-        if (selectedUser) {
-          setSelectedUser(null);
-        } else {
-          setShowLogoutConfirm(true);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedUser, setSelectedUser]);
 
   if (!currentUser) {
     return (
@@ -215,7 +223,7 @@ const Dashboard: React.FC = () => {
                     {isMobile && (
                       <div className="border-t border-gray-100 mt-2">
                         <button
-                          onClick={handleLogout}
+                          onClick={handleLogoutClick}
                           className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center space-x-2"
                         >
                           <LogOut className="h-4 w-4" />
@@ -229,7 +237,7 @@ const Dashboard: React.FC = () => {
 
               {/* Logout Button - Only visible on desktop */}
               <button
-                onClick={handleLogout}
+                onClick={handleLogoutClick}
                 className="hidden md:inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition duration-150 ease-in-out"
               >
                 <LogOut className="h-4 w-4 mr-2" />

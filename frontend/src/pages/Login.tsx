@@ -3,8 +3,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { User } from '../types';
 import { toast } from 'react-hot-toast';
-import { UserCircle, Calendar, Heart } from 'lucide-react';
+import { UserCircle, Calendar } from 'lucide-react';
 import Footer from '../components/Footer';
+import { Helmet } from 'react-helmet-async';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -57,6 +58,23 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <Helmet>
+        <title>ChatSafari - Free Online Chat Room</title>
+        <meta name="description" content="Join ChatSafari's free online chat room. Meet new people, make friends, and chat in a safe environment. No registration required." />
+        <link rel="canonical" href="https://chatsafari.com" />
+        
+        {/* Open Graph tags */}
+        <meta property="og:title" content="ChatSafari - Free Online Chat Room" />
+        <meta property="og:description" content="Join ChatSafari's free online chat room. Meet new people, make friends, and chat in a safe environment. No registration required." />
+        <meta property="og:url" content="https://chatsafari.com" />
+        <meta property="og:type" content="website" />
+        
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="ChatSafari - Free Online Chat Room" />
+        <meta name="twitter:description" content="Join ChatSafari's free online chat room. Meet new people, make friends, and chat in a safe environment." />
+      </Helmet>
+
       {/* Fixed Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -68,13 +86,12 @@ const Login: React.FC = () => {
               </h1>
             </div>
 
-            {/* Right section - Donate Button */}
+            {/* Right section - Blogs Button */}
             <Link
-              to="/donate"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition duration-150 ease-in-out"
+              to="/blogs"
+              className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-medium rounded-lg text-white bg-violet-700 hover:bg-violet-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 transition duration-150 ease-in-out shadow-md"
             >
-              <Heart className="h-4 w-4 mr-2" />
-              Donate Us
+              Blogs
             </Link>
           </div>
         </div>
@@ -162,9 +179,22 @@ const Login: React.FC = () => {
                 <p>By joining, you agree to our Terms of Service and Privacy Policy</p>
               </div>
 
+              {/* Bottom Ad Space - Visible on mobile and tablet */}
+              <div className="mt-8 lg:hidden">
+                <div className="bg-white rounded-xl shadow-md p-4 h-24 flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
+                  <span>Advertisement</span>
                 </div>
+              </div>
             </div>
-          
+
+            {/* Right side - Ad Space */}
+            <div className="hidden lg:block flex-1">
+              <div className="bg-white rounded-xl shadow-md p-4 h-[400px] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
+                <span>Advertisement</span>
+              </div>
+            </div>
+          </div>
+
           {/* Features Section - Full Width */}
           <div className="bg-white rounded-xl shadow-md p-8">
             <h2 className="text-2xl font-semibold text-violet-600 mb-4 text-center">Why Choose ChatSafari?</h2>
@@ -172,7 +202,7 @@ const Login: React.FC = () => {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-violet-600">Real-time Communication</h3>
                 <p className="text-gray-600">
-                  Experience seamless real-time messaging on chat safari with instant delivery indicators, typing status, and read receipts. 
+                  Experience seamless real-time messaging with instant delivery indicators, typing status, and read receipts. 
                   Share images and connect with users worldwide through our modern, responsive interface.
                 </p>
               </div>
@@ -180,7 +210,7 @@ const Login: React.FC = () => {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-violet-600">Security & Privacy</h3>
                 <p className="text-gray-600">
-                  On Chat safari Enjoy secure end-to-end encrypted messaging, customizable profiles with avatars, and user presence indicators on chat safari. 
+                  Enjoy secure end-to-end encrypted messaging, customizable profiles with avatars, and user presence indicators. 
                   Your privacy and security are our top priorities.
                 </p>
               </div>
@@ -188,8 +218,8 @@ const Login: React.FC = () => {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-violet-600">Free & Community-Driven</h3>
                 <p className="text-gray-600">
-                  ChatSafari and chat safari is completely free to use, supported by our generous community through donations. Join thousands 
-                  of users enjoying safe, fun, and meaningful conversations every day on chat safari.
+                  ChatSafari is completely free to use, supported by our generous community through donations. Join thousands 
+                  of users enjoying safe, fun, and meaningful conversations every day.
                 </p>
               </div>
             </div>
