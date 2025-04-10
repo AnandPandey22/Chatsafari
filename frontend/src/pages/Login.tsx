@@ -58,23 +58,6 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Helmet>
-        <title>ChatSafari - Free Online Chat Room</title>
-        <meta name="description" content="Join ChatSafari's free online chat room. Meet new people, make friends, and chat in a safe environment. No registration required." />
-        <link rel="canonical" href="https://chatsafari.com" />
-        
-        {/* Open Graph tags */}
-        <meta property="og:title" content="ChatSafari - Free Online Chat Room" />
-        <meta property="og:description" content="Join ChatSafari's free online chat room. Meet new people, make friends, and chat in a safe environment. No registration required." />
-        <meta property="og:url" content="https://chatsafari.com" />
-        <meta property="og:type" content="website" />
-        
-        {/* Twitter Card tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="ChatSafari - Free Online Chat Room" />
-        <meta name="twitter:description" content="Join ChatSafari's free online chat room. Meet new people, make friends, and chat in a safe environment." />
-      </Helmet>
-
       {/* Fixed Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -178,20 +161,7 @@ const Login: React.FC = () => {
               <div className="mt-8 text-center text-sm text-gray-600">
                 <p>By joining, you agree to our Terms of Service and Privacy Policy</p>
               </div>
-
-              {/* Bottom Ad Space - Visible on mobile and tablet */}
-              <div className="mt-8 lg:hidden">
-                <div className="bg-white rounded-xl shadow-md p-4 h-24 flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
-                  <span>Advertisement</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right side - Ad Space */}
-            <div className="hidden lg:block flex-1">
-              <div className="bg-white rounded-xl shadow-md p-4 h-[400px] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
-                <span>Advertisement</span>
-              </div>
+              
             </div>
           </div>
 
