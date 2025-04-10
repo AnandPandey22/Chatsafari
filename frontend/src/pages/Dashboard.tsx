@@ -299,7 +299,7 @@ const Dashboard: React.FC = () => {
           {/* Large Banner Ad below chat - Fixed Height */}
           <div className="h-48 bg-white border-t border-gray-200 flex-none">
             <div className="h-full flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
-              <span>Large Banner Ad (728x90)</span>
+              <span>image</span>
             </div>
           </div>
         </div>
@@ -308,7 +308,7 @@ const Dashboard: React.FC = () => {
         <div className="hidden lg:block w-96 border-l border-gray-200 bg-white p-4 flex-none">
           <div className="h-full flex flex-col justify-center">
             <div className="bg-gray-50 rounded-xl shadow-sm p-4 h-[calc(100vh-8rem)] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
-              <span>Large Banner Ad</span>
+              <span>Large image</span>
             </div>
           </div>
         </div>
