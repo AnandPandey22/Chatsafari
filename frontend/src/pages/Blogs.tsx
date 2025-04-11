@@ -34,6 +34,7 @@ With ChatSafari, users can **dive straight into global conversations**, meet str
 
 ## The Teen Behind the Tech
 
+**Anand Pandey**, a 19-year-old tech enthusiast, is deeply passionate about computer science and has a strong love for coding. With a solid grasp of various programming languages and a relentless drive to learn, he dedicates himself to expanding his knowledge every single day. **Anand** has completed multiple MERN Stack projects, showcasing his skills in full-stack development. His most notable achievement so far is **Chatsafari**, a real-time chatting website, which also happens to be his first solo project. As the **founder of Chatsafari**, **Anand** is not only applying his technical skills but also learning new and impactful things regularly to make tools and platforms that can benefit others. His journey is just beginning, and his passion ensures that he’s always one step ahead in the world of tech.
 **Anand Pandey** isn’t your typical tech founder. At just 19 years old, he single-handedly envisioned and brought ChatSafari to life. What began as a passion project quickly turned into a full-fledged platform with a growing global user base. His knack for understanding what the youth want in online communication is what sets him apart.
 
 Growing up, Anand observed how social platforms became more intrusive and less about meaningful interactions. This sparked his idea: **a platform built around simplicity, freedom, and real-time conversation**. And that’s exactly what ChatSafari delivers.
