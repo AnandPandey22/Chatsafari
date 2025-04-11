@@ -22,7 +22,7 @@ export const blogs: Blog[] = [
     excerpt: "Read the Mindset Of Founder Of chatsafari and the story behind the development of this new Secure Chatting Platform",
     date: "2024-03-21",
     content: `
-# Meet the Founder Of Chatsafari: Anand Pandey
+# The Founder Of Chatsafari: Anand Pandey
 
 In an age dominated by social media giants and complex registration processes, one teenager dared to simplify how people connect online. Meet **Anand Pandey**, the visionary **19-year-old founder of ChatSafari**, a platform that has taken the internet by storm since its launch on **March 14, 2025**.
 
@@ -34,7 +34,7 @@ With ChatSafari, users can **dive straight into global conversations**, meet str
 
 ## The Teen Behind the Tech
 
-Anand Pandey isn’t your typical tech founder. At just 19 years old, he single-handedly envisioned and brought ChatSafari to life. What began as a passion project quickly turned into a full-fledged platform with a growing global user base. His knack for understanding what the youth want in online communication is what sets him apart.
+**Anand Pandey** isn’t your typical tech founder. At just 19 years old, he single-handedly envisioned and brought ChatSafari to life. What began as a passion project quickly turned into a full-fledged platform with a growing global user base. His knack for understanding what the youth want in online communication is what sets him apart.
 
 Growing up, Anand observed how social platforms became more intrusive and less about meaningful interactions. This sparked his idea: **a platform built around simplicity, freedom, and real-time conversation**. And that’s exactly what ChatSafari delivers.
 
@@ -49,7 +49,7 @@ Growing up, Anand observed how social platforms became more intrusive and less a
 
 ## From Idea to Reality
 
-Launching a chat platform in today’s competitive tech space is no small feat. Anand Pandey not only designed the concept but also oversaw the development and deployment of both the frontend and backend. His platform is optimized for **both PC and mobile users**.
+Launching a chat platform in today’s competitive tech space is no small feat. **Anand Pandey** not only designed the concept but also oversaw the development and deployment of both the frontend and backend. His platform is optimized for **both PC and mobile users**.
 
 Despite its recent launch, ChatSafari is already gaining traction—thanks to its unique value proposition and clean, user-friendly design. Anand is also actively working on blog content and SEO strategies to boost the site’s visibility and attract more users globally.
 
