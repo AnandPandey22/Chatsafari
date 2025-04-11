@@ -4,6 +4,8 @@ import { ArrowLeft, Users, MessageCircle, Globe, Shield, Sparkles } from 'lucide
 import { blogs } from './Blogs';
 import type { Helmet as HelmetType } from 'react-helmet-async';
 import { Helmet } from 'react-helmet-async';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Define the Blog interface here to match the structure in Blogs.tsx
 interface Blog {
@@ -163,13 +165,15 @@ const BlogPost: React.FC = () => {
           </div>
 
           {/* Content */}
-          <div className="p-8">
+         <div className="p-6 sm:p-8 md:p-10">
             <div className="text-sm text-gray-500 mb-4">{post.date}</div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">{post.title}</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold text-violet-700 mb-6">{post.title}</h1>
             
-            <div className="prose prose-violet max-w-none">
+            <div className="prose prose-violet prose-lg max-w-none custom-blog-content blog-content-no-title">
               {post.content ? (
-                <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {post.content}
+                </ReactMarkdown>
               ) : (
                 <p>{post.excerpt}</p>
               )}
