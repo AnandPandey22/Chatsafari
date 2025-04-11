@@ -34,8 +34,10 @@ const BlogPost: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPostType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     const foundPost = blogs.find(p => p.slug === slug);
     if (foundPost) {
       // Convert from Blog to BlogPostType, ensuring all required fields exist
@@ -51,9 +53,13 @@ const BlogPost: React.FC = () => {
         tags: [] // Default empty tags array
       };
       setPost(convertedPost);
+
+     // Scroll to the top when post changes
+      window.scrollTo(0, 0); 
     } else {
       setPost(null);
     }
+    setIsLoading(false);
   }, [slug]);
 
   // Get 3 random related posts excluding current post
@@ -63,6 +69,17 @@ const BlogPost: React.FC = () => {
     return shuffled.slice(0, 3);
   };
 
+ if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading post...</p>
+        </div>
+      </div>
+    );
+  }
+  
   if (!post) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
