@@ -16,13 +16,13 @@ interface Blog {
 export const blogs: Blog[] = [
   {
     id: 1,
-    title: "ChatSafari: The Ultimate Guide to Modern Online Chat Features",
-    slug: "chatsafari-ultimate-guide-modern-online-chat-features",
-    thumbnail: "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=500&q=80",
-    excerpt: "Discover all the powerful features that make ChatSafari the leading platform for online communication, from real-time messaging to advanced security.",
+    title: "Meet the Founder Of Chatsafari",
+    slug: "Founder-of-Chatsafari",
+    thumbnail: "https://i.postimg.cc/MpkxPYqn/A-promotional-5-MP-thumbnail.jpg",
+    excerpt: "Understand the Mindset Of Founder Of chatsafari and the story behind the development of this new Secure Chatting Platform",
     date: "2024-03-21",
     content: `
-# ChatSafari: The Ultimate Guide to Modern Online Chat Features
+# Meet the Founder Of Chatsafari
 
 In today's digital age, finding a secure, user-friendly, and feature-rich chat platform is essential. ChatSafari emerges as a comprehensive solution, offering a perfect blend of modern communication features, robust security, and an engaging user experience. Let's explore what makes ChatSafari the preferred choice for online communication.
 
