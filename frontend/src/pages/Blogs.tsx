@@ -16,7 +16,7 @@ interface Blog {
 export const blogs: Blog[] = [
   {
     id: 1,
-    title: "Meet the Founder Of Chatsafari: Anand Pandey",
+    title: "The Founder Of Chatsafari: Anand Pandey",
     slug: "Founder-of-Chatsafari-Anand-Pandey",
     thumbnail: "https://i.postimg.cc/MpkxPYqn/A-promotional-5-MP-thumbnail.jpg",
     excerpt: "Read the Mindset Of Founder Of chatsafari and the story behind the development of this new Secure Chatting Platform",
