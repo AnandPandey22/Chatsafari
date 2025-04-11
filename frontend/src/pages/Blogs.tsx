@@ -49,13 +49,13 @@ Growing up, Anand observed how social platforms became more intrusive and less a
 
 ## From Idea to Reality
 
-Launching a chat platform in today’s competitive tech space is no small feat. Anand not only designed the concept but also oversaw the development and deployment of both the frontend and backend. His platform is currently hosted on **Netlify** (frontend) and **Render** (backend), optimized for **both PC and mobile users**.
+Launching a chat platform in today’s competitive tech space is no small feat. Anand Pandey not only designed the concept but also oversaw the development and deployment of both the frontend and backend. His platform is optimized for **both PC and mobile users**.
 
 Despite its recent launch, ChatSafari is already gaining traction—thanks to its unique value proposition and clean, user-friendly design. Anand is also actively working on blog content and SEO strategies to boost the site’s visibility and attract more users globally.
 
 ## What’s Next?
 
-Anand isn’t stopping here. His roadmap for ChatSafari includes features like **voice messages**, **user blocking/reporting**, **profile customization**, and **Google AdSense monetization** through engaging blog content. His goal? **To make ChatSafari the go-to platform for safe, anonymous, and fun conversations across the globe**.
+**Anand Pandey** isn’t stopping here. His roadmap for **ChatSafari** includes features like **voice messages**, **user blocking/reporting**, **profile customization**, and **Google AdSense monetization** through engaging blog content. His goal? **To make ChatSafari the go-to platform for safe, anonymous, and fun conversations across the globe**.
 
 ## Final Thoughts
 
