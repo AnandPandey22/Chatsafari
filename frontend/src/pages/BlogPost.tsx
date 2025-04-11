@@ -230,7 +230,7 @@ const BlogPost: React.FC = () => {
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center bg-white text-violet-700 hover:bg-violet-50 font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 w-full md:w-auto"
                   >
-                    Start Chatting Now
+                    Start Chatting
                   </a>
                   <div className="flex items-center text-sm text-violet-100">
                     <Shield className="h-4 w-4 mr-1 text-yellow-300" />
