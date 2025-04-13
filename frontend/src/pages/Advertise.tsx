@@ -1,10 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, BarChart, Users, Globe, Mail } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 
 const Advertise: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <Helmet>
+  <title>Advertise with ChatSafari - Reach Global Audience At Low Cost</title>
+  <meta name="description" content="Advertise your brand or service on ChatSafari, the free, anonymous chat platform. Reach a wide, engaged global audience. No sign-up required!" />
+  <meta name="keywords" content="advertise, advertising, brand promotion, online advertising, digital marketing, target audience, free chat platform, global reach, no signup advertising" />
+  <link rel="canonical" href="https://chatsafari.com/advertise" />
+      </Helmet>
+
       {/* Fixed Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
