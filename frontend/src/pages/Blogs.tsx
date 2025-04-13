@@ -22,7 +22,6 @@ export const blogs: Blog[] = [
     excerpt: "Read the Mindset Of Founder Of chatsafari and the story behind the development of this new Secure Chatting Platform",
     date: "2024-03-21",
     content: `
-# The Founder Of Chatsafari: Anand Pandey
 
 In an age dominated by social media giants and complex registration processes, one teenager dared to simplify how people connect online. Meet **Anand Pandey**, the visionary **19-year-old founder of ChatSafari**, a platform that has taken the internet by storm since its launch on **March 14, 2025**.
 
