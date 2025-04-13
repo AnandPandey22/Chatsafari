@@ -2,10 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Footer from '../components/Footer';
+import { Helmet } from 'react-helmet-async';
 
 const Terms: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <Helmet>
+  <title>Terms of Service - ChatSafari</title>
+  <meta name="description" content="Read ChatSafari's Terms of Service to understand our policies, rules, and guidelines for using our free chat platform. Learn about our service terms and responsibilities." />
+  <meta name="keywords" content="terms of service, ChatSafari terms, terms and conditions, chat platform rules, service guidelines" />
+  <link rel="canonical" href="https://chatsafari.com/terms" />
+      </Helmet>
+      
       {/* Fixed Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
