@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Mail, MapPin, Phone, Globe, MessageCircle, Clock } from 'lucide-react';
 import Footer from '../components/Footer';
 import { toast } from 'react-hot-toast';
+import { Helmet } from 'react-helmet-async';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -45,6 +46,13 @@ const Contact: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <Helmet>
+  <title>Contact Us - Get in Touch with ChatSafari</title>
+  <meta name="description" content="Have questions or need support? Contact the ChatSafari team for assistance. We're here to help you with any inquiries or issues you may have." />
+  <meta name="keywords" content="contact us, get in touch, customer support, ChatSafari help, contact ChatSafari, online chat support, reach us, inquiries" />
+  <link rel="canonical" href="https://chatsafari.com/contact" />
+      </Helmet>
+
       {/* Fixed Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
