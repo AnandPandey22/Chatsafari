@@ -161,7 +161,3 @@ body {
   font-size: 1.05em;
 }
 
-/* Hide duplicate title in blog content */
-.blog-content-no-title > h1:first-child {
-  display: none;
-}
