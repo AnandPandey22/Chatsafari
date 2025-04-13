@@ -93,7 +93,7 @@ const Contact: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-medium text-gray-900">Our Location</h3>
                   <p className="mt-1 text-gray-600">
-                     Jaipur, Rajasthan, India
+                     Street 21, Port charlotte, United States
                   </p>
                 </div>
               </div>
