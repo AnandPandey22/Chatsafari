@@ -2,10 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import Footer from '../components/Footer';
+import { Helmet } from 'react-helmet-async';
 
 const Privacy: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
+      <Helmet>
+  <title>Privacy Policy - ChatSafari</title>
+  <meta name="description" content="Learn about ChatSafari's privacy practices. Our Privacy Policy explains how we collect, use, and protect your personal information when using our platform." />
+  <meta name="keywords" content="privacy policy, ChatSafari privacy,Chat Safari, data protection, personal information, user privacy" />
+  <link rel="canonical" href="https://chatsafari.com/privacy" />
+      </Helmet>
+
       {/* Fixed Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
