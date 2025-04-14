@@ -60,7 +60,7 @@ const Login: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Helmet>
         <title>ChatSafari - Free Online Chat Rooms | Talk to Strangers</title>
-        <meta name="description" content="Join ChatSafari's free online chat rooms. Talk to strangers, chat with strangers, and enjoy video chat worldwide. No registration required. Safe and secure platform." />
+        <meta name="description" content="Join ChatSafari's free online chat rooms. Talk to strangers, chat with strangers, and enjoy video chat worldwide. No registration required." />
         <meta name="keywords" content="chat rooms, online chat, video chat, talk to strangers, free chat, chat with strangers, meet new friends" />
         <link rel="canonical" href="https://chatsafari.com/" />
         <meta property="og:title" content="ChatSafari - Free Online Chat Rooms | Talk to Strangers" />
