@@ -59,18 +59,28 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Helmet>
+        <title>ChatSafari - Free Online Chat Rooms | Talk to Strangers</title>
+        <meta name="description" content="Join ChatSafari's free online chat rooms. Talk to strangers, chat with strangers, and enjoy video chat worldwide. No registration required. Safe and secure platform." />
+        <meta name="keywords" content="chat rooms, online chat, video chat, talk to strangers, free chat, chat with strangers, meet new friends" />
         <link rel="canonical" href="https://chatsafari.com/" />
+        <meta property="og:title" content="ChatSafari - Free Online Chat Rooms | Talk to Strangers" />
+        <meta property="og:description" content="Join ChatSafari's free online chat rooms. Talk to strangers, chat with strangers, and enjoy video chat worldwide. No registration required." />
+        <meta property="og:url" content="https://chatsafari.com/" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="ChatSafari - Free Online Chat Rooms" />
+        <meta name="twitter:description" content="Join ChatSafari's free online chat rooms. Meet new friends worldwide." />
       </Helmet>
-      
+
       {/* Fixed Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-10">
+      <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-10" role="banner">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Left section - Brand */}
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
+              <span className="text-2xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
                 ChatSafari
-              </h1>
+              </span>
             </div>
 
             {/* Right section - Blogs Button */}
@@ -85,20 +95,20 @@ const Login: React.FC = () => {
       </header>
 
       {/* Main Content - Adjusted for fixed header */}
-      <div className="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-16 mt-16">
+      <main className="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-16 mt-16" role="main">
         <div className="w-full max-w-6xl flex flex-col gap-8">
           {/* Main Content Area */}
-          <div className="flex flex-col lg:flex-row gap-8">
+          <section className="flex flex-col lg:flex-row gap-8" aria-label="Login and Introduction">
             {/* Login Form */}
             <div className="lg:w-[500px] w-full">
-              <div className="text-center mb-8">
-                <h1 className="text-5xl font-bold text-violet-600 mb-2" style={{ fontFamily: 'Pacifico, cursive' }}>
-                  ChatSafari
-                </h1>
-                <p className="text-gray-600">Connect with people around the world</p>
-              </div>
-
               <div className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-lg bg-opacity-90">
+                <div className="text-center mb-8">
+                  <span className="text-5xl font-bold text-violet-600 mb-2" style={{ fontFamily: 'Pacifico, cursive' }}>
+                    ChatSafari
+                  </span>
+                  <p className="text-gray-600">Connect with people around the world</p>
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-4">
                     <div className="relative">
@@ -165,42 +175,109 @@ const Login: React.FC = () => {
               <div className="mt-8 text-center text-sm text-gray-600">
                 <p>By joining, you agree to our Terms of Service and Privacy Policy</p>
               </div>
-              
             </div>
-          </div>
 
-          {/* Features Section - Full Width */}
-          <div className="bg-white rounded-xl shadow-md p-8">
-            <h2 className="text-2xl font-semibold text-violet-600 mb-4 text-center">Why Choose ChatSafari?</h2>
+            {/* Right side - Content */}
+            <div className="w-full lg:flex-1">
+              <div className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-lg bg-opacity-90">
+                <h1 className="text-3xl font-bold text-violet-600 mb-6">
+                  Talk to Strangers, Free Chat Rooms, Make Friends Online!
+                </h1>
+                
+                <div className="space-y-4">
+                  <p className="text-gray-600 text-lg leading-relaxed">
+                    Free chat rooms, chat online with girls No Registration. Experience the best Online Chatting platform to find friends and Chat with strangers all over the world.
+                  </p>
+
+                  <p className="text-gray-600 text-lg leading-relaxed">
+                    Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. 
+                    Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Additional Content - Below Login Form */}
+          <section className="max-w-4xl mx-auto text-center py-12" aria-label="About ChatSafari">
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Chatsafari.com is a free chat room and Video chat website where you can have live chat with single girls and boys, 
+              you can Chat with random strangers from USA, Canada, United Kingdom, Australia and people from all over the world, 
+              at the same time in multiple chatrooms and discussion groups, any time you can start a private conversation 
+              to meet girls and boys living nearby in your area.
+            </p>
+          </section>
+
+          {/* Talk to Strangers Section */}
+          <section className="bg-white rounded-xl shadow-md p-8" aria-label="Chat Features">
+            <h2 className="text-3xl font-bold text-violet-600 mb-8 text-center">
+              Talk to Strangers On Chatsafari
+            </h2>
+            <div className="max-w-5xl mx-auto space-y-4">
+              <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers and Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
+                <p className="text-gray-600 text-lg leading-relaxed">
+                  Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Features Section */}
+          <section className="bg-white rounded-xl shadow-md p-8" aria-label="Why Choose Us">
+            <h3 className="text-3xl font-bold text-violet-600 mb-8 text-center">
+              Why Choose ChatSafari?
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-violet-600">Real-time Communication</h3>
-                <p className="text-gray-600">
+                <h4 className="text-lg font-medium text-violet-600">Real-time Communication</h4>
+                <p className="text-gray-600 text-lg leading-relaxed">
                   Experience seamless real-time messaging with instant delivery indicators, typing status, and read receipts. 
                   Share images and connect with users worldwide through our modern, responsive interface.
                 </p>
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-violet-600">Security & Privacy</h3>
-                <p className="text-gray-600">
+                <h4 className="text-lg font-medium text-violet-600">Security & Privacy</h4>
+                <p className="text-gray-600 text-lg leading-relaxed">
                   Enjoy secure end-to-end encrypted messaging, customizable profiles with avatars, and user presence indicators. 
                   Your privacy and security are our top priorities.
                 </p>
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-medium text-violet-600">Free & Community-Driven</h3>
-                <p className="text-gray-600">
+                <h4 className="text-lg font-medium text-violet-600">Free & Community-Driven</h4>
+                <p className="text-gray-600 text-lg leading-relaxed">
                   ChatSafari is completely free to use, supported by our generous community through donations. Join thousands 
                   of users enjoying safe, fun, and meaningful conversations every day.
                 </p>
               </div>
             </div>
-          </div>
+          </section>
         </div>
-      </div>
+      </main>
+
       <Footer />
+
     </div>
   );
 };
