@@ -27,9 +27,9 @@ const Privacy: React.FC = () => {
 
             {/* Center section - Brand */}
             <div className="flex-1 flex justify-center">
-              <h1 className="text-2xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
+              <span className="text-2xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
                 ChatSafari
-              </h1>
+              </span>
             </div>
 
             {/* Right section - Empty for balance */}
