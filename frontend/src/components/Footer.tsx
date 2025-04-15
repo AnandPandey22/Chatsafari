@@ -10,9 +10,9 @@ const Footer: React.FC = () => {
             {/* Branding - Hidden on mobile */}
             <div className="hidden md:block mb-6 md:mb-0">
               <div className="text-center">
-                <h1 className="text-3xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
+                <span className="text-3xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
                   ChatSafari
-                </h1>
+                </span>
                 <p className="text-violet-600 mt-1" style={{ fontFamily: 'Georgia, serif' }}>
                   Free Chat
                 </p>
