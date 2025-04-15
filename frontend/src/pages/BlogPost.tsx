@@ -161,9 +161,9 @@ const BlogPost: React.FC = () => {
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
-            <h1 className="text-2xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
+             <span className="text-2xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
               ChatSafari
-            </h1>
+            </span>
             <div className="w-20"></div>
           </div>
         </div>
@@ -184,6 +184,19 @@ const BlogPost: React.FC = () => {
           {/* Content */}
          <div className="p-6 sm:p-8 md:p-10">
             <div className="text-sm text-gray-500 mb-4">{post.date}</div>
+           
+            {/* Start Chatting Button */}
+            <div className="mb-6 flex justify-center">
+              <a 
+                href="https://chatsafari.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center bg-violet-600 text-white hover:bg-violet-700 font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
+                Start Chatting 
+              </a>
+            </div>
+           
             <h1 className="text-3xl sm:text-4xl font-bold text-violet-700 mb-6">{post.title}</h1>
             
             <div className="prose prose-violet prose-lg max-w-none custom-blog-content blog-content-no-title">
