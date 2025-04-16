@@ -232,9 +232,14 @@ const Login: React.FC = () => {
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
                 <p className="text-gray-600 text-lg leading-relaxed">
                   Anand Pandey is the Founder of Chatsafari and he launched Chatsafari.com on 14th March 2025. After so many days and too many updates the Chatsafari is Successfully launched. Chatsafari was the First Dream of Anand Pandey which he wanted to accomplish, now since Chatsafari has been launched he wants people to see his work and try Chatsafari for once and give some feedback about the services of chatsafari and if they find some bug they should contact Us so that we can resolve it immediately.
+                  </p>
+              </div>
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
                 <p className="text-gray-600 text-lg leading-relaxed">
                   If you are an introvert and want to improve your conversation skill with girls then Chatsafari.com is One and Only the Best Chatting Platform which can connect you to different girls from so many countries so that you can interact with them and Improve your English Speaking and Conversation Skill. Only Real usera are available on chatsafari from different countries and we do not have Bots who send spamy and fishy messages to users. This is what make Chatsafari.com different from Other Online Chatting Platform.
+                  </p>
+              </div>
+            </div>
           </section>
 
           {/* Features Section */}
