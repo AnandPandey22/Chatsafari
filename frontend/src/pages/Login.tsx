@@ -211,35 +211,30 @@ const Login: React.FC = () => {
           {/* Talk to Strangers Section */}
           <section className="bg-white rounded-xl shadow-md p-8" aria-label="Chat Features">
             <h2 className="text-3xl font-bold text-violet-600 mb-8 text-center">
-              Talk to Strangers On Chatsafari
+              Talk to Strangers Free On Chatsafari
             </h2>
             <div className="max-w-5xl mx-auto space-y-4">
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
                 <p className="text-gray-600 text-lg leading-relaxed">
-                  Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers and Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers
+                  Talk to strangers, Free Chat Rooms, online chat, Random Chat, 1-on-1 live chat with Strangers, Video Chat with girls,Voice Chat, text chat, Ghost Chat etc. these are some services that are fully served by Chatsafari to all its Users so that they all can interact with anyone around the world to Uplift their mind and take a break from their hectic schedule and relax their body and mind. Chatsafari.com also have some different features that users can use to Impress girl and uplift their mood.
                 </p>
               </div>
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
                 <p className="text-gray-600 text-lg leading-relaxed">
-                  Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers
+                  Free Chat Rooms like India Chat Room, USA chat room, Lesbian chat room, Gay Chat room, Teen Chat rooms, Dating Chat Rooms, Girls Chat Room, Ghost Chat Rooms are Available on Chatsafari.com which helps different types of people to interact with their lovable person. Sometimes people get bored talking to their friends and here chatsafari helps them to find a good stranger from a different part of world who does not know about him so that they both can share each others feelings without Judging them. All the features and Chat Rooms are Completely Free, Users don't have to pay anything.
                 </p>
               </div>
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
                 <p className="text-gray-600 text-lg leading-relaxed">
-                  Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers
+                  Talking to strangers online on chatsafari helps people to Uplift their mood because they can share their feelings with real people and have a good conversation with them. Talk to Random cute girls on Chatsafari and start Improving your conversation pull with them so that they get Impressed by you. You can also flirt with girls on chatsafari and they are very polite to all users.
                 </p>
               </div>
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
                 <p className="text-gray-600 text-lg leading-relaxed">
-                  Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers
-                </p>
-              </div>
+                  Anand Pandey is the Founder of Chatsafari and he launched Chatsafari.com on 14th March 2025. After so many days and too many updates the Chatsafari is Successfully launched. Chatsafari was the First Dream of Anand Pandey which he wanted to accomplish, now since Chatsafari has been launched he wants people to see his work and try Chatsafari for once and give some feedback about the services of chatsafari and if they find some bug they should contact Us so that we can resolve it immediately.
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
                 <p className="text-gray-600 text-lg leading-relaxed">
-                  Chatsafari.com is an Online Free Chat Rooms. Enjoy video chat with strangers worldwide. Here you can chat with hot girls, meet new friends from all over the world. Chatsafari.com have Free Online Chat Rooms where you can Chat with Strangers
-                </p>
-              </div>
-            </div>
+                  If you are an introvert and want to improve your conversation skill with girls then Chatsafari.com is One and Only the Best Chatting Platform which can connect you to different girls from so many countries so that you can interact with them and Improve your English Speaking and Conversation Skill. Only Real usera are available on chatsafari from different countries and we do not have Bots who send spamy and fishy messages to users. This is what make Chatsafari.com different from Other Online Chatting Platform.
           </section>
 
           {/* Features Section */}
@@ -265,10 +260,10 @@ const Login: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-lg font-medium text-violet-600">Free & Community-Driven</h4>
+                <h4 className="text-lg font-medium text-violet-600">Free Chat Rooms</h4>
                 <p className="text-gray-600 text-lg leading-relaxed">
-                  ChatSafari is completely free to use, supported by our generous community through donations. Join thousands 
-                  of users enjoying safe, fun, and meaningful conversations every day.
+                 Free Chat Rooms, online chatting and including all features are completely Free on Chatsafari. 
+                 It means Users do not have to pay anything to Talk to strangers like Other chatting websites. Best Service is Our Priority.
                 </p>
               </div>
             </div>
