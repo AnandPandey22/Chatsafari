@@ -260,7 +260,7 @@ const Login: React.FC = () => {
                 <h4 className="text-lg font-medium text-violet-600">Security & Privacy</h4>
                 <p className="text-gray-600 text-lg leading-relaxed">
                   Enjoy secure end-to-end encrypted messaging, customizable profiles with avatars, and user presence indicators. 
-                  Your privacy and security are our top priorities.
+                  Your privacy and security are our top priorities. Your Privacy is our Responsibility.
                 </p>
               </div>
 
@@ -268,7 +268,7 @@ const Login: React.FC = () => {
                 <h4 className="text-lg font-medium text-violet-600">Free Chat Rooms</h4>
                 <p className="text-gray-600 text-lg leading-relaxed">
                  Free Chat Rooms, online chatting and including all features are completely Free on Chatsafari. 
-                 It means Users do not have to pay anything to Talk to strangers like Other chatting websites. Best Service is Our Priority.
+                 It means Users do not have to pay anything to Talk to strangers like Other chatting websites.
                 </p>
               </div>
             </div>
