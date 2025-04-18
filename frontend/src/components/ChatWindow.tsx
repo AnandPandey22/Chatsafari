@@ -356,7 +356,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
 
     return (
       <div key={message.id} className={`flex ${containerClass} mb-4`}>
-        <div className={`flex flex-col max-w-[70%] ${isCurrentUser ? 'items-end' : 'items-start'}`}>
+        <div className={`flex flex-col max-w-[90%] ${isCurrentUser ? 'items-end' : 'items-start'}`}>
           <div className={`rounded-lg px-4 py-2 ${messageClass} shadow-sm`}>
             {isImage ? (
               <div 
