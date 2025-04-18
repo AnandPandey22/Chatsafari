@@ -5,6 +5,7 @@ import ChatWindow from '../components/ChatWindow';
 import { LogOut, Menu, X, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import AdSense from '../components/AdSense';
 
 const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -296,25 +297,28 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
-          {/* Large Banner Ad below chat - Fixed Height */}
+         {/* Large Banner Ad below chat - Fixed Height */}
           <div className="h-48 bg-white border-t border-gray-200 flex-none">
-            <div className="h-full flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
-              <span>image</span>
-            </div>
+            <AdSense
+              slot="1455746969" // Replace with your ad slot ID for the banner
+              format="auto"
+              style={{ display: 'block', height: '100%' }}
+            />
           </div>
         </div>
 
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-96 border-l border-gray-200 bg-white p-4 flex-none">
           <div className="h-full flex flex-col justify-center">
-            <div className="bg-gray-50 rounded-xl shadow-sm p-4 h-[calc(100vh-8rem)] flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
-              <span>Large image</span>
-            </div>
+            <AdSense
+              slot="4239852667" // Replace with your ad slot ID for the sidebar
+              format="auto"
+              style={{ display: 'block', height: '100%' }}
+            />
           </div>
         </div>
       </div>
     </div>
   );
 };
-
 export default Dashboard;
