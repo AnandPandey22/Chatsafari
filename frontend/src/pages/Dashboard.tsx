@@ -295,11 +295,11 @@ const Dashboard: React.FC = () => {
           } flex-1 flex-col overflow-hidden`}
         >
           {/* Chat Window Container */}
-          <div className="flex-1 overflow-hidden">
+          <div className="h-[530px] overflow-hidden">
             {selectedUser ? (
               <ChatWindow isMobile={isMobile} />
             ) : (
-              <div className="flex-1 flex items-center justify-center bg-gray-50 rounded-xl">
+              <div className="h-full flex items-center justify-center bg-gray-50 rounded-xl">
                 <div className="text-center">
                   <div className="text-gray-400 mb-4">
                     <svg
@@ -323,32 +323,28 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
-         {/* Large Banner Ad below chat - Fixed Height */}
-         <div className="h-48 bg-white border-t border-gray-200 flex-none">
-            <div className="h-full flex items-center justify-center">
+          {/* Bottom Ad Space */}
+          <div className="flex-1 bg-white border-t border-gray-200">
+            <div className="h-full w-full">
               <ins className="adsbygoogle"
-                style={{ display: 'block' }}
+                style={{ display: 'block', height: '100%', width: '100%' }}
                 data-ad-client="ca-pub-9696449443766781"
                 data-ad-slot="1455746969"
                 data-ad-format="auto"
-                data-full-width-responsive="true">
-              </ins>
-            </div>          
+                data-full-width-responsive="true"></ins>
+            </div>
           </div>
         </div>
 
         {/* Right Sidebar - Ad Space (desktop only) */}
-        <div className="hidden lg:block w-96 border-l border-gray-200 bg-white p-4 flex-none">
-          <div className="h-full flex flex-col justify-center">
-            <div className="w-full h-full flex items-center justify-center">
-              <ins className="adsbygoogle"
-                style={{ display: 'block' }}
-                data-ad-client="ca-pub-9696449443766781"
-                data-ad-slot="4239852667"
-                data-ad-format="auto" 
-                data-full-width-responsive="true">
-              </ins>
-            </div>
+        <div className="hidden lg:block w-[305px] h-[800px] border-l border-gray-200 bg-white">
+          <div className="h-full w-full">
+            <ins className="adsbygoogle"
+              style={{ display: 'block', height: '100%', width: '100%' }}
+              data-ad-client="ca-pub-9696449443766781"
+              data-ad-slot="4239852667"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
           </div>
         </div>
       </div>
