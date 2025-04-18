@@ -103,15 +103,31 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedUser, setSelectedUser]);
 
-  // Add useEffect for loading ads
+  // Add useEffect for loading ads after login
   useEffect(() => {
-    try {
-      // @ts-ignore - adsbygoogle is loaded by AdSense script
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (err) {
-      console.error('Error loading ads:', err);
+    if (currentUser) {
+      // Load AdSense script if not already loaded
+      if (!window.adsbygoogle) {
+        const script = document.createElement('script');
+        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
+      }
+
+      // Load ads after a short delay to ensure script is loaded
+      const timer = setTimeout(() => {
+        try {
+          // @ts-ignore - adsbygoogle is loaded by AdSense script
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (err) {
+          console.error('Error loading ads:', err);
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
     }
-  }, []);
+  }, [currentUser]);
 
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
