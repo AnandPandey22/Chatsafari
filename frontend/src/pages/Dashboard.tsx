@@ -283,7 +283,7 @@ const Dashboard: React.FC = () => {
             isMobile && selectedUser ? 'hidden' : 'block'
           } w-full md:w-80 md:block flex-col border-r border-gray-200 bg-white`}
         >
-          <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <div className="h-[calc(100vh-64px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             <UserList />
           </div>
         </div>
