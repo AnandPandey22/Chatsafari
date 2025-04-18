@@ -299,22 +299,30 @@ const Dashboard: React.FC = () => {
 
          {/* Large Banner Ad below chat - Fixed Height */}
           <div className="h-48 bg-white border-t border-gray-200 flex-none">
-            <AdSense
-              slot="1455746969" // Replace with your ad slot ID for the banner
-              format="auto"
-              style={{ display: 'block', height: '100%' }}
-            />
+            <div className="h-full flex items-center justify-center">
+              <ins className="adsbygoogle"
+                style={{ display: 'block', width: '728px', height: '90px' }}
+                data-ad-client="ca-pub-9696449443766781"
+                data-ad-slot="1455746969"
+                data-ad-format="auto"
+                data-full-width-responsive="true">
+              </ins>
+            </div>
           </div>
         </div>
 
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-96 border-l border-gray-200 bg-white p-4 flex-none">
           <div className="h-full flex flex-col justify-center">
-            <AdSense
-              slot="4239852667" // Replace with your ad slot ID for the sidebar
-              format="auto"
-              style={{ display: 'block', height: '100%' }}
-            />
+            <div className="bg-gray-50 rounded-xl shadow-sm p-4 h-[calc(100vh-8rem)] flex items-center justify-center">
+              <ins className="adsbygoogle"
+                style={{ display: 'block', width: '300px', height: '600px' }}
+                data-ad-client="ca-pub-9696449443766781"
+                data-ad-slot="4239852667"
+                data-ad-format="auto"
+                data-full-width-responsive="true">
+              </ins>
+            </div>
           </div>
         </div>
       </div>
