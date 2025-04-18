@@ -104,11 +104,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   }, []);
 
   const scrollToBottom = () => {
-    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    // Only scroll to bottom when new messages are added
+    if (chatRooms.length > 0) {
+      const lastRoom = chatRooms[chatRooms.length - 1];
+      if (lastRoom.messages.length > 0) {
+        scrollToBottom();
+      }
+    }
   }, [chatRooms]);
 
   // Play notification sound when receiving a new message
