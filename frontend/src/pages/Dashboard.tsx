@@ -15,48 +15,19 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
- // Initialize ads when selectedUser changes
+// Initialize ads when selectedUser changes
   useEffect(() => {
-    const initializeAds = () => {
+    // Small delay to ensure DOM is updated
+    setTimeout(() => {
       try {
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch (error) {
         console.error('Error loading ads:', error);
       }
-    };
-
-    // Initialize immediately
-    initializeAds();
-
-    // Initialize again after a very short delay to ensure DOM is ready
-    const timer = setTimeout(initializeAds, 50);
-
-    // Cleanup
-    return () => clearTimeout(timer);
+    }, 100);
   }, [selectedUser]);
-
-  // Additional initialization on mount
-  useEffect(() => {
-    const initializeAds = () => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading ads:', error);
-      }
-    };
-
-    // Initialize on mount
-    initializeAds();
-
-    // Initialize again after component is fully mounted
-    const timer = setTimeout(initializeAds, 100);
-
-    // Cleanup
-    return () => clearTimeout(timer);
-  }, []);
-
+  
   // Restore session on mount
   useEffect(() => {
     restoreSession();
@@ -196,6 +167,52 @@ const Dashboard: React.FC = () => {
 
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
+
+   // Initialize bottom ad when selectedUser changes
+  useEffect(() => {
+    const loadBottomAd = () => {
+      try {
+        // @ts-ignore
+        (window.adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-9696449443766781",
+          enable_page_level_ads: true
+        });
+      } catch (error) {
+        console.error('Error loading bottom ad:', error);
+      }
+    };
+
+    // Initial load
+    loadBottomAd();
+
+    // Reload when user changes
+    if (selectedUser) {
+      setTimeout(loadBottomAd, 1000);
+    }
+  }, [selectedUser]);
+
+  // Initialize sidebar ad when selectedUser changes
+  useEffect(() => {
+    const loadSidebarAd = () => {
+      try {
+        // @ts-ignore
+        (window.adsbygoogle = window.adsbygoogle || []).push({
+          google_ad_client: "ca-pub-9696449443766781",
+          enable_page_level_ads: true
+        });
+      } catch (error) {
+        console.error('Error loading sidebar ad:', error);
+      }
+    };
+
+    // Initial load
+    loadSidebarAd();
+
+    // Reload when user changes
+    if (selectedUser) {
+      setTimeout(loadSidebarAd, 1000);
+    }
+  }, [selectedUser]);
 
 
   if (!currentUser) {
