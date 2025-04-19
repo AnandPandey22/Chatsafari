@@ -467,7 +467,7 @@ const Dashboard: React.FC = () => {
               data-ad-format="auto"
               data-full-width-responsive="true"
               data-ad-targeting="target=_blank"
-             key={`sidebar-${rightAdSlot}-${selectedUser?.id || 'default'}`}
+              key={`sidebar-${rightAdSlot}`}
             ></ins>
            </div>
         </div>
