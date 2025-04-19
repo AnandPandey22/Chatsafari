@@ -168,14 +168,18 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-   // Initialize bottom ad when selectedUser changes
+// Initialize bottom ad when selectedUser changes
   useEffect(() => {
     const loadBottomAd = () => {
       try {
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({
           google_ad_client: "ca-pub-9696449443766781",
-          enable_page_level_ads: true
+          enable_page_level_ads: true,
+          onclick: function(ads: { url: string }) {
+            window.open(ads.url, '_blank', 'noopener,noreferrer');
+            return false;
+          }
         });
       } catch (error) {
         console.error('Error loading bottom ad:', error);
@@ -198,7 +202,11 @@ const Dashboard: React.FC = () => {
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({
           google_ad_client: "ca-pub-9696449443766781",
-          enable_page_level_ads: true
+          enable_page_level_ads: true,
+          onclick: function(ads: { url: string }) {
+            window.open(ads.url, '_blank', 'noopener,noreferrer');
+            return false;
+          }
         });
       } catch (error) {
         console.error('Error loading sidebar ad:', error);
@@ -213,6 +221,11 @@ const Dashboard: React.FC = () => {
       setTimeout(loadSidebarAd, 1000);
     }
   }, [selectedUser]);
+
+  // Prevent browser leave confirmation
+  useEffect(() => {
+    window.onbeforeunload = null;
+  }, []);
 
   // Handle ad clicks to open in new tab
   useEffect(() => {
@@ -411,6 +424,7 @@ const Dashboard: React.FC = () => {
                 data-ad-format="auto"
                 data-full-width-responsive="true"
                 data-ad-targeting="target=_blank"
+                data-ad-onclick="window.open(this.href, '_blank', 'noopener,noreferrer'); return false;"
                 key={`bottom-${selectedUser?.id || 'default'}`}
               ></ins>
             </div>
@@ -428,6 +442,7 @@ const Dashboard: React.FC = () => {
               data-ad-format="auto"
               data-full-width-responsive="true"
               data-ad-targeting="target=_blank"
+              data-ad-onclick="window.open(this.href, '_blank', 'noopener,noreferrer'); return false;"
               key={`sidebar-${selectedUser?.id || 'default'}`}
             ></ins>
            </div>
