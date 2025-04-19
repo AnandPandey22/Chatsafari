@@ -324,8 +324,8 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
-          {/* Bottom Ad Space */}
-          <div className="flex-1 bg-white border-t border-gray-200">
+         {/* Bottom Ad Space - Always visible in mobile */}
+          <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
             <div className="h-full w-full">
               <ins className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
