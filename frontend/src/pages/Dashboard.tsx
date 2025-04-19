@@ -348,8 +348,8 @@ const Dashboard: React.FC = () => {
                 data-ad-slot="1455746969"
                 data-ad-format="auto"
                 data-full-width-responsive="true"
-                key={selectedUser?.id || 'default'} // Add key to force re-render
-              ></ins>
+                key={selectedUser?.id || 'default'}
+              />
             </div>
           </div>
         </div>
