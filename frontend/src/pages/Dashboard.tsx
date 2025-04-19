@@ -218,10 +218,16 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const loadSidebarAd = () => {
       try {
-        // Clear existing ad
-        const existingAd = document.querySelector('.adsbygoogle[data-ad-slot="' + rightAdSlot + '"]');
-        if (existingAd) {
-          existingAd.innerHTML = '';
+        // Clear all existing ads
+        const existingAds = document.querySelectorAll('.adsbygoogle');
+        existingAds.forEach(ad => {
+          ad.innerHTML = '';
+        });
+
+        // Force a re-render of the ad container
+        const adContainer = document.querySelector('.adsbygoogle[data-ad-slot="' + rightAdSlot + '"]');
+        if (adContainer) {
+          adContainer.setAttribute('data-ad-slot', rightAdSlot);
         }
 
         // Load new ad
@@ -471,7 +477,7 @@ const Dashboard: React.FC = () => {
               data-ad-format="auto"
               data-full-width-responsive="true"
               data-ad-targeting="target=_blank"
-              key={`sidebar-${rightAdSlot}`}
+              key={`sidebar-${rightAdSlot}-${Date.now()}`}
             ></ins>
            </div>
         </div>
