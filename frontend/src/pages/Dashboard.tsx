@@ -16,15 +16,20 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
-  // Rotate right sidebar ad slots
+  // Rotate right sidebar ad slots every minute
   useEffect(() => {
-    if (selectedUser) {
-      const slots = ['4239852667', '5718393780', '3208532517'];
+    const slots = ['4239852667', '5718393780', '3208532517'];
+    const rotateAds = () => {
       const currentIndex = slots.indexOf(rightAdSlot);
       const nextIndex = (currentIndex + 1) % slots.length;
       setRightAdSlot(slots[nextIndex]);
-    }
-  }, [selectedUser]);
+    };
+
+    // Initial rotation
+    const interval = setInterval(rotateAds, 60000); // Rotate every minute
+
+    return () => clearInterval(interval);
+  }, [rightAdSlot]);
 
 // Initialize ads when selectedUser changes
   useEffect(() => {
@@ -209,19 +214,10 @@ const Dashboard: React.FC = () => {
     }
   }, [selectedUser]);
 
- // Initialize sidebar ad when selectedUser or rightAdSlot changes
+  // Initialize sidebar ad when rightAdSlot changes
   useEffect(() => {
     const loadSidebarAd = () => {
       try {
-        // Clear any existing ads first
-        const existingAds = document.querySelectorAll('.adsbygoogle');
-        existingAds.forEach(ad => {
-          if (ad.getAttribute('data-ad-slot') === rightAdSlot) {
-            ad.innerHTML = '';
-          }
-        });
-
-        // Force a new ad load
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({
           google_ad_client: "ca-pub-9696449443766781",
@@ -239,13 +235,15 @@ const Dashboard: React.FC = () => {
       }
     };
 
-    // Load ad immediately
-    loadSidebarAd();
-
-    // Reload after a short delay to ensure proper initialization
-    const timer = setTimeout(loadSidebarAd, 1000);
-    return () => clearTimeout(timer);
-  }, [selectedUser, rightAdSlot]);
+    // Clear existing ad
+    const sidebarAd = document.querySelector('.adsbygoogle[data-ad-slot="' + rightAdSlot + '"]');
+    if (sidebarAd) {
+      sidebarAd.innerHTML = '';
+    }
+    
+    // Load new ad
+    setTimeout(loadSidebarAd, 1000);
+  }, [rightAdSlot]);
   
   // Handle ad clicks globally
   useEffect(() => {
