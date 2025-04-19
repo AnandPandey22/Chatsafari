@@ -15,18 +15,34 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
-  // Initialize ads when selectedUser changes
+ // Initialize ads when selectedUser changes
   useEffect(() => {
-    // Small delay to ensure DOM is updated
-    setTimeout(() => {
+    const initializeAds = () => {
       try {
+        // Initialize bottom ad
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
+        
+        // Initialize right side ad if not mobile
+        if (!isMobile) {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        }
       } catch (error) {
         console.error('Error loading ads:', error);
       }
-    }, 100);
-  }, [selectedUser]);
+    };
+
+    // Initial load
+    initializeAds();
+
+    // Add a small delay and try again to ensure ads load
+    const timer = setTimeout(() => {
+      initializeAds();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [selectedUser, isMobile]);
 
   // Restore session on mount
   useEffect(() => {
