@@ -15,33 +15,44 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
- // Initialize ads when selectedUser changes
+  // Initialize ads when component mounts and when selectedUser changes
   useEffect(() => {
     const initializeAds = () => {
       try {
         // Initialize bottom ad
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-        
-        // Initialize right side ad if not mobile
-        if (!isMobile) {
+      } catch (error) {
+        console.error('Error loading bottom ad:', error);
+      }
+    };
+
+    // Initialize right side ad if not mobile
+    const initializeRightAd = () => {
+      if (!isMobile) {
+        try {
           // @ts-ignore
           (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (error) {
+          console.error('Error loading right side ad:', error);
         }
-      } catch (error) {
-        console.error('Error loading ads:', error);
       }
     };
 
     // Initial load
     initializeAds();
+    initializeRightAd();
 
-    // Add a small delay and try again to ensure ads load
-    const timer = setTimeout(() => {
-      initializeAds();
-    }, 500);
+    // Add multiple retries to ensure ads load
+    const retryIntervals = [100, 500, 1000];
+    const timers = retryIntervals.map(interval => 
+      setTimeout(() => {
+        initializeAds();
+        initializeRightAd();
+      }, interval)
+    );
 
-    return () => clearTimeout(timer);
+    return () => timers.forEach(timer => clearTimeout(timer));
   }, [selectedUser, isMobile]);
 
   // Restore session on mount
@@ -363,7 +374,7 @@ const Dashboard: React.FC = () => {
                 data-ad-slot="1455746969"
                 data-ad-format="auto"
                 data-full-width-responsive="true"
-                key={selectedUser?.id || 'default'}
+               key={`bottom-${selectedUser?.id || 'default'}`}
               ></ins>
             </div>
           </div>
