@@ -168,7 +168,7 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-// Initialize bottom ad when selectedUser changes
+ // Initialize bottom ad when selectedUser changes
   useEffect(() => {
     const loadBottomAd = () => {
       try {
@@ -177,7 +177,10 @@ const Dashboard: React.FC = () => {
           google_ad_client: "ca-pub-9696449443766781",
           enable_page_level_ads: true,
           onclick: function(ads: { url: string }) {
-            window.open(ads.url, '_blank', 'noopener,noreferrer');
+            const newWindow = window.open(ads.url, '_blank');
+            if (newWindow) {
+              newWindow.focus();
+            }
             return false;
           }
         });
@@ -204,7 +207,10 @@ const Dashboard: React.FC = () => {
           google_ad_client: "ca-pub-9696449443766781",
           enable_page_level_ads: true,
           onclick: function(ads: { url: string }) {
-            window.open(ads.url, '_blank', 'noopener,noreferrer');
+            const newWindow = window.open(ads.url, '_blank');
+            if (newWindow) {
+              newWindow.focus();
+            }
             return false;
           }
         });
@@ -222,12 +228,7 @@ const Dashboard: React.FC = () => {
     }
   }, [selectedUser]);
 
-  // Prevent browser leave confirmation
-  useEffect(() => {
-    window.onbeforeunload = null;
-  }, []);
-
-  // Handle ad clicks to open in new tab
+  // Handle ad clicks globally
   useEffect(() => {
     const handleAdClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -235,13 +236,21 @@ const Dashboard: React.FC = () => {
         const link = target.closest('a');
         if (link) {
           event.preventDefault();
-          window.open(link.href, '_blank', 'noopener,noreferrer');
+          const newWindow = window.open(link.href, '_blank');
+          if (newWindow) {
+            newWindow.focus();
+          }
         }
       }
     };
 
     document.addEventListener('click', handleAdClick);
     return () => document.removeEventListener('click', handleAdClick);
+  }, []);
+
+  // Prevent browser leave confirmation
+  useEffect(() => {
+    window.onbeforeunload = null;
   }, []);
 
 
@@ -424,7 +433,6 @@ const Dashboard: React.FC = () => {
                 data-ad-format="auto"
                 data-full-width-responsive="true"
                 data-ad-targeting="target=_blank"
-                data-ad-onclick="window.open(this.href, '_blank', 'noopener,noreferrer'); return false;"
                 key={`bottom-${selectedUser?.id || 'default'}`}
               ></ins>
             </div>
@@ -442,7 +450,6 @@ const Dashboard: React.FC = () => {
               data-ad-format="auto"
               data-full-width-responsive="true"
               data-ad-targeting="target=_blank"
-              data-ad-onclick="window.open(this.href, '_blank', 'noopener,noreferrer'); return false;"
               key={`sidebar-${selectedUser?.id || 'default'}`}
             ></ins>
            </div>
