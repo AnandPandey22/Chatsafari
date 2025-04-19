@@ -20,20 +20,13 @@ const Dashboard: React.FC = () => {
     // Small delay to ensure DOM is updated
     setTimeout(() => {
       try {
-        // Initialize bottom ad
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-        
-        // Initialize right side ad if not mobile
-        if (!isMobile) {
-          // @ts-ignore
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        }
       } catch (error) {
         console.error('Error loading ads:', error);
       }
     }, 100);
-  }, [selectedUser, isMobile]);
+  }, [selectedUser]);
 
   // Restore session on mount
   useEffect(() => {
