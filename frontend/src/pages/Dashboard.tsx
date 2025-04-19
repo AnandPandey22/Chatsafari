@@ -14,6 +14,7 @@ const Dashboard: React.FC = () => {
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
+  const [adKey, setAdKey] = useState(0);
 
   // Restore session on mount
   useEffect(() => {
@@ -154,6 +155,18 @@ const Dashboard: React.FC = () => {
 
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
+
+  // Function to refresh ads
+  const refreshAds = () => {
+    setAdKey(prev => prev + 1);
+  };
+
+  // Refresh ads when selected user changes
+  useEffect(() => {
+    if (selectedUser) {
+      refreshAds();
+    }
+  }, [selectedUser]);
 
   if (!currentUser) {
     return (
@@ -297,7 +310,7 @@ const Dashboard: React.FC = () => {
           {/* Chat Window Container */}
           <div className="h-[530px] overflow-hidden">
             {selectedUser ? (
-              <ChatWindow isMobile={isMobile} />
+              <ChatWindow isMobile={isMobile} onChatOpen={refreshAds} />
             ) : (
               <div className="h-full flex items-center justify-center bg-gray-50 rounded-xl">
                 <div className="text-center">
@@ -325,7 +338,7 @@ const Dashboard: React.FC = () => {
 
           {/* Bottom Ad Space */}
           <div className="flex-1 bg-white border-t border-gray-200">
-            <div className="h-full w-full">
+            <div className="h-full w-full" key={`bottom-ad-${adKey}`}>
               <ins className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
                 data-ad-client="ca-pub-9696449443766781"
@@ -339,7 +352,7 @@ const Dashboard: React.FC = () => {
 
         {/* Right Sidebar - Ad Space (desktop only) */}
          <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
-          <div className="h-full w-full">
+         <div className="h-full w-full" key={`right-ad-${adKey}`}>
             <ins className="adsbygoogle"
               style={{ display: 'block', height: '100%', width: '100%' }}
               data-ad-client="ca-pub-9696449443766781"
