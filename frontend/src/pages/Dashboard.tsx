@@ -200,12 +200,23 @@ const Dashboard: React.FC = () => {
 
 // Initialize sidebar ad once on mount
   useEffect(() => {
-    try {
-      // @ts-ignore
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch (error) {
-      console.error('Error loading sidebar ad:', error);
-    }
+    const initializeAd = () => {
+      try {
+        // @ts-ignore
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (error) {
+        console.error('Error loading sidebar ad:', error);
+      }
+    };
+
+    // Initial load
+    initializeAd();
+
+    // Retry after a short delay to ensure DOM is ready
+    const retryTimer = setTimeout(initializeAd, 1000);
+
+    // Cleanup
+    return () => clearTimeout(retryTimer);
   }, []);
   
   // Handle ad clicks globally
@@ -422,13 +433,19 @@ const Dashboard: React.FC = () => {
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
          <div className="h-full w-full">
-           <ins 
+          <ins 
               className="adsbygoogle"
-              style={{ display: 'block', height: '100%', width: '100%' }}
+              style={{ 
+                display: 'block', 
+                height: '100%', 
+                width: '100%',
+                minHeight: '250px' // Ensure minimum height for ad
+              }}
               data-ad-client="ca-pub-9696449443766781"
-              data-ad-slot="8719654150"
+              data-ad-slot="4239852667"
               data-ad-format="auto"
               data-full-width-responsive="true"
+              data-adtest="on" // Enable test mode to help debug
             ></ins>
            </div>
         </div>
