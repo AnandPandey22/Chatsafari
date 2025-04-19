@@ -209,7 +209,7 @@ const Dashboard: React.FC = () => {
     }
   }, [selectedUser]);
 
-  // Initialize sidebar ad when selectedUser changes
+  // Initialize sidebar ad when selectedUser or rightAdSlot changes
   useEffect(() => {
     const loadSidebarAd = () => {
       try {
@@ -233,12 +233,19 @@ const Dashboard: React.FC = () => {
     // Initial load
     loadSidebarAd();
 
-    // Reload when user changes
-    if (selectedUser) {
+    // Reload when user changes or ad slot changes
+    if (selectedUser || rightAdSlot) {
+      // Clear existing ad
+      const sidebarAd = document.querySelector('.adsbygoogle[data-ad-slot="' + rightAdSlot + '"]');
+      if (sidebarAd) {
+        sidebarAd.innerHTML = '';
+      }
+      
+      // Reload with new slot
       setTimeout(loadSidebarAd, 1000);
     }
-  }, [selectedUser]);
-
+  }, [selectedUser, rightAdSlot]);
+  
   // Handle ad clicks globally
   useEffect(() => {
     const handleAdClick = (event: MouseEvent) => {
