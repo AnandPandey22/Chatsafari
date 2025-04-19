@@ -15,18 +15,25 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
-   // Initialize ads when selectedUser changes
+  // Initialize ads when selectedUser changes
   useEffect(() => {
     // Small delay to ensure DOM is updated
     setTimeout(() => {
       try {
+        // Initialize bottom ad
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
+        
+        // Initialize right side ad if not mobile
+        if (!isMobile) {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        }
       } catch (error) {
         console.error('Error loading ads:', error);
       }
     }, 100);
-  }, [selectedUser]);
+  }, [selectedUser, isMobile]);
 
   // Restore session on mount
   useEffect(() => {
@@ -354,7 +361,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Right Sidebar - Ad Space (desktop only) */}
-         <div className={`${isMobile ? 'hidden' : 'block'} w-[320px] h-[830px] border-l border-gray-200 bg-white`}>
+        <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
          <div className="h-full w-full">
             <ins 
               className="adsbygoogle"
