@@ -354,7 +354,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Right Sidebar - Ad Space (desktop only) */}
-         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
+         <div className={`${isMobile ? 'hidden' : 'block'} w-[320px] h-[830px] border-l border-gray-200 bg-white`}>
          <div className="h-full w-full">
             <ins 
               className="adsbygoogle"
