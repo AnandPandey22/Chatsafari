@@ -337,7 +337,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Right Sidebar - Ad Space (desktop only) */}
-        <div className="hidden lg:block w-[320px] h-[250px] border-l border-gray-200 bg-white">
+        <div className="hidden lg:block w-[320px] h-[800px] border-l border-gray-200 bg-white">
           <div className="h-full w-full">
             <ins className="adsbygoogle"
               style={{ display: 'block', height: '100%', width: '100%' }}
