@@ -49,9 +49,10 @@ document.head.appendChild(styleSheet);
 
 interface ChatWindowProps {
   isMobile: boolean;
+  onChatOpen?: () => void;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
+const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile, onChatOpen }) => {
   const { selectedUser, setSelectedUser, currentUser, addMessage, chatRooms, socket } = useStore();
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -178,6 +179,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
       }
     };
   }, []);
+
+  // Trigger onChatOpen when component mounts
+  useEffect(() => {
+    if (onChatOpen) {
+      onChatOpen();
+    }
+  }, [onChatOpen]);
 
   if (!selectedUser || !currentUser) {
     return (
