@@ -11,9 +11,20 @@ const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [rightAdSlot, setRightAdSlot] = useState('4239852667');
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
+
+  // Rotate right sidebar ad slots
+  useEffect(() => {
+    if (selectedUser) {
+      const slots = ['4239852667', '5718393780', '3208532517'];
+      const currentIndex = slots.indexOf(rightAdSlot);
+      const nextIndex = (currentIndex + 1) % slots.length;
+      setRightAdSlot(slots[nextIndex]);
+    }
+  }, [selectedUser]);
 
 // Initialize ads when selectedUser changes
   useEffect(() => {
@@ -446,11 +457,11 @@ const Dashboard: React.FC = () => {
               className="adsbygoogle"
               style={{ display: 'block', height: '100%', width: '100%' }}
               data-ad-client="ca-pub-9696449443766781"
-              data-ad-slot="4239852667"
+              data-ad-slot={rightAdSlot}
               data-ad-format="auto"
               data-full-width-responsive="true"
               data-ad-targeting="target=_blank"
-              key={`sidebar-${selectedUser?.id || 'default'}`}
+             key={`sidebar-${rightAdSlot}-${selectedUser?.id || 'default'}`}
             ></ins>
            </div>
         </div>
