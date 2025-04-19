@@ -11,25 +11,9 @@ const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [rightAdSlot, setRightAdSlot] = useState('4239852667');
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
-
-  // Rotate right sidebar ad slots every minute
-  useEffect(() => {
-    const slots = ['4239852667', '5718393780', '3208532517'];
-    const rotateAds = () => {
-      const currentIndex = slots.indexOf(rightAdSlot);
-      const nextIndex = (currentIndex + 1) % slots.length;
-      setRightAdSlot(slots[nextIndex]);
-    };
-
-    // Initial rotation
-    const interval = setInterval(rotateAds, 60000); // Rotate every minute
-
-    return () => clearInterval(interval);
-  }, [rightAdSlot]);
 
 // Initialize ads when selectedUser changes
   useEffect(() => {
@@ -214,46 +198,15 @@ const Dashboard: React.FC = () => {
     }
   }, [selectedUser]);
 
- // Initialize sidebar ad when rightAdSlot changes
+// Initialize sidebar ad once on mount
   useEffect(() => {
-    const loadSidebarAd = () => {
-      try {
-        // Clear all existing ads
-        const existingAds = document.querySelectorAll('.adsbygoogle');
-        existingAds.forEach(ad => {
-          ad.innerHTML = '';
-        });
-
-        // Force a re-render of the ad container
-        const adContainer = document.querySelector('.adsbygoogle[data-ad-slot="' + rightAdSlot + '"]');
-        if (adContainer) {
-          adContainer.setAttribute('data-ad-slot', rightAdSlot);
-        }
-
-        // Load new ad
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({
-          google_ad_client: "ca-pub-9696449443766781",
-          enable_page_level_ads: true,
-          onclick: function(ads: { url: string }) {
-            const newWindow = window.open(ads.url, '_blank');
-            if (newWindow) {
-              newWindow.focus();
-            }
-            return false;
-          }
-        });
-      } catch (error) {
-        console.error('Error loading sidebar ad:', error);
-      }
-    };
-
-    // Load ad immediately and then every minute
-    loadSidebarAd();
-    const interval = setInterval(loadSidebarAd, 60000);
-
-    return () => clearInterval(interval);
-  }, [rightAdSlot]);
+    try {
+      // @ts-ignore
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (error) {
+      console.error('Error loading sidebar ad:', error);
+    }
+  }, []);
   
   // Handle ad clicks globally
   useEffect(() => {
@@ -476,8 +429,6 @@ const Dashboard: React.FC = () => {
               data-ad-slot={rightAdSlot}
               data-ad-format="auto"
               data-full-width-responsive="true"
-              data-ad-targeting="target=_blank"
-              key={`sidebar-${rightAdSlot}-${Date.now()}`}
             ></ins>
            </div>
         </div>
