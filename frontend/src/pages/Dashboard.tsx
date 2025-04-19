@@ -442,7 +442,7 @@ const Dashboard: React.FC = () => {
                 minHeight: '250px' // Ensure minimum height for ad
               }}
               data-ad-client="ca-pub-9696449443766781"
-              data-ad-slot="4239852667"
+              data-ad-slot="8719654150"
               data-ad-format="auto"
               data-full-width-responsive="true"
               data-adtest="on" // Enable test mode to help debug
