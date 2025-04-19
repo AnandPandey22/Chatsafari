@@ -329,7 +329,7 @@ const Dashboard: React.FC = () => {
               <ins className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
                 data-ad-client="ca-pub-9696449443766781"
-                data-ad-slot=""
+                data-ad-slot="1455746969"
                 data-ad-format="auto"
                 data-full-width-responsive="true"></ins>
             </div>
