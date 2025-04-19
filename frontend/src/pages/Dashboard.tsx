@@ -341,7 +341,8 @@ const Dashboard: React.FC = () => {
 
          {/* Bottom Ad Space - Always visible in mobile */}
           <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
-           <ins 
+            <div className="h-full w-full">
+              <ins 
                 className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
                 data-ad-client="ca-pub-9696449443766781"
@@ -349,7 +350,7 @@ const Dashboard: React.FC = () => {
                 data-ad-format="auto"
                 data-full-width-responsive="true"
                 key={selectedUser?.id || 'default'}
-              />
+              ></ins>
             </div>
           </div>
         </div>
