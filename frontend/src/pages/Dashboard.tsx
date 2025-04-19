@@ -214,10 +214,17 @@ const Dashboard: React.FC = () => {
     }
   }, [selectedUser]);
 
-  // Initialize sidebar ad when rightAdSlot changes
+ // Initialize sidebar ad when rightAdSlot changes
   useEffect(() => {
     const loadSidebarAd = () => {
       try {
+        // Clear existing ad
+        const existingAd = document.querySelector('.adsbygoogle[data-ad-slot="' + rightAdSlot + '"]');
+        if (existingAd) {
+          existingAd.innerHTML = '';
+        }
+
+        // Load new ad
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({
           google_ad_client: "ca-pub-9696449443766781",
@@ -235,14 +242,11 @@ const Dashboard: React.FC = () => {
       }
     };
 
-    // Clear existing ad
-    const sidebarAd = document.querySelector('.adsbygoogle[data-ad-slot="' + rightAdSlot + '"]');
-    if (sidebarAd) {
-      sidebarAd.innerHTML = '';
-    }
-    
-    // Load new ad
-    setTimeout(loadSidebarAd, 1000);
+    // Load ad immediately and then every minute
+    loadSidebarAd();
+    const interval = setInterval(loadSidebarAd, 60000);
+
+    return () => clearInterval(interval);
   }, [rightAdSlot]);
   
   // Handle ad clicks globally
