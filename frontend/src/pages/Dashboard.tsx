@@ -209,10 +209,19 @@ const Dashboard: React.FC = () => {
     }
   }, [selectedUser]);
 
-  // Initialize sidebar ad when selectedUser or rightAdSlot changes
+ // Initialize sidebar ad when selectedUser or rightAdSlot changes
   useEffect(() => {
     const loadSidebarAd = () => {
       try {
+        // Clear any existing ads first
+        const existingAds = document.querySelectorAll('.adsbygoogle');
+        existingAds.forEach(ad => {
+          if (ad.getAttribute('data-ad-slot') === rightAdSlot) {
+            ad.innerHTML = '';
+          }
+        });
+
+        // Force a new ad load
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({
           google_ad_client: "ca-pub-9696449443766781",
@@ -230,20 +239,12 @@ const Dashboard: React.FC = () => {
       }
     };
 
-    // Initial load
+    // Load ad immediately
     loadSidebarAd();
 
-    // Reload when user changes or ad slot changes
-    if (selectedUser || rightAdSlot) {
-      // Clear existing ad
-      const sidebarAd = document.querySelector('.adsbygoogle[data-ad-slot="' + rightAdSlot + '"]');
-      if (sidebarAd) {
-        sidebarAd.innerHTML = '';
-      }
-      
-      // Reload with new slot
-      setTimeout(loadSidebarAd, 1000);
-    }
+    // Reload after a short delay to ensure proper initialization
+    const timer = setTimeout(loadSidebarAd, 1000);
+    return () => clearTimeout(timer);
   }, [selectedUser, rightAdSlot]);
   
   // Handle ad clicks globally
