@@ -15,45 +15,18 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
-  // Initialize ads when component mounts and when selectedUser changes
+// Initialize ads when selectedUser changes
   useEffect(() => {
-    const initializeAds = () => {
+    // Small delay to ensure DOM is updated
+    setTimeout(() => {
       try {
-        // Initialize bottom ad
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch (error) {
-        console.error('Error loading bottom ad:', error);
+        console.error('Error loading ads:', error);
       }
-    };
-
-    // Initialize right side ad if not mobile
-    const initializeRightAd = () => {
-      if (!isMobile) {
-        try {
-          // @ts-ignore
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (error) {
-          console.error('Error loading right side ad:', error);
-        }
-      }
-    };
-
-    // Initial load
-    initializeAds();
-    initializeRightAd();
-
-    // Add multiple retries to ensure ads load
-    const retryIntervals = [100, 500, 1000];
-    const timers = retryIntervals.map(interval => 
-      setTimeout(() => {
-        initializeAds();
-        initializeRightAd();
-      }, interval)
-    );
-
-    return () => timers.forEach(timer => clearTimeout(timer));
-  }, [selectedUser, isMobile]);
+    }, 100);
+  }, [selectedUser]);
 
   // Restore session on mount
   useEffect(() => {
@@ -374,7 +347,7 @@ const Dashboard: React.FC = () => {
                 data-ad-slot="1455746969"
                 data-ad-format="auto"
                 data-full-width-responsive="true"
-               key={`bottom-${selectedUser?.id || 'default'}`}
+               key={selectedUser?.id || 'default'}
               ></ins>
             </div>
           </div>
