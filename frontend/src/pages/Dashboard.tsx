@@ -329,7 +329,6 @@ const Dashboard: React.FC = () => {
              
             </div>
           </div>
-        </div>
 
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white justify-center items-center flex">
@@ -343,7 +342,6 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
     </div>
-    );
   );
 };
 export default Dashboard;
