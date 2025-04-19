@@ -214,6 +214,23 @@ const Dashboard: React.FC = () => {
     }
   }, [selectedUser]);
 
+  // Handle ad clicks to open in new tab
+  useEffect(() => {
+    const handleAdClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.closest('.adsbygoogle')) {
+        const link = target.closest('a');
+        if (link) {
+          event.preventDefault();
+          window.open(link.href, '_blank', 'noopener,noreferrer');
+        }
+      }
+    };
+
+    document.addEventListener('click', handleAdClick);
+    return () => document.removeEventListener('click', handleAdClick);
+  }, []);
+
 
   if (!currentUser) {
     return (
@@ -393,6 +410,7 @@ const Dashboard: React.FC = () => {
                 data-ad-slot="1455746969"
                 data-ad-format="auto"
                 data-full-width-responsive="true"
+                data-ad-targeting="target=_blank"
                 key={`bottom-${selectedUser?.id || 'default'}`}
               ></ins>
             </div>
@@ -409,6 +427,7 @@ const Dashboard: React.FC = () => {
               data-ad-slot="4239852667"
               data-ad-format="auto"
               data-full-width-responsive="true"
+              data-ad-targeting="target=_blank"
               key={`sidebar-${selectedUser?.id || 'default'}`}
             ></ins>
            </div>
