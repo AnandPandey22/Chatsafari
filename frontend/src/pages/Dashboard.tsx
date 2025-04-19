@@ -329,15 +329,17 @@ const Dashboard: React.FC = () => {
              
             </div>
           </div>
+        </div>
 
         {/* Right Sidebar - Ad Space (desktop only) */}
-        <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white justify-center items-center flex">
-         <ins className="adsbygoogle"
-         style={{ display: 'block', width: '300px', height: '600px' }}
-         data-ad-client="ca-pub-3940256099942544"
-         data-ad-slot="5487392952"
-         data-ad-format="rectangle"
-         data-full-width-responsive="false"></ins>
+        <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
+          <div className="h-full w-full">
+            <ins className="adsbygoogle"
+              style={{ display: 'block', height: '100%', width: '100%' }}
+              data-ad-client="ca-pub-9696449443766781"
+              data-ad-slot="6276657369"
+              data-ad-format="auto"
+              data-full-width-responsive="true"></ins>
           </div>
         </div>
       </div>
