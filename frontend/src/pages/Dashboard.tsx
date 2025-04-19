@@ -7,13 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import AdSense from '../components/AdSense';
 
-// Add this at the top of the file, after imports
-declare global {
-  interface Window {
-    adsbygoogle: any[];
-  }
-}
-
 const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -21,8 +14,6 @@ const Dashboard: React.FC = () => {
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
-  const [adKey, setAdKey] = useState(0);
-  const adInitialized = useRef(false);
 
   // Restore session on mount
   useEffect(() => {
@@ -112,15 +103,6 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedUser, setSelectedUser]);
 
-  // Initialize ads
-  useEffect(() => {
-    if (!adInitialized.current) {
-      // @ts-ignore
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      adInitialized.current = true;
-    }
-  }, []);
-
  // Add useEffect for loading ads after login
   useEffect(() => {
     if (currentUser) {
@@ -173,25 +155,6 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-  // Function to refresh ads
-const refreshAds = () => {
-    setAdKey(prev => prev + 1);
-    // Reinitialize ads after a short delay
-    setTimeout(() => {
-      try {
-        window.adsbygoogle.push({});
-      } catch (err) {
-        console.error('Error refreshing ads:', err);
-      }
-    }, 100);
-  };
-
-  // Refresh ads when selected user changes
-  useEffect(() => {
-    if (selectedUser) {
-      refreshAds();
-    }
-  }, [selectedUser]);
 
   if (!currentUser) {
     return (
@@ -335,7 +298,7 @@ const refreshAds = () => {
           {/* Chat Window Container */}
           <div className="h-[530px] overflow-hidden">
             {selectedUser ? (
-              <ChatWindow isMobile={isMobile} onChatOpen={refreshAds} />
+              <ChatWindow isMobile={isMobile} />
             ) : (
               <div className="h-full flex items-center justify-center bg-gray-50 rounded-xl">
                 <div className="text-center">
@@ -363,7 +326,7 @@ const refreshAds = () => {
 
           {/* Bottom Ad Space */}
           <div className="flex-1 bg-white border-t border-gray-200">
-            <div className="h-full w-full" key={`bottom-ad-${adKey}`}>
+            <div className="h-full w-full">
               <ins className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
                 data-ad-client="ca-pub-9696449443766781"
@@ -377,7 +340,7 @@ const refreshAds = () => {
 
         {/* Right Sidebar - Ad Space (desktop only) */}
          <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
-         <div className="h-full w-full" key={`right-ad-${adKey}`}>
+         <div className="h-full w-full">
             <ins className="adsbygoogle"
               style={{ display: 'block', height: '100%', width: '100%' }}
               data-ad-client="ca-pub-9696449443766781"
