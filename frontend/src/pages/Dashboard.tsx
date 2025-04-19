@@ -7,6 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import AdSense from '../components/AdSense';
 
+// Add this at the top of the file, after imports
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
+
 const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -15,6 +22,7 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
   const [adKey, setAdKey] = useState(0);
+  const adInitialized = useRef(false);
 
   // Restore session on mount
   useEffect(() => {
@@ -104,6 +112,15 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedUser, setSelectedUser]);
 
+  // Initialize ads
+  useEffect(() => {
+    if (!adInitialized.current) {
+      // @ts-ignore
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      adInitialized.current = true;
+    }
+  }, []);
+
  // Add useEffect for loading ads after login
   useEffect(() => {
     if (currentUser) {
@@ -157,8 +174,16 @@ const Dashboard: React.FC = () => {
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
   // Function to refresh ads
-  const refreshAds = () => {
+const refreshAds = () => {
     setAdKey(prev => prev + 1);
+    // Reinitialize ads after a short delay
+    setTimeout(() => {
+      try {
+        window.adsbygoogle.push({});
+      } catch (err) {
+        console.error('Error refreshing ads:', err);
+      }
+    }, 100);
   };
 
   // Refresh ads when selected user changes
