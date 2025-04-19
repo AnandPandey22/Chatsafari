@@ -15,18 +15,47 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
-// Initialize ads when selectedUser changes
+ // Initialize ads when selectedUser changes
   useEffect(() => {
-    // Small delay to ensure DOM is updated
-    setTimeout(() => {
+    const initializeAds = () => {
       try {
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch (error) {
         console.error('Error loading ads:', error);
       }
-    }, 100);
+    };
+
+    // Initialize immediately
+    initializeAds();
+
+    // Initialize again after a very short delay to ensure DOM is ready
+    const timer = setTimeout(initializeAds, 50);
+
+    // Cleanup
+    return () => clearTimeout(timer);
   }, [selectedUser]);
+
+  // Additional initialization on mount
+  useEffect(() => {
+    const initializeAds = () => {
+      try {
+        // @ts-ignore
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (error) {
+        console.error('Error loading ads:', error);
+      }
+    };
+
+    // Initialize on mount
+    initializeAds();
+
+    // Initialize again after component is fully mounted
+    const timer = setTimeout(initializeAds, 100);
+
+    // Cleanup
+    return () => clearTimeout(timer);
+  }, []);
 
   // Restore session on mount
   useEffect(() => {
@@ -347,7 +376,7 @@ const Dashboard: React.FC = () => {
                 data-ad-slot="1455746969"
                 data-ad-format="auto"
                 data-full-width-responsive="true"
-               key={selectedUser?.id || 'default'}
+                key={`bottom-${selectedUser?.id || 'default'}`}
               ></ins>
             </div>
           </div>
