@@ -422,32 +422,14 @@ const Dashboard: React.FC = () => {
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
          <div className="h-full w-full">
-            {/* First Ad */}
-            <div className="h-[400px] w-full">
-              <ins 
-                className="adsbygoogle"
-                style={{ display: 'block', height: '100%', width: '100%' }}
-                data-ad-client="ca-pub-9696449443766781"
-                data-ad-slot="4239852667"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-              ></ins>
-            </div>
-
-            {/* Spacing between ads */}
-            <div className="h-4"></div>
-
-            {/* Second Ad */}
-            <div className="h-[400px] w-full">
-              <ins 
-                className="adsbygoogle"
-                style={{ display: 'block', height: '100%', width: '100%' }}
-                data-ad-client="ca-pub-9696449443766781"
-                data-ad-slot="5260814931"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-              ></ins>
-            </div>
+           <ins 
+              className="adsbygoogle"
+              style={{ display: 'block', height: '100%', width: '100%' }}
+              data-ad-client="ca-pub-9696449443766781"
+              data-ad-slot="8719654150"
+              data-ad-format="auto"
+              data-full-width-responsive="true"
+            ></ins>
            </div>
         </div>
       </div>
