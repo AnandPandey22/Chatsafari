@@ -56,11 +56,66 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const notificationSound = useRef<HTMLAudioElement | null>(null);
   const imageRefs = useRef<{ [key: string]: HTMLImageElement | null }>({});
   const [isSecureMode, setIsSecureMode] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto scroll to bottom for messages only
+  const scrollToBottom = () => {
+    if (messageEndRef.current && chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  // Handle keyboard appearance on mobile
+  useEffect(() => {
+    if (isMobile) {
+      const handleFocus = (e: Event) => {
+        e.preventDefault();
+        // Prevent page scroll when keyboard opens
+        if (chatContainerRef.current) {
+          chatContainerRef.current.style.height = '450px';
+          chatContainerRef.current.style.position = 'fixed';
+          chatContainerRef.current.style.bottom = '0';
+          chatContainerRef.current.style.left = '0';
+          chatContainerRef.current.style.right = '0';
+          chatContainerRef.current.style.zIndex = '50';
+        }
+      };
+
+      const handleBlur = () => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.style.position = '';
+          chatContainerRef.current.style.bottom = '';
+          chatContainerRef.current.style.left = '';
+          chatContainerRef.current.style.right = '';
+          chatContainerRef.current.style.zIndex = '';
+        }
+      };
+
+      const inputElement = document.querySelector('input[type="text"]');
+      inputElement?.addEventListener('focus', handleFocus);
+      inputElement?.addEventListener('blur', handleBlur);
+
+      return () => {
+        inputElement?.removeEventListener('focus', handleFocus);
+        inputElement?.removeEventListener('blur', handleBlur);
+      };
+    }
+  }, [isMobile]);
+
+  // Scroll messages when new ones arrive
+  useEffect(() => {
+    if (chatRooms.length > 0) {
+      const lastRoom = chatRooms[chatRooms.length - 1];
+      if (lastRoom.messages.length > 0) {
+        scrollToBottom();
+      }
+    }
+  }, [chatRooms]);
 
   useEffect(() => {
     // Initialize notification sound
@@ -102,22 +157,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
       window.removeEventListener('blur', handleFocusChange);
     };
   }, []);
-
-  const scrollToBottom = () => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  useEffect(() => {
-    // Only scroll to bottom when new messages are added
-    if (chatRooms.length > 0) {
-      const lastRoom = chatRooms[chatRooms.length - 1];
-      if (lastRoom.messages.length > 0) {
-        scrollToBottom();
-      }
-    }
-  }, [chatRooms]);
 
   // Play notification sound when receiving a new message
   useEffect(() => {
@@ -770,7 +809,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
       </div>
 
       {/* Messages - Scrollable */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 min-h-0">
+      <div 
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 min-h-0"
+      >
         <div className="p-4 space-y-4">
           <div className="flex justify-center">
             <div className="bg-white rounded-full py-2 px-4 text-sm text-gray-500 shadow-sm">
