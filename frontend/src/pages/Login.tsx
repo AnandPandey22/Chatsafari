@@ -14,17 +14,20 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { setCurrentUser, connect, activeUsers } = useStore();
 
-   // Initialize ads
+  // Initialize ads
   useEffect(() => {
     try {
-      // @ts-ignore
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      // @ts-ignore
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      // @ts-ignore
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      const adElements = document.querySelectorAll('.adsbygoogle');
+      adElements.forEach((ad) => {
+        try {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (error) {
+          console.error('Error initializing individual ad:', error);
+        }
+      });
     } catch (error) {
-      console.error('Error initializing ads:', error);
+      console.error('Error in ad initialization:', error);
     }
   }, []);
 
@@ -191,11 +194,11 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            {/* First Ad - Mobile Only (before content) */}
-            <div className="lg:hidden w-full">
+            {/* First Ad - Mobile Only (before right content) */}
+            <div className="block lg:hidden w-full h-full">
               <ins
                 className="adsbygoogle"
-                style={{ display: 'block' }}
+                style={{ display: 'block', height: '100%', width: '100%' }}
                 data-ad-client="ca-pub-9696449443766781"
                 data-ad-slot="6743920017"
                 data-ad-format="auto"
@@ -223,6 +226,18 @@ const Login: React.FC = () => {
               </div>
             </div>
           </section>
+
+          {/* First Ad - Web Version (below login and content) */}
+          <div className="hidden lg:block w-full h-full">
+            <ins
+              className="adsbygoogle"
+              style={{ display: 'block', height: '100%', width: '100%' }}
+              data-ad-client="ca-pub-9696449443766781"
+              data-ad-slot="1867080000"
+              data-ad-format="auto"
+              data-full-width-responsive="true"
+            ></ins>
+          </div>
 
           {/* Additional Content - Below Login Form */}
           <section className="max-w-4xl mx-auto text-center py-12" aria-label="About ChatSafari">
@@ -252,10 +267,10 @@ const Login: React.FC = () => {
               </div>
 
               {/* Second Ad - After second point */}
-              <div className="w-full">
+              <div className="w-full h-full">
                 <ins
                   className="adsbygoogle"
-                  style={{ display: 'block' }}
+                  style={{ display: 'block', height: '100%', width: '100%' }}
                   data-ad-client="ca-pub-9696449443766781"
                   data-ad-slot="7423185675"
                   data-ad-format="auto"
@@ -281,11 +296,11 @@ const Login: React.FC = () => {
             </div>
           </section>
 
-          {/* Third Ad - Above Why Choose ChatSafari */}
-          <div className="w-full">
+         {/* Third Ad - Before Why Choose ChatSafari */}
+          <div className="w-full h-full">
             <ins
               className="adsbygoogle"
-              style={{ display: 'block' }}
+              style={{ display: 'block', height: '100%', width: '100%' }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="9857777322"
               data-ad-format="auto"
