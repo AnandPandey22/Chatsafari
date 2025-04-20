@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { User } from '../types';
@@ -13,6 +13,20 @@ const Login: React.FC = () => {
   const [age, setAge] = useState('');
   const navigate = useNavigate();
   const { setCurrentUser, connect, activeUsers } = useStore();
+
+   // Initialize ads
+  useEffect(() => {
+    try {
+      // @ts-ignore
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      // @ts-ignore
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      // @ts-ignore
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    } catch (error) {
+      console.error('Error initializing ads:', error);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -177,6 +191,18 @@ const Login: React.FC = () => {
               </div>
             </div>
 
+            {/* First Ad - Mobile Only (before content) */}
+            <div className="lg:hidden w-full">
+              <ins
+                className="adsbygoogle"
+                style={{ display: 'block' }}
+                data-ad-client="ca-pub-9696449443766781"
+                data-ad-slot="6743920017"
+                data-ad-format="auto"
+                data-full-width-responsive="true"
+              ></ins>
+            </div>
+
             {/* Right side - Content */}
             <div className="w-full lg:flex-1">
               <div className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-lg bg-opacity-90">
@@ -224,6 +250,19 @@ const Login: React.FC = () => {
                   Free Chat Rooms like India Chat Room, USA chat room, Lesbian chat room, Gay Chat room, Teen Chat rooms, Dating Chat Rooms, Girls Chat Room, Ghost Chat Rooms are Available on Chatsafari.com which helps different types of people to interact with their lovable person. Sometimes people get bored talking to their friends and here chatsafari helps them to find a good stranger from a different part of world who does not know about him so that they both can share each others feelings without Judging them. All the features and Chat Rooms are Completely Free, Users don't have to pay anything.
                 </p>
               </div>
+
+              {/* Second Ad - After second point */}
+              <div className="w-full">
+                <ins
+                  className="adsbygoogle"
+                  style={{ display: 'block' }}
+                  data-ad-client="ca-pub-9696449443766781"
+                  data-ad-slot="7423185675"
+                  data-ad-format="auto"
+                  data-full-width-responsive="true"
+                ></ins>
+              </div>
+              
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
                 <p className="text-gray-600 text-lg leading-relaxed">
                   Talking to strangers online on chatsafari helps people to Uplift their mood because they can share their feelings with real people and have a good conversation with them. Talk to Random cute girls on Chatsafari and start Improving your conversation pull with them so that they get Impressed by you. You can also flirt with girls on chatsafari and they are very polite to all users.
@@ -241,6 +280,18 @@ const Login: React.FC = () => {
               </div>
             </div>
           </section>
+
+          {/* Third Ad - Above Why Choose ChatSafari */}
+          <div className="w-full">
+            <ins
+              className="adsbygoogle"
+              style={{ display: 'block' }}
+              data-ad-client="ca-pub-9696449443766781"
+              data-ad-slot="9857777322"
+              data-ad-format="auto"
+              data-full-width-responsive="true"
+            ></ins>
+          </div>
 
           {/* Features Section */}
           <section className="bg-white rounded-xl shadow-md p-8" aria-label="Why Choose Us">
