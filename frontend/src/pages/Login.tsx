@@ -305,16 +305,16 @@ const Login: React.FC = () => {
           </section>
 
         {/* Third Ad - Visible on all devices */}
-          <div className="w-full" style={{ minHeight: '300px' }}>
-            <ins
-              className="adsbygoogle"
-              style={{ display: 'block', width: '100%', minHeight: '300px' }}
-              data-ad-client="ca-pub-9696449443766781"
-              data-ad-slot="9857777322"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-            ></ins>
-          </div>
+          <div className="w-full">
+  <ins
+    className="adsbygoogle"
+    style={{ display: 'block' }}
+    data-ad-client="ca-pub-9696449443766781"
+    data-ad-slot="9857777322"
+    data-ad-format="auto"
+    data-full-width-responsive="true"
+  ></ins>
+</div>
 
           {/* Features Section */}
           <section className="bg-white rounded-xl shadow-md p-8" aria-label="Why Choose Us">
