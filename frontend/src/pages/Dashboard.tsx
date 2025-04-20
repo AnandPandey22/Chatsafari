@@ -54,22 +54,23 @@ const Dashboard: React.FC = () => {
   }, [currentUser]);
 
   // Handle ad rotation
-  useEffect(() => {
-    if (selectedUser && isAdInitialized) {
-      // Move to next slot
-      setCurrentAdSlotIndex(prevIndex => (prevIndex + 1) % horizontalAdSlots.length);
-      
-      // Give DOM time to update before initializing new ad
-      const timer = setTimeout(() => {
-         window.adsbygoogle.push({});
-        } catch (error) {
-          console.error('Error loading rotated ad:', error);
-        }
-      }, 300);
+useEffect(() => {
+  if (selectedUser && isAdInitialized) {
+    // Move to next slot
+    setCurrentAdSlotIndex(prevIndex => (prevIndex + 1) % horizontalAdSlots.length);
+    
+    // Give DOM time to update before initializing new ad
+    const timer = setTimeout(() => {
+      try {
+        window.adsbygoogle.push({});
+      } catch (error) {
+        console.error('Error loading rotated ad:', error);
+      }
+    }, 300);
 
-      return () => clearTimeout(timer);
-    }
-  }, [selectedUser, isAdInitialized]);
+    return () => clearTimeout(timer);
+  }
+}, [selectedUser, isAdInitialized, horizontalAdSlots.length]);
   
   // Restore session on mount
   useEffect(() => {
