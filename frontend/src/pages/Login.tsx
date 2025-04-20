@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { User } from '../types';
@@ -13,30 +13,6 @@ const Login: React.FC = () => {
   const [age, setAge] = useState('');
   const navigate = useNavigate();
   const { setCurrentUser, connect, activeUsers } = useStore();
-
- // Initialize ads
-  useEffect(() => {
-    const initAds = () => {
-      try {
-        const adElements = document.querySelectorAll('ins.adsbygoogle');
-        adElements.forEach((ad) => {
-          if (!(ad as any).hasAttribute('data-adsbygoogle-status')) {
-            // @ts-ignore
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-          }
-        });
-      } catch (error) {
-        console.error('Error in ad initialization:', error);
-      }
-    };
-
-    // Initial load
-    initAds();
-
-    // Re-init ads when window is resized
-    window.addEventListener('resize', initAds);
-    return () => window.removeEventListener('resize', initAds);
-  }, []);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,17 +97,6 @@ const Login: React.FC = () => {
       {/* Main Content - Adjusted for fixed header */}
       <main className="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-16 mt-16" role="main">
         <div className="w-full max-w-6xl flex flex-col gap-8">
-          {/* First Ad - Mobile Only (above login form) */}
-          <div className="block lg:hidden w-full" style={{ minHeight: '300px' }}>
-            <ins
-              className="adsbygoogle"
-              style={{ display: 'block', width: '100%', minHeight: '300px' }}
-                data-ad-client="ca-pub-9696449443766781"
-                data-ad-slot="6743920017"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-              ></ins>
-            </div>
           
           {/* Main Content Area */}
           <section className="flex flex-col lg:flex-row gap-8" aria-label="Login and Introduction">
@@ -235,17 +200,6 @@ const Login: React.FC = () => {
             </div>
           </section>
 
-          {/* First Ad - Web Version (below login and content) */}
-          <div className="hidden lg:block w-full" style={{ minHeight: '300px' }}>
-            <ins
-              className="adsbygoogle"
-              style={{ display: 'block', width: '100%', minHeight: '300px' }}
-              data-ad-client="ca-pub-9696449443766781"
-              data-ad-slot="1867080000"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-            ></ins>
-          </div>
 
           {/* Additional Content - Below Login Form */}
           <section className="max-w-4xl mx-auto text-center py-12" aria-label="About ChatSafari">
@@ -274,17 +228,6 @@ const Login: React.FC = () => {
                 </p>
               </div>
 
-               {/* Third Ad - Visible on all devices */}
-          <div className="h-full w-full">
-              <ins 
-                className="adsbygoogle"
-                style={{ display: 'block', height: '100%', width: '100%' }}
-                  data-ad-client="ca-pub-9696449443766781"
-                  data-ad-slot="7423185675"
-                  data-ad-format="auto"
-                  data-full-width-responsive="true"
-                ></ins>
-              </div>
               
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
                 <p className="text-gray-600 text-lg leading-relaxed">
@@ -303,18 +246,6 @@ const Login: React.FC = () => {
               </div>
             </div>
           </section>
-
-         {/* Third Ad - Visible on all devices */}
-          <div className="h-full w-full">
-              <ins 
-                className="adsbygoogle"
-                style={{ display: 'block', height: '100%', width: '100%' }}
-              data-ad-client="ca-pub-9696449443766781"
-              data-ad-slot="9857777322"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-            ></ins>
-          </div>
 
           {/* Features Section */}
           <section className="bg-white rounded-xl shadow-md p-8" aria-label="Why Choose Us">
