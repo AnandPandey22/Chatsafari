@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { User } from '../types';
@@ -7,12 +7,53 @@ import { UserCircle, Calendar } from 'lucide-react';
 import Footer from '../components/Footer';
 import { Helmet } from 'react-helmet-async';
 
+// Add type declaration for adsbygoogle
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
+
 const Login: React.FC = () => {
   const [username, setUsername] = useState('');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [age, setAge] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const navigate = useNavigate();
   const { setCurrentUser, connect, activeUsers } = useStore();
+
+   // Initialize Google Ads
+  useEffect(() => {
+    // Load AdSense script if not already loaded
+    if (!window.adsbygoogle) {
+      window.adsbygoogle = [];
+      const script = document.createElement('script');
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+    }
+
+    // Load ads after a short delay to ensure script is loaded
+    const timer = setTimeout(() => {
+      try {
+        window.adsbygoogle.push({});
+      } catch (err) {
+        console.error('Error loading ads:', err);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +138,20 @@ const Login: React.FC = () => {
       {/* Main Content - Adjusted for fixed header */}
       <main className="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-16 mt-16" role="main">
         <div className="w-full max-w-6xl flex flex-col gap-8">
+
+          {/* First Ad - Mobile Only */}
+          {isMobile && (
+            <div className="w-full">
+              <ins
+                className="adsbygoogle"
+                style={{ display: 'block' }}
+                data-ad-client="ca-pub-9696449443766781"
+                data-ad-slot="6743920017"
+                data-ad-format="auto"
+                data-full-width-responsive="true"
+              />
+            </div>
+          )}
           
           {/* Main Content Area */}
           <section className="flex flex-col lg:flex-row gap-8" aria-label="Login and Introduction">
@@ -199,6 +254,18 @@ const Login: React.FC = () => {
               </div>
             </div>
           </section>
+
+          {/* Second Ad - Both Mobile and Web */}
+          <div className="w-full">
+            <ins
+              className="adsbygoogle"
+              style={{ display: 'block' }}
+              data-ad-client="ca-pub-9696449443766781"
+              data-ad-slot="7423185675"
+              data-ad-format="auto"
+              data-full-width-responsive="true"
+            />
+          </div>
 
 
           {/* Additional Content - Below Login Form */}
