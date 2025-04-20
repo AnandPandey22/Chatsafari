@@ -11,6 +11,7 @@ const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [currentAdSlot, setCurrentAdSlot] = useState("1455746969");
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -244,6 +245,24 @@ const Dashboard: React.FC = () => {
     window.onbeforeunload = null;
   }, []);
 
+   // Rotate ad slots when user is selected
+  useEffect(() => {
+    if (selectedUser) {
+      // Toggle between the two ad slots
+      setCurrentAdSlot(prev => prev === "1455746969" ? "6743920017" : "1455746969");
+      
+      // Initialize the new ad
+      setTimeout(() => {
+        try {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (error) {
+          console.error('Error loading rotated ad:', error);
+        }
+      }, 100);
+    }
+  }, [selectedUser]);
+
 
   if (!currentUser) {
     return (
@@ -424,7 +443,7 @@ const Dashboard: React.FC = () => {
                 data-ad-format="auto"
                 data-full-width-responsive="true"
                 data-ad-targeting="target=_blank"
-                key={`bottom-${selectedUser?.id || 'default'}`}
+                key={`bottom-${selectedUser?.id || 'default'}-${currentAdSlot}`}
               ></ins>
             </div>
           </div>
