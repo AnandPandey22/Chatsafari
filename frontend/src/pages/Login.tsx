@@ -275,10 +275,10 @@ const Login: React.FC = () => {
               </div>
 
                {/* Third Ad - Visible on all devices */}
-          <div className="w-full" style={{ minHeight: '300px' }}>
-            <ins
-              className="adsbygoogle"
-              style={{ display: 'block', width: '100%', minHeight: '300px' }}
+          <div className="h-full w-full">
+              <ins 
+                className="adsbygoogle"
+                style={{ display: 'block', height: '100%', width: '100%' }}
                   data-ad-client="ca-pub-9696449443766781"
                   data-ad-slot="7423185675"
                   data-ad-format="auto"
@@ -304,17 +304,17 @@ const Login: React.FC = () => {
             </div>
           </section>
 
-        {/* Third Ad - Visible on all devices */}
-          <div className="w-full">
-  <ins
-    className="adsbygoogle"
-    style={{ display: 'block' }}
-    data-ad-client="ca-pub-9696449443766781"
-    data-ad-slot="9857777322"
-    data-ad-format="auto"
-    data-full-width-responsive="true"
-  ></ins>
-</div>
+         {/* Third Ad - Visible on all devices */}
+          <div className="h-full w-full">
+              <ins 
+                className="adsbygoogle"
+                style={{ display: 'block', height: '100%', width: '100%' }}
+              data-ad-client="ca-pub-9696449443766781"
+              data-ad-slot="9857777322"
+              data-ad-format="auto"
+              data-full-width-responsive="true"
+            ></ins>
+          </div>
 
           {/* Features Section */}
           <section className="bg-white rounded-xl shadow-md p-8" aria-label="Why Choose Us">
