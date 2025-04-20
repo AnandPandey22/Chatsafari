@@ -256,16 +256,10 @@ const Login: React.FC = () => {
           </section>
 
           {/* Second Ad - Both Mobile and Web */}
-          <div className="w-full mt-8">
+          <div className="w-full mt-4">
             <ins
               className="adsbygoogle"
-              style={{ 
-                display: 'block',
-                width: '100%',
-                height: isMobile ? '50px' : '90px',
-                maxWidth: isMobile ? '320px' : '728px',
-                margin: '0 auto'
-              }}
+              style={{ display: 'block' }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="7423185675"
               data-ad-format="auto"
