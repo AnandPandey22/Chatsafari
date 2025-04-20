@@ -255,31 +255,18 @@ const Login: React.FC = () => {
             </div>
           </section>
 
-                  {/* Second Ad - Both Mobile and Web */}
+                 {/* Second Ad - Both Mobile and Web */}
           <div className="w-full mt-4">
-            {isMobile ? (
-              <div className="w-[420px] h-[350px] mx-auto">
-                <ins
-                  className="adsbygoogle"
-                  style={{ display: 'block', height: '100%', width: '100%' }}
-                  data-ad-client="ca-pub-9696449443766781"
-                  data-ad-slot="6276657369"
-                  data-ad-format="auto"
-                  data-full-width-responsive="true"
-                />
-              </div>
-            ) : (
-              <div className="h-full w-full">
-                <ins
-                  className="adsbygoogle"
-                  style={{ display: 'block', height: '100%', width: '100%' }}
-                  data-ad-client="ca-pub-9696449443766781"
-                  data-ad-slot="9857777322"
-                  data-ad-format="auto"
-                  data-full-width-responsive="true"
-                />
-              </div>
-            )}
+            <div className="h-full w-full">
+              <ins
+                className="adsbygoogle"
+                style={{ display: 'block', height: '100%', width: '100%' }}
+                data-ad-client="ca-pub-9696449443766781"
+                data-ad-slot="9857777322"
+                data-ad-format="auto"
+                data-full-width-responsive="true"
+              />
+            </div>
           </div>
 
 
