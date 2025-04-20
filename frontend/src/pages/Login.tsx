@@ -114,6 +114,18 @@ const Login: React.FC = () => {
       {/* Main Content - Adjusted for fixed header */}
       <main className="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-16 mt-16" role="main">
         <div className="w-full max-w-6xl flex flex-col gap-8">
+          {/* First Ad - Mobile Only (above login form) */}
+          <div className="block lg:hidden w-full" style={{ minHeight: '300px' }}>
+            <ins
+              className="adsbygoogle"
+              style={{ display: 'block', width: '100%', minHeight: '300px' }}
+                data-ad-client="ca-pub-9696449443766781"
+                data-ad-slot="6743920017"
+                data-ad-format="auto"
+                data-full-width-responsive="true"
+              ></ins>
+            </div>
+          
           {/* Main Content Area */}
           <section className="flex flex-col lg:flex-row gap-8" aria-label="Login and Introduction">
             {/* Login Form */}
@@ -194,17 +206,6 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-            {/* First Ad - Mobile Only (before right content) */}
-            <div className="block lg:hidden w-full h-full">
-              <ins
-                className="adsbygoogle"
-                style={{ display: 'block', height: '100%', width: '100%' }}
-                data-ad-client="ca-pub-9696449443766781"
-                data-ad-slot="6743920017"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-              ></ins>
-            </div>
 
             {/* Right side - Content */}
             <div className="w-full lg:flex-1">
@@ -228,10 +229,10 @@ const Login: React.FC = () => {
           </section>
 
           {/* First Ad - Web Version (below login and content) */}
-          <div className="hidden lg:block w-full h-full">
+          <div className="hidden lg:block w-full" style={{ minHeight: '300px' }}>
             <ins
               className="adsbygoogle"
-              style={{ display: 'block', height: '100%', width: '100%' }}
+              style={{ display: 'block', width: '100%', minHeight: '300px' }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="1867080000"
               data-ad-format="auto"
@@ -266,11 +267,11 @@ const Login: React.FC = () => {
                 </p>
               </div>
 
-               {/* Second Ad - Visible on all devices */}
-              <div className="w-full h-full">
-                <ins
-                  className="adsbygoogle"
-                  style={{ display: 'block', height: '100%', width: '100%' }}
+               {/* Third Ad - Visible on all devices */}
+          <div className="w-full" style={{ minHeight: '300px' }}>
+            <ins
+              className="adsbygoogle"
+              style={{ display: 'block', width: '100%', minHeight: '300px' }}
                   data-ad-client="ca-pub-9696449443766781"
                   data-ad-slot="7423185675"
                   data-ad-format="auto"
@@ -296,11 +297,11 @@ const Login: React.FC = () => {
             </div>
           </section>
 
-         {/* Third Ad - Visible on all devices */}
-          <div className="w-full h-full">
+        {/* Third Ad - Visible on all devices */}
+          <div className="w-full" style={{ minHeight: '300px' }}>
             <ins
               className="adsbygoogle"
-              style={{ display: 'block', height: '100%', width: '100%' }}
+              style={{ display: 'block', width: '100%', minHeight: '300px' }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="9857777322"
               data-ad-format="auto"
