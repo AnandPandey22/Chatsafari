@@ -236,18 +236,6 @@ const Login: React.FC = () => {
 
             {/* Right side - Content */}
             <div className="w-full lg:flex-1">
-              {/* Mobile-only Ad */}
-              {isMobile && (
-                <div className="w-full mb-4 flex justify-center">
-                  <ins
-                    className="adsbygoogle"
-                    style={{ display: 'inline-block', width: '320px', height: '150px' }}
-                    data-ad-client="ca-pub-9696449443766781"
-                    data-ad-slot="7423185675"
-                  />
-                </div>
-              )}
-              
               <div className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-lg bg-opacity-90">
                 <h1 className="text-3xl font-bold text-violet-600 mb-6">
                   Talk to Strangers, Free Chat Rooms, Make Friends Online!
