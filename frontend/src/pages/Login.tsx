@@ -16,27 +16,20 @@ const Login: React.FC = () => {
 
  // Initialize ads
   useEffect(() => {
-    const initAds = () => {
+  const adElements = document.querySelectorAll('.adsbygoogle');
+
+  adElements.forEach((ad) => {
+    // Only initialize if not already marked
+    if (!ad.classList.contains('adsbygoogle-init')) {
       try {
-        const adElements = document.querySelectorAll('ins.adsbygoogle');
-        adElements.forEach((ad) => {
-          if (!(ad as any).hasAttribute('data-adsbygoogle-status')) {
-            // @ts-ignore
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-          }
-        });
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        ad.classList.add('adsbygoogle-init'); // prevent re-init
       } catch (error) {
-        console.error('Error in ad initialization:', error);
+        console.error('Ad init error:', error);
       }
-    };
-
-    // Initial load
-    initAds();
-
-    // Re-init ads when window is resized
-    window.addEventListener('resize', initAds);
-    return () => window.removeEventListener('resize', initAds);
-  }, []);
+    }
+  });
+}, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
