@@ -15,23 +15,22 @@ const Login: React.FC = () => {
   const { setCurrentUser, connect, activeUsers } = useStore();
 
   // Initialize ads
- useEffect(() => {
-  const observer = new MutationObserver(() => {
-    const adElements = document.querySelectorAll('.adsbygoogle:not(.adsbygoogle-init)');
-    adElements.forEach((ad) => {
+useEffect(() => {
+  const adElements = document.querySelectorAll('.adsbygoogle');
+
+  adElements.forEach((ad) => {
+    // Only initialize if not already marked
+    if (!ad.classList.contains('adsbygoogle-init')) {
       try {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-        ad.classList.add('adsbygoogle-init');
-      } catch (e) {
-        console.error('Ad init error (mutation observer):', e);
+        ad.classList.add('adsbygoogle-init'); // prevent re-init
+      } catch (error) {
+        console.error('Ad init error:', error);
       }
-    });
+    }
   });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  return () => observer.disconnect();
 }, []);
+
 
     
     // Check if username already exists
