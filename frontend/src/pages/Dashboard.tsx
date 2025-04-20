@@ -11,23 +11,63 @@ const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [currentAdSlot, setCurrentAdSlot] = useState("1455746969");
+
+   // Define all available ad slots
+  const horizontalAdSlots = [
+    "1455746969",  // Original slot
+    "6743920017",  // Second slot
+    // Add more slots here as needed
+    // "your-new-slot-id",
+  ];
+  
+  const [currentAdSlotIndex, setCurrentAdSlotIndex] = useState(0);
+  const [isAdInitialized, setIsAdInitialized] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
-// Initialize ads when selectedUser changes
+// Initialize AdSense once when component mounts
   useEffect(() => {
-    // Small delay to ensure DOM is updated
-    setTimeout(() => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading ads:', error);
-      }
-    }, 100);
-  }, [selectedUser]);
+    if (currentUser && !window.adsbygoogle) {
+      const script = document.createElement('script');
+      script.src = 'https://pagead2.googlesyndleware.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      script.onload = () => {
+        setIsAdInitialized(true);
+        // Initialize first ad
+        try {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (error) {
+          console.error('Error initializing first ad:', error);
+        }
+      };
+      document.head.appendChild(script);
+    }
+  }, [currentUser]);
+
+  // Handle ad rotation
+  useEffect(() => {
+    if (selectedUser && isAdInitialized) {
+      // Move to next slot
+      setCurrentAdSlotIndex(prevIndex => (prevIndex + 1) % horizontalAdSlots.length);
+      
+      // Give DOM time to update before initializing new ad
+      const timer = setTimeout(() => {
+        try {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({
+            overlays: {bottom: true}
+          });
+        } catch (error) {
+          console.error('Error loading rotated ad:', error);
+        }
+      }, 300); // Increased delay to ensure DOM is ready
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedUser, isAdInitialized]);
   
   // Restore session on mount
   useEffect(() => {
@@ -245,24 +285,6 @@ const Dashboard: React.FC = () => {
     window.onbeforeunload = null;
   }, []);
 
-   // Rotate ad slots when user is selected
-  useEffect(() => {
-    if (selectedUser) {
-      // Toggle between the two ad slots
-      setCurrentAdSlot(prev => prev === "1455746969" ? "6743920017" : "1455746969");
-      
-      // Initialize the new ad
-      setTimeout(() => {
-        try {
-          // @ts-ignore
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (error) {
-          console.error('Error loading rotated ad:', error);
-        }
-      }, 100);
-    }
-  }, [selectedUser]);
-
 
   if (!currentUser) {
     return (
@@ -435,16 +457,18 @@ const Dashboard: React.FC = () => {
          {/* Bottom Ad Space - Always visible in mobile */}
           <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
             <div className="h-full w-full">
-              <ins 
-                className="adsbygoogle"
-                style={{ display: 'block', height: '100%', width: '100%' }}
-                data-ad-client="ca-pub-9696449443766781"
-                data-ad-slot="1455746969"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-                data-ad-targeting="target=_blank"
-                key={`bottom-${selectedUser?.id || 'default'}-${currentAdSlot}`}
-              ></ins>
+              {isAdInitialized && (
+                <ins 
+                  className="adsbygoogle"
+                  style={{ display: 'block', height: '100%', width: '100%' }}
+                  data-ad-client="ca-pub-9696449443766781"
+                  data-ad-slot={horizontalAdSlots[currentAdSlotIndex]}
+                  data-ad-format="auto"
+                  data-full-width-responsive="true"
+                  data-ad-targeting="target=_blank"
+                  key={`bottom-${selectedUser?.id || 'default'}-${horizontalAdSlots[currentAdSlotIndex]}`}
+                ></ins>
+              )}
             </div>
           </div>
         </div>
