@@ -266,7 +266,7 @@ const Login: React.FC = () => {
                 </p>
               </div>
 
-              {/* Second Ad - After second point */}
+               {/* Second Ad - Visible on all devices */}
               <div className="w-full h-full">
                 <ins
                   className="adsbygoogle"
@@ -296,7 +296,7 @@ const Login: React.FC = () => {
             </div>
           </section>
 
-         {/* Third Ad - Before Why Choose ChatSafari */}
+         {/* Third Ad - Visible on all devices */}
           <div className="w-full h-full">
             <ins
               className="adsbygoogle"
