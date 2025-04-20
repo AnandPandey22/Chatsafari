@@ -14,25 +14,33 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { setCurrentUser, connect, activeUsers } = useStore();
 
-  // Initialize ads
-useEffect(() => {
-  const adElements = document.querySelectorAll('.adsbygoogle');
-
-  adElements.forEach((ad) => {
-    // Only initialize if not already marked
-    if (!ad.classList.contains('adsbygoogle-init')) {
+ // Initialize ads
+  useEffect(() => {
+    const initAds = () => {
       try {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-        ad.classList.add('adsbygoogle-init'); // prevent re-init
+        const adElements = document.querySelectorAll('ins.adsbygoogle');
+        adElements.forEach((ad) => {
+          if (!(ad as any).hasAttribute('data-adsbygoogle-status')) {
+            // @ts-ignore
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          }
+        });
       } catch (error) {
-        console.error('Ad init error:', error);
+        console.error('Error in ad initialization:', error);
       }
-    }
-  });
-}, []);
+    };
 
+    // Initial load
+    initAds();
 
-    
+    // Re-init ads when window is resized
+    window.addEventListener('resize', initAds);
+    return () => window.removeEventListener('resize', initAds);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     // Check if username already exists
     const usernameExists = activeUsers.some(
       (user) => user.username.toLowerCase() === username.toLowerCase()
