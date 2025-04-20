@@ -115,10 +115,10 @@ const Login: React.FC = () => {
       <main className="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-16 mt-16" role="main">
         <div className="w-full max-w-6xl flex flex-col gap-8">
           {/* First Ad - Mobile Only (above login form) */}
-          <div className="block lg:hidden w-full" style={{ minHeight: '280px' }}>
+          <div className="block lg:hidden w-full" style={{ minHeight: '300px' }}>
             <ins
               className="adsbygoogle"
-              style={{ display: 'block', width: '100%', minHeight: '280px' }}
+              style={{ display: 'block', width: '100%', minHeight: '300px' }}
                 data-ad-client="ca-pub-9696449443766781"
                 data-ad-slot="6743920017"
                 data-ad-format="auto"
