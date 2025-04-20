@@ -5,7 +5,13 @@ import ChatWindow from '../components/ChatWindow';
 import { LogOut, Menu, X, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import AdSense from '../components/AdSense';
+
+// Define adsbygoogle for TypeScript
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
 
 const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -26,21 +32,21 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
-// Initialize AdSense once when component mounts
+// Single AdSense initialization
   useEffect(() => {
     if (currentUser && !window.adsbygoogle) {
+       window.adsbygoogle = [];
       const script = document.createElement('script');
-      script.src = 'https://pagead2.googlesyndleware.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
       script.async = true;
       script.crossOrigin = 'anonymous';
       script.onload = () => {
         setIsAdInitialized(true);
-        // Initialize first ad
+       // Initialize ads
         try {
-          // @ts-ignore
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
+           window.adsbygoogle.push({});
         } catch (error) {
-          console.error('Error initializing first ad:', error);
+          console.error('Error initializing ads:', error);
         }
       };
       document.head.appendChild(script);
@@ -55,15 +61,11 @@ const Dashboard: React.FC = () => {
       
       // Give DOM time to update before initializing new ad
       const timer = setTimeout(() => {
-        try {
-          // @ts-ignore
-          (window.adsbygoogle = window.adsbygoogle || []).push({
-            overlays: {bottom: true}
-          });
+         window.adsbygoogle.push({});
         } catch (error) {
           console.error('Error loading rotated ad:', error);
         }
-      }, 300); // Increased delay to ensure DOM is ready
+      }, 300);
 
       return () => clearTimeout(timer);
     }
@@ -157,32 +159,6 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedUser, setSelectedUser]);
 
- // Add useEffect for loading ads after login
-  useEffect(() => {
-    if (currentUser) {
-      // Load AdSense script if not already loaded
-      if (!window.adsbygoogle) {
-        window.adsbygoogle = [];
-        const script = document.createElement('script');
-        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
-        script.async = true;
-        script.crossOrigin = 'anonymous';
-        document.head.appendChild(script);
-      }
-
-      // Load ads after a short delay to ensure script is loaded
-      const timer = setTimeout(() => {
-        try {
-          window.adsbygoogle.push({});
-        } catch (err) {
-          console.error('Error loading ads:', err);
-        }
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [currentUser]);
-
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
   };
@@ -208,82 +184,6 @@ const Dashboard: React.FC = () => {
 
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
-
- // Initialize bottom ad when selectedUser changes
-  useEffect(() => {
-    const loadBottomAd = () => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({
-          google_ad_client: "ca-pub-9696449443766781",
-          enable_page_level_ads: true,
-          onclick: function(ads: { url: string }) {
-            const newWindow = window.open(ads.url, '_blank');
-            if (newWindow) {
-              newWindow.focus();
-            }
-            return false;
-          }
-        });
-      } catch (error) {
-        console.error('Error loading bottom ad:', error);
-      }
-    };
-
-    // Initial load
-    loadBottomAd();
-
-    // Reload when user changes
-    if (selectedUser) {
-      setTimeout(loadBottomAd, 1000);
-    }
-  }, [selectedUser]);
-
-// Initialize sidebar ad once on mount
-  useEffect(() => {
-    const initializeAd = () => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading sidebar ad:', error);
-      }
-    };
-
-    // Initial load
-    initializeAd();
-
-    // Retry after a short delay to ensure DOM is ready
-    const retryTimer = setTimeout(initializeAd, 1000);
-
-    // Cleanup
-    return () => clearTimeout(retryTimer);
-  }, []);
-  
-  // Handle ad clicks globally
-  useEffect(() => {
-    const handleAdClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (target.closest('.adsbygoogle')) {
-        const link = target.closest('a');
-        if (link) {
-          event.preventDefault();
-          const newWindow = window.open(link.href, '_blank');
-          if (newWindow) {
-            newWindow.focus();
-          }
-        }
-      }
-    };
-
-    document.addEventListener('click', handleAdClick);
-    return () => document.removeEventListener('click', handleAdClick);
-  }, []);
-
-  // Prevent browser leave confirmation
-  useEffect(() => {
-    window.onbeforeunload = null;
-  }, []);
 
 
   if (!currentUser) {
@@ -465,8 +365,7 @@ const Dashboard: React.FC = () => {
                   data-ad-slot={horizontalAdSlots[currentAdSlotIndex]}
                   data-ad-format="auto"
                   data-full-width-responsive="true"
-                  data-ad-targeting="target=_blank"
-                  key={`bottom-${selectedUser?.id || 'default'}-${horizontalAdSlots[currentAdSlotIndex]}`}
+                 data-ad-layout="in-article"
                 ></ins>
               )}
             </div>
@@ -482,13 +381,12 @@ const Dashboard: React.FC = () => {
                 display: 'block', 
                 height: '100%', 
                 width: '100%',
-                minHeight: '250px' // Ensure minimum height for ad
+               minHeight: '250px'
               }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="8719654150"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-              data-adtest="on" // Enable test mode to help debug
+              data-ad-format="vertical"
+              data-full-width-responsive="false"
             ></ins>
            </div>
         </div>
