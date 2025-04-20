@@ -70,15 +70,6 @@ const Login: React.FC = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="ChatSafari - Free Online Chat Rooms" />
         <meta name="twitter:description" content="Join ChatSafari's free online chat rooms. Meet new friends worldwide." />
-
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-<script>
-  (adsbygoogle = window.adsbygoogle || []).push({
-    google_ad_client: "ca-pub-9696449443766781", // Your AdSense publisher ID
-    enable_page_level_ads: true
-  });
-</script>
-        
       </Helmet>
 
       {/* Fixed Header */}
