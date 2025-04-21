@@ -256,22 +256,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-           {/* Google Ad */}
-      <div className="w-full flex justify-center h-[90px] overflow-hidden">
-        <ins className="adsbygoogle"
-             style={{ 
-               display: 'block', 
-               width: '100%', 
-               maxWidth: '970px', 
-               height: '90px', 
-               minWidth: '320px',
-               aspectRatio: 'auto 970/90' // Force horizontal aspect ratio
-             }}
-             data-ad-client="ca-pub-9696449443766781"
-             data-ad-slot="8719654150"
-             data-ad-format="horizontal"
-             data-full-width-responsive="true"></ins>
-      </div>
       
       {/* Logout Confirmation Dialog */}
       {showLogoutConfirm && (
