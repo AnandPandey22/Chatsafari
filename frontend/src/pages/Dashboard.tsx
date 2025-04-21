@@ -5,7 +5,7 @@ import ChatWindow from '../components/ChatWindow';
 import { LogOut, Menu, X, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import AdSense from '../components/AdSense';
+
 
 const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -256,6 +256,16 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+      {/* Google Ad */}
+      <div className="w-full flex justify-center" style={{ maxHeight: '90px', overflow: 'hidden' }}>
+        <ins className="adsbygoogle"
+             style={{ display: 'block', width: '100%', maxWidth: '970px', maxHeight: '90px', minWidth: '320px' }}
+             data-ad-client="ca-pub-9696449443766781"
+             data-ad-slot="8719654150"
+             data-ad-format="horizontal"
+             data-full-width-responsive="true"></ins>
+      </div>
+      
       {/* Logout Confirmation Dialog */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
