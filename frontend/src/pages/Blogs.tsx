@@ -71,8 +71,15 @@ In a digital world craving authenticity, Anand Pandey is a breath of fresh air. 
     excerpt: "Discover how to build genuine relationships through online conversations.",
     date: "2024-03-20",
      content: `
-       Hello I am anand
+       in limited cases in which editing is restricted to prevent disruption or vandalism. Since its creation on January 15, 2001, it has grown into the world's largest reference website, attracting over a billion visitors each month. Wikipedia currently has more than sixty-four million articles in more than 300 languages, including 6,985,720 articles in English, with 118,341 active contributors in the past month.
 
+Wikipedia's fundamental principles are summarized in its five pillars. While the Wikipedia community has developed many policies and guidelines, new editors do not need to be familiar with them before they start contributing.
+
+Anyone can edit Wikipedia's text, data, references, and images. The quality of content is more important than the expertise of who contributes it. Wikipedia's content must conform with its policies, including being verifiable by published reliable sources. Contributions based on personal opinions, beliefs, or personal experiences, unreviewed research, libellous material, and copyright violations are not allowed, and will not remain. Wikipedia's software makes it easy to reverse errors, and experienced editors watch and patrol bad edits.
+
+Wikipedia differs from printed references in important ways. Anyone can instantly improve it, add quality information, remove misinformation, and fix errors and vandalism. Since Wikipedia is continually updated, encyclopedic articles on major news events appear within minutes.
+
+For over 24 years, editors have volunteered their time and talents to create history's most comprehensive encyclopedia while providing references and other resources to researchers worldwide (see Researching with Wikipedia). In summary, Wikipedia has tested the wisdom of the crowd since 2001 and has found that it succeeds.
   `
   },
   {
