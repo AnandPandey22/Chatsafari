@@ -65,7 +65,7 @@ In a digital world craving authenticity, Anand Pandey is a breath of fresh air. 
 },
   {
     id: 2,
-    title: "Chatsafari: The Ultimate Free Anonymous Chat Platform - Features, Benefits & How to Use",
+    title: "Chatsafari: The Ultimate Free Anonymous Chat Platform - Features & How to Use",
     slug: "What-is-Chatsafari-features-how-to-Use",
     thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80",
     excerpt: "Talk to strangers, Free online chatrooms, Chat Online are the features fully available on Chatsafari. You Can chat with girls from different countries",
