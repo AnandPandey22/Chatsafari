@@ -72,7 +72,7 @@ In a digital world craving authenticity, Anand Pandey is a breath of fresh air. 
     date: "2024-03-20",
      content: `
       
-       In limited cases in which editing is restricted to prevent disruption or vandalism. Since its creation on January 15, 2001, it has grown into the world's largest reference website, attracting over a billion visitors each month. Wikipedia currently has more than sixty-four million articles in more than 300 languages, including 6,985,720 articles in English, with 118,341 active contributors in the past month.
+In limited cases in which editing is restricted to prevent disruption or vandalism. Since its creation on January 15, 2001, it has grown into the world's largest reference website, attracting over a billion visitors each month. Wikipedia currently has more than sixty-four million articles in more than 300 languages, including 6,985,720 articles in English, with 118,341 active contributors in the past month.
 
 Wikipedia's fundamental principles are summarized in its five pillars. While the Wikipedia community has developed many policies and guidelines, new editors do not need to be familiar with them before they start contributing.
 
