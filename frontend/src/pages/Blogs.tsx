@@ -29,7 +29,7 @@ In an age dominated by social media giants and complex registration processes, o
 
 ChatSafari isn’t just another chatting app. It was designed with a mission: **to let people chat freely, safely, and anonymously**—without the need for registration. Anand realized that many users, especially young people, crave genuine conversations without the burden of creating accounts or worrying about their data being stored.
 
-With ChatSafari, users can **dive straight into global conversations**, meet strangers, share stories, and make connections that matter—all while staying anonymous. It’s a digital jungle where voices are heard without filters or profiles, yet designed thoughtfully to ensure safety and respect.
+With 	[ChatSafari](https://chatsafari.com), users can **dive straight into global conversations**, meet strangers, share stories, and make connections that matter—all while staying anonymous. It’s a digital jungle where voices are heard without filters or profiles, yet designed thoughtfully to ensure safety and respect.
 
 ## The Teen Behind the Tech
 
@@ -70,7 +70,10 @@ In a digital world craving authenticity, Anand Pandey is a breath of fresh air. 
     thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80",
     excerpt: "Discover how to build genuine relationships through online conversations.",
     date: "2024-03-20",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl vel ultricies lacinia, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl. Sed euismod, nisl vel ultricies lacinia, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl."
+     content: `
+       Hello I am anand
+
+  `
   },
   {
     id: 3,
