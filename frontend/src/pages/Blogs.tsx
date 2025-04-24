@@ -97,14 +97,18 @@ In a digital world craving authenticity, Anand Pandey is a breath of fresh air. 
     thumbnail: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&q=80",
     excerpt: "Great ways to start and maintain engaging conversations.",
     date: "2024-03-12",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl vel ultricies lacinia, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl. Sed euismod, nisl vel ultricies lacinia, nisl nisl aliquam nisl, eget aliquam nisl nisl sit amet nisl."
+    content: '
 
-    - **No registration required** – Just pick a name, age, and gender, and you’re in.
+    ## Key Features of ChatSafari
+
+- **No registration required** – Just pick a name, age, and gender, and you’re in.
 - **Anonymous global chat** – Talk to anyone, anytime, without giving away personal info.
 - **One-on-one messaging (DMs)** – Connect deeper with individual users.
 - **Real-time active users list** – See who's online and start chatting instantly.
 - **Fun features** like message reactions, media sharing, typing indicators, and gender-based avatars.
 - **Privacy first** – No data storage. Chats vanish once the session ends.
+    '
+   
   },
   {
     id: 6,
