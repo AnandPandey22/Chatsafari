@@ -132,7 +132,11 @@ const Dashboard: React.FC = () => {
       // Load ads after a short delay to ensure script is loaded
       const timer = setTimeout(() => {
         try {
-          window.adsbygoogle.push({});
+          // Initialize page-level ads only once
+          (window.adsbygoogle = window.adsbygoogle || []).push({
+            google_ad_client: "ca-pub-9696449443766781",
+            enable_page_level_ads: true
+          });
         } catch (err) {
           console.error('Error loading ads:', err);
         }
@@ -168,35 +172,21 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
- // Initialize bottom ad when selectedUser changes
+ // Initialize bottom ad once
   useEffect(() => {
     const loadBottomAd = () => {
       try {
         // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({
-          google_ad_client: "ca-pub-9696449443766781",
-          enable_page_level_ads: true,
-          onclick: function(ads: { url: string }) {
-            const newWindow = window.open(ads.url, '_blank');
-            if (newWindow) {
-              newWindow.focus();
-            }
-            return false;
-          }
-        });
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch (error) {
         console.error('Error loading bottom ad:', error);
       }
     };
 
-    // Initial load
-    loadBottomAd();
-
-    // Reload when user changes
-    if (selectedUser) {
-      setTimeout(loadBottomAd, 1000);
-    }
-  }, [selectedUser]);
+    // Initial load only, no reload on user change
+    const timer = setTimeout(loadBottomAd, 1500); // Delay slightly more than initial script load
+    return () => clearTimeout(timer);
+  }, []); 
 
 // Initialize sidebar ad once on mount
   useEffect(() => {
@@ -209,14 +199,9 @@ const Dashboard: React.FC = () => {
       }
     };
 
-    // Initial load
-    initializeAd();
-
-    // Retry after a short delay to ensure DOM is ready
-    const retryTimer = setTimeout(initializeAd, 1000);
-
-    // Cleanup
-    return () => clearTimeout(retryTimer);
+    // Initial load with delay after bottom ad
+    const timer = setTimeout(initializeAd, 2000); // Delay more than bottom ad
+    return () => clearTimeout(timer);
   }, []);
   
   // Handle ad clicks globally
@@ -426,7 +411,6 @@ const Dashboard: React.FC = () => {
                 data-ad-format="auto"
                 data-full-width-responsive="true"
                 data-ad-targeting="target=_blank"
-                key={`bottom-${selectedUser?.id || 'default'}`}
               ></ins>
             </div>
           </div>
@@ -434,22 +418,21 @@ const Dashboard: React.FC = () => {
 
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
-         <div className="h-full w-full">
-          <ins 
+          <div className="h-full w-full">
+            <ins 
               className="adsbygoogle"
               style={{ 
                 display: 'block', 
                 height: '100%', 
                 width: '100%',
-                minHeight: '250px' // Ensure minimum height for ad
+                minHeight: '250px'
               }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="8719654150"
               data-ad-format="auto"
               data-full-width-responsive="true"
-              data-adtest="on" // Enable test mode to help debug
             ></ins>
-           </div>
+          </div>
         </div>
       </div>
     </div>
