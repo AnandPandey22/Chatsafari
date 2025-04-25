@@ -18,14 +18,16 @@ const Dashboard: React.FC = () => {
 // Initialize ads when selectedUser changes
   useEffect(() => {
     // Small delay to ensure DOM is updated
-    setTimeout(() => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading ads:', error);
-      }
-    }, 100);
+    if (selectedUser) {
+      setTimeout(() => {
+        try {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (error) {
+          console.error('Error loading ads:', error);
+        }
+      }, 100);
+    }
   }, [selectedUser]);
   
   // Restore session on mount
@@ -168,7 +170,7 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
- // Initialize bottom ad when selectedUser changes
+// Initialize bottom ad once
   useEffect(() => {
     const loadBottomAd = () => {
       try {
@@ -189,14 +191,8 @@ const Dashboard: React.FC = () => {
       }
     };
 
-    // Initial load
+   // Initial load
     loadBottomAd();
-
-       // Retry after a short delay to ensure DOM is ready
-    const retryTimer = setTimeout(loadBottomAd, 1000);
-
-    // Cleanup
-    return () => clearTimeout(retryTimer);
   }, []);
 
 // Initialize sidebar ad once on mount
@@ -426,6 +422,7 @@ const Dashboard: React.FC = () => {
               data-ad-format="auto"
               data-full-width-responsive="true"
               data-ad-targeting="target=_blank"
+              key={selectedUser ? 'chat-ad' : 'default-ad'}
             ></ins>
           </div>
         </div>
