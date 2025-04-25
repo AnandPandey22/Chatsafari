@@ -192,11 +192,12 @@ const Dashboard: React.FC = () => {
     // Initial load
     loadBottomAd();
 
-    // Reload when user changes
-    if (selectedUser) {
-      setTimeout(loadBottomAd, 1000);
-    }
-  }, [selectedUser]);
+       // Retry after a short delay to ensure DOM is ready
+    const retryTimer = setTimeout(loadBottomAd, 1000);
+
+    // Cleanup
+    return () => clearTimeout(retryTimer);
+  }, []);
 
 // Initialize sidebar ad once on mount
   useEffect(() => {
@@ -426,7 +427,6 @@ const Dashboard: React.FC = () => {
                 data-ad-format="auto"
                 data-full-width-responsive="true"
                 data-ad-targeting="target=_blank"
-                key={`bottom-${selectedUser?.id || 'default'}`}
               ></ins>
             </div>
           </div>
