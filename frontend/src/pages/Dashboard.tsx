@@ -17,16 +17,17 @@ const Dashboard: React.FC = () => {
 
 // Initialize ads when selectedUser changes
   useEffect(() => {
-    // Small delay to ensure DOM is updated
-    if (selectedUser) {
-      setTimeout(() => {
-        try {
-          // @ts-ignore
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (error) {
-          console.error('Error loading ads:', error);
-        }
-      }, 100);
+    // Only initialize ads if they haven't been initialized yet
+    const adElements = document.querySelectorAll('.adsbygoogle');
+    const uninitializedAds = Array.from(adElements).filter(ad => !ad.hasAttribute('data-ad-status'));
+    
+    if (uninitializedAds.length > 0) {
+      try {
+        // @ts-ignore
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (error) {
+        console.error('Error loading ads:', error);
+      }
     }
   }, [selectedUser]);
   
@@ -122,25 +123,13 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (currentUser) {
       // Load AdSense script if not already loaded
-      if (!window.adsbygoogle) {
-        window.adsbygoogle = [];
+      if (!document.querySelector('script[src*="pagead2.googlesyndication.com"]')) {
         const script = document.createElement('script');
         script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
         script.async = true;
         script.crossOrigin = 'anonymous';
         document.head.appendChild(script);
       }
-
-      // Load ads after a short delay to ensure script is loaded
-      const timer = setTimeout(() => {
-        try {
-          window.adsbygoogle.push({});
-        } catch (err) {
-          console.error('Error loading ads:', err);
-        }
-      }, 1000);
-
-      return () => clearTimeout(timer);
     }
   }, [currentUser]);
 
@@ -422,7 +411,6 @@ const Dashboard: React.FC = () => {
               data-ad-format="auto"
               data-full-width-responsive="true"
               data-ad-targeting="target=_blank"
-              key={selectedUser ? 'chat-ad' : 'default-ad'}
             ></ins>
           </div>
         </div>
