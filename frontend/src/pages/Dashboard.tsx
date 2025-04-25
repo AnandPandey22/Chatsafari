@@ -17,17 +17,23 @@ const Dashboard: React.FC = () => {
 
 // Initialize ads when selectedUser changes
   useEffect(() => {
-    // Only initialize ads if they haven't been initialized yet
-    const adElements = document.querySelectorAll('.adsbygoogle');
-    const uninitializedAds = Array.from(adElements).filter(ad => !ad.hasAttribute('data-ad-status'));
-    
-    if (uninitializedAds.length > 0) {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading ads:', error);
-      }
+    // Small delay to ensure DOM is updated
+    if (selectedUser) {
+      setTimeout(() => {
+        try {
+          const adElements = document.querySelectorAll('.adsbygoogle');
+          const uninitializedAds = Array.from(adElements).filter(
+            ad => !ad.hasAttribute('data-ad-status')
+          );
+          
+          if (uninitializedAds.length > 0) {
+            // @ts-ignore
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          }
+        } catch (error) {
+          console.error('Error loading ads:', error);
+        }
+      }, 100);
     }
   }, [selectedUser]);
   
@@ -123,13 +129,32 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (currentUser) {
       // Load AdSense script if not already loaded
-      if (!document.querySelector('script[src*="pagead2.googlesyndication.com"]')) {
+      if (!window.adsbygoogle) {
+        window.adsbygoogle = [];
         const script = document.createElement('script');
         script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
         script.async = true;
         script.crossOrigin = 'anonymous';
         document.head.appendChild(script);
       }
+
+      // Load ads after a short delay to ensure script is loaded
+      const timer = setTimeout(() => {
+        try {
+          const adElements = document.querySelectorAll('.adsbygoogle');
+          const uninitializedAds = Array.from(adElements).filter(
+            ad => !ad.hasAttribute('data-ad-status')
+          );
+          
+          if (uninitializedAds.length > 0) {
+            window.adsbygoogle.push({});
+          }
+        } catch (err) {
+          console.error('Error loading ads:', err);
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
     }
   }, [currentUser]);
 
@@ -159,28 +184,31 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-// Initialize bottom ad once
+ // Initialize bottom ad once
   useEffect(() => {
     const loadBottomAd = () => {
       try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({
-          google_ad_client: "ca-pub-9696449443766781",
-          enable_page_level_ads: true,
-          onclick: function(ads: { url: string }) {
-            const newWindow = window.open(ads.url, '_blank');
-            if (newWindow) {
-              newWindow.focus();
+        const bottomAd = document.querySelector('.bottom-ad');
+        if (bottomAd && !bottomAd.hasAttribute('data-ad-status')) {
+          // @ts-ignore
+          (window.adsbygoogle = window.adsbygoogle || []).push({
+            google_ad_client: "ca-pub-9696449443766781",
+            enable_page_level_ads: true,
+            onclick: function(ads: { url: string }) {
+              const newWindow = window.open(ads.url, '_blank');
+              if (newWindow) {
+                newWindow.focus();
+              }
+              return false;
             }
-            return false;
-          }
-        });
+          });
+        }
       } catch (error) {
         console.error('Error loading bottom ad:', error);
       }
     };
 
-   // Initial load
+    // Initial load
     loadBottomAd();
   }, []);
 
@@ -401,10 +429,10 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
-                 {/* Bottom Ad Space - Always visible in mobile */}
-         <div className="bg-white border-t border-gray-200">
+          {/* Bottom Ad Space - Always visible in mobile */}
+          <div className="bg-white border-t border-gray-200">
             <ins 
-              className="adsbygoogle"
+              className="adsbygoogle bottom-ad"
               style={{ display: 'block' }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="1455746969"
@@ -417,8 +445,8 @@ const Dashboard: React.FC = () => {
 
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
-         <div className="h-full w-full">
-          <ins 
+          <div className="h-full w-full">
+            <ins 
               className="adsbygoogle"
               style={{ 
                 display: 'block', 
@@ -432,7 +460,7 @@ const Dashboard: React.FC = () => {
               data-full-width-responsive="true"
               data-adtest="on" // Enable test mode to help debug
             ></ins>
-           </div>
+          </div>
         </div>
       </div>
     </div>
