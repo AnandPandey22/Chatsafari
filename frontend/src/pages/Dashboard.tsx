@@ -385,7 +385,7 @@ const Dashboard: React.FC = () => {
         <div 
           className={`${
             isMobile && !selectedUser ? 'hidden' : 'flex'
-          } flex-1 flex-col overflow-hidden`}
+          } flex-1 flex-col`}
         >
           {/* Chat Window Container */}
           <div className={`${isMobile ? 'h-[410px]' : 'h-[530px]'} overflow-hidden`}>
@@ -417,7 +417,7 @@ const Dashboard: React.FC = () => {
           </div>
 
                  {/* Bottom Ad Space - Always visible in mobile */}
-          <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
+         <div className="bg-white border-t border-gray-200">
             <ins 
               className="adsbygoogle"
               style={{ display: 'block' }}
