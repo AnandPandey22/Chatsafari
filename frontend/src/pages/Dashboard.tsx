@@ -6,6 +6,8 @@ import { LogOut, Menu, X, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
+// Add a global flag to track ad initialization
+let adsInitialized = false;
 
 const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -15,7 +17,47 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
-// Initialize ads when selectedUser changes
+  // Single useEffect for all ad initialization
+  useEffect(() => {
+    if (!currentUser || adsInitialized) return;
+
+    const initializeAds = () => {
+      try {
+        // Load AdSense script if not already loaded
+        if (!window.adsbygoogle) {
+          window.adsbygoogle = [];
+          const script = document.createElement('script');
+          script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+          script.async = true;
+          script.crossOrigin = 'anonymous';
+          document.head.appendChild(script);
+
+          // Wait for script to load
+          script.onload = () => {
+            // Initialize ads only once
+            try {
+              (window.adsbygoogle = window.adsbygoogle || []).push({});
+              adsInitialized = true;
+            } catch (err) {
+              console.error('Error initializing ads:', err);
+            }
+          };
+        } else {
+          // If script already exists, just initialize ads
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          adsInitialized = true;
+        }
+      } catch (error) {
+        console.error('Error in ad initialization:', error);
+      }
+    };
+
+    // Initialize with a delay to ensure DOM is ready
+    const timer = setTimeout(initializeAds, 1000);
+    return () => clearTimeout(timer);
+  }, [currentUser]);
+
+  // Initialize ads when selectedUser changes
   useEffect(() => {
     // Small delay to ensure DOM is updated
     if (selectedUser) {
@@ -125,39 +167,6 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedUser, setSelectedUser]);
 
- // Add useEffect for loading ads after login
-  useEffect(() => {
-    if (currentUser) {
-      // Load AdSense script if not already loaded
-      if (!window.adsbygoogle) {
-        window.adsbygoogle = [];
-        const script = document.createElement('script');
-        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
-        script.async = true;
-        script.crossOrigin = 'anonymous';
-        document.head.appendChild(script);
-      }
-
-      // Load ads after a short delay to ensure script is loaded
-      const timer = setTimeout(() => {
-        try {
-          const adElements = document.querySelectorAll('.adsbygoogle');
-          const uninitializedAds = Array.from(adElements).filter(
-            ad => !ad.hasAttribute('data-ad-status')
-          );
-          
-          if (uninitializedAds.length > 0) {
-            window.adsbygoogle.push({});
-          }
-        } catch (err) {
-          console.error('Error loading ads:', err);
-        }
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [currentUser]);
-
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
   };
@@ -183,82 +192,6 @@ const Dashboard: React.FC = () => {
 
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
-
- // Initialize bottom ad once
-  useEffect(() => {
-    const loadBottomAd = () => {
-      try {
-        const bottomAd = document.querySelector('.bottom-ad');
-        if (bottomAd && !bottomAd.hasAttribute('data-ad-status')) {
-          // @ts-ignore
-          (window.adsbygoogle = window.adsbygoogle || []).push({
-            google_ad_client: "ca-pub-9696449443766781",
-            enable_page_level_ads: true,
-            onclick: function(ads: { url: string }) {
-              const newWindow = window.open(ads.url, '_blank');
-              if (newWindow) {
-                newWindow.focus();
-              }
-              return false;
-            }
-          });
-        }
-      } catch (error) {
-        console.error('Error loading bottom ad:', error);
-      }
-    };
-
-    // Initial load
-    loadBottomAd();
-  }, []);
-
-// Initialize sidebar ad once on mount
-  useEffect(() => {
-    const initializeAd = () => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading sidebar ad:', error);
-      }
-    };
-
-    // Initial load
-    initializeAd();
-
-    // Retry after a short delay to ensure DOM is ready
-    const retryTimer = setTimeout(initializeAd, 1000);
-
-    // Cleanup
-    return () => clearTimeout(retryTimer);
-  }, []);
-  
-  // Handle ad clicks globally
-  useEffect(() => {
-    const handleAdClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (target.closest('.adsbygoogle')) {
-        const link = target.closest('a');
-        if (link) {
-          event.preventDefault();
-          const newWindow = window.open(link.href, '_blank');
-          if (newWindow) {
-            newWindow.focus();
-          }
-        }
-      }
-    };
-
-    document.addEventListener('click', handleAdClick);
-    return () => document.removeEventListener('click', handleAdClick);
-  }, []);
-
-  // Prevent browser leave confirmation
-  useEffect(() => {
-    window.onbeforeunload = null;
-  }, []);
-
-
 
   if (!currentUser) {
     return (
@@ -432,13 +365,12 @@ const Dashboard: React.FC = () => {
           {/* Bottom Ad Space - Always visible in mobile */}
           <div className="bg-white border-t border-gray-200">
             <ins 
-              className="adsbygoogle bottom-ad"
+              className="adsbygoogle"
               style={{ display: 'block' }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="1455746969"
               data-ad-format="auto"
               data-full-width-responsive="true"
-              data-ad-targeting="target=_blank"
             ></ins>
           </div>
         </div>
@@ -452,13 +384,12 @@ const Dashboard: React.FC = () => {
                 display: 'block', 
                 height: '100%', 
                 width: '100%',
-                minHeight: '250px' // Ensure minimum height for ad
+                minHeight: '250px'
               }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="8719654150"
               data-ad-format="auto"
               data-full-width-responsive="true"
-              data-adtest="on" // Enable test mode to help debug
             ></ins>
           </div>
         </div>
