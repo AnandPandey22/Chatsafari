@@ -11,6 +11,7 @@ const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isAdInitialized, setIsAdInitialized] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -151,6 +152,7 @@ const Dashboard: React.FC = () => {
           (window.adsbygoogle = window.adsbygoogle || []).push({});
           (window.adsbygoogle = window.adsbygoogle || []).push({});
           (window.adsbygoogle = window.adsbygoogle || []).push({});
+          setIsAdInitialized(true);
         } catch (err) {
           console.error('Error loading ads:', err);
         }
@@ -160,17 +162,20 @@ const Dashboard: React.FC = () => {
     }
   }, [currentUser]);
 
-  // Add useEffect to reinitialize ads when chat window opens in mobile
+  // Add useEffect to handle mobile ad visibility
   useEffect(() => {
-    if (selectedUser && isMobile) {
-      // Reinitialize bottom ad when chat window opens in mobile
-      try {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (err) {
-        console.error('Error reinitializing mobile ad:', err);
+    if (selectedUser && isMobile && isAdInitialized) {
+      // Force ad refresh when chat window opens in mobile
+      const adElement = document.querySelector('.adsbygoogle');
+      if (adElement) {
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (err) {
+          console.error('Error refreshing mobile ad:', err);
+        }
       }
     }
-  }, [selectedUser, isMobile]);
+  }, [selectedUser, isMobile, isAdInitialized]);
 
   // Handle ad clicks globally
   useEffect(() => {
