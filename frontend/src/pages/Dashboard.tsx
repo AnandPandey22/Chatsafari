@@ -11,6 +11,7 @@ const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [adKey, setAdKey] = useState(0);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -162,6 +163,13 @@ const Dashboard: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [currentUser]);
+
+  // Force ad remount when chat window opens in mobile
+  useEffect(() => {
+    if (selectedUser && isMobile) {
+      setAdKey(prev => prev + 1);
+    }
+  }, [selectedUser, isMobile]);
 
   // Handle mobile ad visibility
   useEffect(() => {
@@ -383,7 +391,7 @@ const Dashboard: React.FC = () => {
 
           {/* Bottom Ad Space - Always visible in mobile */}
           <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
-            <div className="h-full w-full">
+            <div className="h-full w-full" key={adKey}>
               <ins 
                 className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
