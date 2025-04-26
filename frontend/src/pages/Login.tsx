@@ -19,32 +19,53 @@ const Login: React.FC = () => {
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [age, setAge] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isContentLoaded, setIsContentLoaded] = useState(false);
   const navigate = useNavigate();
   const { setCurrentUser, connect, activeUsers } = useStore();
 
-   // Initialize Google Ads
+  // Initialize Google Ads after content is loaded
   useEffect(() => {
-    // Load AdSense script if not already loaded
-    if (!window.adsbygoogle) {
-      window.adsbygoogle = [];
-      const script = document.createElement('script');
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
-      script.async = true;
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
+    // Mark content as loaded after a short delay
+    const contentTimer = setTimeout(() => {
+      setIsContentLoaded(true);
+    }, 100);
+
+    // Load AdSense only after content is marked as loaded
+    if (isContentLoaded) {
+      const loadAds = () => {
+        if (!document.querySelector('script[src*="adsbygoogle"]')) {
+          const script = document.createElement('script');
+          script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+          script.async = true;
+          script.crossOrigin = 'anonymous';
+          script.onload = () => {
+            // Initialize ads only after script is fully loaded
+            try {
+              (window.adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (err) {
+              console.error('Error loading ads:', err);
+            }
+          };
+          document.head.appendChild(script);
+        } else {
+          // If script already exists, just initialize the ad
+          try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (err) {
+            console.error('Error loading ads:', err);
+          }
+        }
+      };
+
+      // Delay ad loading to prioritize content
+      const adTimer = setTimeout(loadAds, 2000);
+
+      return () => {
+        clearTimeout(adTimer);
+        clearTimeout(contentTimer);
+      };
     }
-
-    // Load ads after a short delay to ensure script is loaded
-    const timer = setTimeout(() => {
-      try {
-        window.adsbygoogle.push({});
-      } catch (err) {
-        console.error('Error loading ads:', err);
-      }
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
+  }, [isContentLoaded]);
 
   // Handle window resize
   useEffect(() => {
@@ -140,11 +161,15 @@ const Login: React.FC = () => {
         <div className="w-full max-w-6xl flex flex-col gap-8">
 
           {/* First Ad - Mobile Only */}
-          {isMobile && (
-            <div className="w-full">
+          {isMobile && isContentLoaded && (
+            <div className="w-full min-h-[100px] bg-transparent">
               <ins
                 className="adsbygoogle"
-                style={{ display: 'block' }}
+                style={{ 
+                  display: 'block',
+                  minHeight: '100px',
+                  backgroundColor: 'transparent'
+                }}
                 data-ad-client="ca-pub-9696449443766781"
                 data-ad-slot="6743920017"
                 data-ad-format="auto"
