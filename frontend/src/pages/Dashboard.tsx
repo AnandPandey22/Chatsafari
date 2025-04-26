@@ -13,6 +13,7 @@ const Dashboard: React.FC = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [adKey, setAdKey] = useState(0);
   const [sidebarAdKey, setSidebarAdKey] = useState(0);
+  const [isAdScriptLoaded, setIsAdScriptLoaded] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -141,13 +142,18 @@ const Dashboard: React.FC = () => {
       script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
       script.async = true;
       script.crossOrigin = 'anonymous';
+      script.onload = () => {
+        setIsAdScriptLoaded(true);
+      };
       document.head.appendChild(script);
+    } else {
+      setIsAdScriptLoaded(true);
     }
   }, []);
 
-  // Initialize ads when user logs in
+  // Initialize ads when user logs in and script is loaded
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && isAdScriptLoaded) {
       const initializeAds = () => {
         try {
           // Initialize all ads
@@ -159,11 +165,12 @@ const Dashboard: React.FC = () => {
         }
       };
 
-      // Initialize ads after a short delay
+      // Initialize ads immediately and after a short delay
+      initializeAds();
       const timer = setTimeout(initializeAds, 1000);
       return () => clearTimeout(timer);
     }
-  }, [currentUser]);
+  }, [currentUser, isAdScriptLoaded]);
 
   // Force ad remount when chat window opens in mobile
   useEffect(() => {
@@ -174,18 +181,10 @@ const Dashboard: React.FC = () => {
 
   // Force sidebar ad remount when user logs in
   useEffect(() => {
-    if (currentUser) {
-      // Force sidebar ad remount immediately
+    if (currentUser && isAdScriptLoaded) {
       setSidebarAdKey(prev => prev + 1);
-      
-      // Force sidebar ad remount again after a delay to ensure it loads
-      const timer = setTimeout(() => {
-        setSidebarAdKey(prev => prev + 1);
-      }, 1500);
-      
-      return () => clearTimeout(timer);
     }
-  }, [currentUser]);
+  }, [currentUser, isAdScriptLoaded]);
 
   // Handle mobile ad visibility
   useEffect(() => {
