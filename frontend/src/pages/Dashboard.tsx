@@ -11,7 +11,6 @@ const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [isAdInitialized, setIsAdInitialized] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -132,42 +131,57 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-  // Add useEffect for loading ads after login
+  // Initialize AdSense script
+  useEffect(() => {
+    if (!window.adsbygoogle) {
+      window.adsbygoogle = [];
+      const script = document.createElement('script');
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  // Handle ad initialization
   useEffect(() => {
     if (currentUser) {
-      // Load AdSense script if not already loaded
-      if (!window.adsbygoogle) {
-        window.adsbygoogle = [];
-        const script = document.createElement('script');
-        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
-        script.async = true;
-        script.crossOrigin = 'anonymous';
-        document.head.appendChild(script);
-      }
-
-      // Initialize ads after a short delay to ensure script is loaded
-      const timer = setTimeout(() => {
+      const initializeAds = () => {
         try {
           // Initialize all ads
           (window.adsbygoogle = window.adsbygoogle || []).push({});
           (window.adsbygoogle = window.adsbygoogle || []).push({});
           (window.adsbygoogle = window.adsbygoogle || []).push({});
-          setIsAdInitialized(true);
         } catch (err) {
           console.error('Error loading ads:', err);
         }
+      };
+
+      // Initial load
+      initializeAds();
+
+      // Set up an interval to check and reinitialize ads if needed
+      const adCheckInterval = setInterval(() => {
+        const adElements = document.querySelectorAll('.adsbygoogle');
+        if (adElements.length > 0) {
+          adElements.forEach(ad => {
+            if (!ad.hasAttribute('data-adsbygoogle-initialized')) {
+              initializeAds();
+            }
+          });
+        }
       }, 1000);
 
-      return () => clearTimeout(timer);
+      return () => clearInterval(adCheckInterval);
     }
   }, [currentUser]);
 
-  // Add useEffect to handle mobile ad visibility
+  // Handle mobile ad visibility
   useEffect(() => {
-    if (selectedUser && isMobile && isAdInitialized) {
-      // Force ad refresh when chat window opens in mobile
-      const adElement = document.querySelector('.adsbygoogle');
-      if (adElement) {
+    if (selectedUser && isMobile) {
+      // Force immediate ad refresh for mobile
+      const mobileAdContainer = document.querySelector('.mobile-ad-container');
+      if (mobileAdContainer) {
         try {
           (window.adsbygoogle = window.adsbygoogle || []).push({});
         } catch (err) {
@@ -175,7 +189,7 @@ const Dashboard: React.FC = () => {
         }
       }
     }
-  }, [selectedUser, isMobile, isAdInitialized]);
+  }, [selectedUser, isMobile]);
 
   // Handle ad clicks globally
   useEffect(() => {
@@ -375,7 +389,7 @@ const Dashboard: React.FC = () => {
 
           {/* Bottom Ad Space - Always visible in mobile */}
           <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
-            <div className="h-full w-full">
+            <div className="h-full w-full mobile-ad-container">
               <ins 
                 className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
