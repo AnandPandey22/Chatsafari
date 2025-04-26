@@ -12,7 +12,6 @@ const Dashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [adKey, setAdKey] = useState(0);
-  const [sidebarAdKey, setSidebarAdKey] = useState(0);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -133,22 +132,27 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-  // Load AdSense script once
+  // Load AdSense script and initialize ads when user logs in
   useEffect(() => {
-    if (!window.adsbygoogle) {
+    if (currentUser) {
+      // Remove existing AdSense script if it exists
+      const existingScript = document.querySelector('script[src*="adsbygoogle"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+
+      // Clear existing adsbygoogle array
       window.adsbygoogle = [];
+
+      // Create and append new AdSense script
       const script = document.createElement('script');
       script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
       script.async = true;
       script.crossOrigin = 'anonymous';
       document.head.appendChild(script);
-    }
-  }, []);
 
-  // Initialize ads when user logs in
-  useEffect(() => {
-    if (currentUser) {
-      const initializeAds = () => {
+      // Initialize ads after script loads
+      script.onload = () => {
         try {
           // Initialize all ads
           (window.adsbygoogle = window.adsbygoogle || []).push({});
@@ -158,10 +162,6 @@ const Dashboard: React.FC = () => {
           console.error('Error initializing ads:', err);
         }
       };
-
-      // Initialize ads after a short delay
-      const timer = setTimeout(initializeAds, 1000);
-      return () => clearTimeout(timer);
     }
   }, [currentUser]);
 
@@ -171,21 +171,6 @@ const Dashboard: React.FC = () => {
       setAdKey(prev => prev + 1);
     }
   }, [selectedUser, isMobile]);
-
-  // Force sidebar ad remount when user logs in
-  useEffect(() => {
-    if (currentUser) {
-      // Force sidebar ad remount immediately
-      setSidebarAdKey(prev => prev + 1);
-      
-      // Force sidebar ad remount again after a delay to ensure visibility
-      const timer = setTimeout(() => {
-        setSidebarAdKey(prev => prev + 1);
-      }, 1500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [currentUser]);
 
   // Handle mobile ad visibility
   useEffect(() => {
@@ -423,7 +408,7 @@ const Dashboard: React.FC = () => {
 
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
-          <div className="h-full w-full" key={sidebarAdKey}>
+          <div className="h-full w-full">
             <ins 
               className="adsbygoogle"
               style={{ 
