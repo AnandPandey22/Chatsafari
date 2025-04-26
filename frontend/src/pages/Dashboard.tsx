@@ -144,29 +144,26 @@ const Dashboard: React.FC = () => {
     }
   }, []);
 
-  // Initialize ads when user logs in
+  // Initialize bottom ad when user logs in
   useEffect(() => {
     if (currentUser) {
-      const initializeAds = () => {
+      const initializeBottomAd = () => {
         try {
-          // Initialize all ads
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
           (window.adsbygoogle = window.adsbygoogle || []).push({});
         } catch (err) {
-          console.error('Error initializing ads:', err);
+          console.error('Error initializing bottom ad:', err);
         }
       };
 
-      // Initialize ads after a short delay
-      const timer = setTimeout(initializeAds, 1000);
+      // Initialize after a short delay
+      const timer = setTimeout(initializeBottomAd, 1000);
       return () => clearTimeout(timer);
     }
   }, [currentUser]);
 
   // Initialize sidebar ad
   useEffect(() => {
-    const initializeAd = () => {
+    const initializeSidebarAd = () => {
       try {
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
@@ -176,16 +173,16 @@ const Dashboard: React.FC = () => {
     };
 
     // Initial load
-    initializeAd();
+    initializeSidebarAd();
 
     // Retry after a short delay to ensure DOM is ready
-    const retryTimer = setTimeout(initializeAd, 1000);
+    const retryTimer = setTimeout(initializeSidebarAd, 1000);
 
     // Cleanup
     return () => clearTimeout(retryTimer);
   }, []);
 
-  // Force ad remount when chat window opens in mobile
+  // Force bottom ad remount when chat window opens in mobile
   useEffect(() => {
     if (selectedUser && isMobile) {
       setAdKey(prev => prev + 1);
