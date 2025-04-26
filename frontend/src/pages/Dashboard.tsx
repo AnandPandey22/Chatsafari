@@ -12,7 +12,6 @@ const Dashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [adKey, setAdKey] = useState(0);
-  const adsInitialized = useRef(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -133,41 +132,43 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-  // Load AdSense script and initialize ads
+  // Load AdSense script
   useEffect(() => {
-    if (currentUser && !adsInitialized.current) {
-      // Load AdSense script if not already loaded
-      if (!window.adsbygoogle) {
-        window.adsbygoogle = [];
-        const script = document.createElement('script');
-        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
-        script.async = true;
-        script.crossOrigin = 'anonymous';
-        document.head.appendChild(script);
+    if (!window.adsbygoogle) {
+      window.adsbygoogle = [];
+      const script = document.createElement('script');
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+    }
+  }, []);
 
-        // Wait for script to load
-        script.onload = () => {
-          // Initialize ads after script is loaded
-          const initializeAds = () => {
-            try {
-              // Initialize each ad slot individually
-              const adElements = document.querySelectorAll('.adsbygoogle');
-              adElements.forEach(ad => {
-                if (!ad.hasAttribute('data-adsbygoogle-initialized')) {
-                  (window.adsbygoogle = window.adsbygoogle || []).push({});
-                  ad.setAttribute('data-adsbygoogle-initialized', 'true');
-                }
-              });
-              adsInitialized.current = true;
-            } catch (err) {
-              console.error('Error initializing ads:', err);
-            }
-          };
+  // Initialize bottom ad
+  useEffect(() => {
+    if (currentUser) {
+      const timer = setTimeout(() => {
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (err) {
+          console.error('Error initializing bottom ad:', err);
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [adKey, currentUser]);
 
-          // Initialize ads after a short delay
-          setTimeout(initializeAds, 1000);
-        };
-      }
+  // Initialize sidebar ad
+  useEffect(() => {
+    if (currentUser) {
+      const timer = setTimeout(() => {
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (err) {
+          console.error('Error initializing sidebar ad:', err);
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
     }
   }, [currentUser]);
 
@@ -175,8 +176,6 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     if (selectedUser && isMobile) {
       setAdKey(prev => prev + 1);
-      // Reset initialization flag for the new ad
-      adsInitialized.current = false;
     }
   }, [selectedUser, isMobile]);
 
