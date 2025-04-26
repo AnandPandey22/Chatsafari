@@ -12,6 +12,7 @@ const Dashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [adKey, setAdKey] = useState(0);
+  const hasOpenedFirstChat = useRef(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -160,10 +161,21 @@ const Dashboard: React.FC = () => {
     }
   }, [currentUser]);
 
-  // Force bottom ad remount when chat window opens in mobile
+  // Handle first chat window open in mobile
   useEffect(() => {
-    if (selectedUser && isMobile) {
+    if (selectedUser && isMobile && !hasOpenedFirstChat.current) {
+      hasOpenedFirstChat.current = true;
       setAdKey(prev => prev + 1);
+      
+      // Initialize the mobile ad
+      const timer = setTimeout(() => {
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (err) {
+          console.error('Error initializing mobile ad:', err);
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
     }
   }, [selectedUser, isMobile]);
 
@@ -387,7 +399,7 @@ const Dashboard: React.FC = () => {
 
           {/* Bottom Ad Space - Always visible in mobile */}
           <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
-            <div className="h-full w-full">
+            <div className="h-full w-full" key={adKey}>
               <ins 
                 className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
