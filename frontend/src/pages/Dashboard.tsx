@@ -132,55 +132,36 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-  // Load AdSense script once
-  useEffect(() => {
-    if (!window.adsbygoogle) {
-      window.adsbygoogle = [];
-      const script = document.createElement('script');
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
-      script.async = true;
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-    }
-  }, []);
-
-  // Initialize bottom ad when user logs in
+  // Load AdSense script and initialize ads
   useEffect(() => {
     if (currentUser) {
-      const initializeBottomAd = () => {
+      // Load AdSense script if not already loaded
+      if (!window.adsbygoogle) {
+        window.adsbygoogle = [];
+        const script = document.createElement('script');
+        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
+      }
+
+      // Initialize all ads after script is loaded
+      const initializeAds = () => {
         try {
+          // Initialize all ads
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
           (window.adsbygoogle = window.adsbygoogle || []).push({});
         } catch (err) {
-          console.error('Error initializing bottom ad:', err);
+          console.error('Error initializing ads:', err);
         }
       };
 
-      // Initialize after a short delay
-      const timer = setTimeout(initializeBottomAd, 1000);
+      // Initialize ads after a short delay
+      const timer = setTimeout(initializeAds, 1000);
       return () => clearTimeout(timer);
     }
   }, [currentUser]);
-
-  // Initialize sidebar ad
-  useEffect(() => {
-    const initializeSidebarAd = () => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading sidebar ad:', error);
-      }
-    };
-
-    // Initial load
-    initializeSidebarAd();
-
-    // Retry after a short delay to ensure DOM is ready
-    const retryTimer = setTimeout(initializeSidebarAd, 1000);
-
-    // Cleanup
-    return () => clearTimeout(retryTimer);
-  }, []);
 
   // Force bottom ad remount when chat window opens in mobile
   useEffect(() => {
