@@ -6,46 +6,6 @@ import { LogOut, Menu, X, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
-// Create a separate component for the right sidebar ad
-const RightSidebarAd: React.FC = () => {
-  const [adKey, setAdKey] = useState(0);
-
-  useEffect(() => {
-    // Initialize the ad when the component mounts
-    const initializeAd = () => {
-      try {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (err) {
-        console.error('Error initializing sidebar ad:', err);
-      }
-    };
-
-    // Initialize immediately and after a delay
-    initializeAd();
-    const timer = setTimeout(initializeAd, 1000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
-      <div className="h-full w-full" key={adKey}>
-        <ins 
-          className="adsbygoogle"
-          style={{ 
-            display: 'block', 
-            height: '100%', 
-            width: '100%',
-            minHeight: '250px'
-          }}
-          data-ad-client="ca-pub-9696449443766781"
-          data-ad-slot="8719654150"
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-        ></ins>
-      </div>
-    </div>
-  );
-};
 
 const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -53,7 +13,6 @@ const Dashboard: React.FC = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [adKey, setAdKey] = useState(0);
   const [sidebarAdKey, setSidebarAdKey] = useState(0);
-  const [isAdScriptLoaded, setIsAdScriptLoaded] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -182,18 +141,13 @@ const Dashboard: React.FC = () => {
       script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
       script.async = true;
       script.crossOrigin = 'anonymous';
-      script.onload = () => {
-        setIsAdScriptLoaded(true);
-      };
       document.head.appendChild(script);
-    } else {
-      setIsAdScriptLoaded(true);
     }
   }, []);
 
-  // Initialize ads when user logs in and script is loaded
+  // Initialize ads when user logs in
   useEffect(() => {
-    if (currentUser && isAdScriptLoaded) {
+    if (currentUser) {
       const initializeAds = () => {
         try {
           // Initialize all ads
@@ -205,12 +159,11 @@ const Dashboard: React.FC = () => {
         }
       };
 
-      // Initialize ads immediately and after a short delay
-      initializeAds();
+      // Initialize ads after a short delay
       const timer = setTimeout(initializeAds, 1000);
       return () => clearTimeout(timer);
     }
-  }, [currentUser, isAdScriptLoaded]);
+  }, [currentUser]);
 
   // Force ad remount when chat window opens in mobile
   useEffect(() => {
@@ -221,10 +174,18 @@ const Dashboard: React.FC = () => {
 
   // Force sidebar ad remount when user logs in
   useEffect(() => {
-    if (currentUser && isAdScriptLoaded) {
+    if (currentUser) {
+      // Force sidebar ad remount immediately
       setSidebarAdKey(prev => prev + 1);
+      
+      // Force sidebar ad remount again after a delay to ensure visibility
+      const timer = setTimeout(() => {
+        setSidebarAdKey(prev => prev + 1);
+      }, 1500);
+      
+      return () => clearTimeout(timer);
     }
-  }, [currentUser, isAdScriptLoaded]);
+  }, [currentUser]);
 
   // Handle mobile ad visibility
   useEffect(() => {
@@ -461,7 +422,23 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Right Sidebar - Ad Space (desktop only) */}
-        <RightSidebarAd />
+        <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
+          <div className="h-full w-full" key={sidebarAdKey}>
+            <ins 
+              className="adsbygoogle"
+              style={{ 
+                display: 'block', 
+                height: '100%', 
+                width: '100%',
+                minHeight: '250px'
+              }}
+              data-ad-client="ca-pub-9696449443766781"
+              data-ad-slot="8719654150"
+              data-ad-format="auto"
+              data-full-width-responsive="true"
+            ></ins>
+          </div>
+        </div>
       </div>
     </div>
   );
