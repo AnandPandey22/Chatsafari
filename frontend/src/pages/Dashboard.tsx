@@ -12,6 +12,7 @@ const Dashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [adKey, setAdKey] = useState(0);
+  const [sidebarAdKey, setSidebarAdKey] = useState(0);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -170,6 +171,21 @@ const Dashboard: React.FC = () => {
       setAdKey(prev => prev + 1);
     }
   }, [selectedUser, isMobile]);
+
+  // Force sidebar ad remount when user logs in
+  useEffect(() => {
+    if (currentUser) {
+      // Force sidebar ad remount immediately
+      setSidebarAdKey(prev => prev + 1);
+      
+      // Force sidebar ad remount again after a delay to ensure it loads
+      const timer = setTimeout(() => {
+        setSidebarAdKey(prev => prev + 1);
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser]);
 
   // Handle mobile ad visibility
   useEffect(() => {
@@ -407,7 +423,7 @@ const Dashboard: React.FC = () => {
 
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
-          <div className="h-full w-full">
+          <div className="h-full w-full" key={sidebarAdKey}>
             <ins 
               className="adsbygoogle"
               style={{ 
@@ -427,4 +443,4 @@ const Dashboard: React.FC = () => {
     </div>
   );
 };
-export default Dashboard;
+export default Dashboard;v
