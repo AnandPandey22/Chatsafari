@@ -6,6 +6,46 @@ import { LogOut, Menu, X, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
+// Create a separate component for the right sidebar ad
+const RightSidebarAd: React.FC = () => {
+  const [adKey, setAdKey] = useState(0);
+
+  useEffect(() => {
+    // Initialize the ad when the component mounts
+    const initializeAd = () => {
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (err) {
+        console.error('Error initializing sidebar ad:', err);
+      }
+    };
+
+    // Initialize immediately and after a delay
+    initializeAd();
+    const timer = setTimeout(initializeAd, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
+      <div className="h-full w-full" key={adKey}>
+        <ins 
+          className="adsbygoogle"
+          style={{ 
+            display: 'block', 
+            height: '100%', 
+            width: '100%',
+            minHeight: '250px'
+          }}
+          data-ad-client="ca-pub-9696449443766781"
+          data-ad-slot="8719654150"
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        ></ins>
+      </div>
+    </div>
+  );
+};
 
 const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -421,23 +461,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Right Sidebar - Ad Space (desktop only) */}
-        <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
-          <div className="h-full w-full" key={sidebarAdKey}>
-            <ins 
-              className="adsbygoogle"
-              style={{ 
-                display: 'block', 
-                height: '100%', 
-                width: '100%',
-                minHeight: '250px'
-              }}
-              data-ad-client="ca-pub-9696449443766781"
-              data-ad-slot="8719654150"
-              data-ad-format="auto"
-              data-full-width-responsive="true"
-            ></ins>
-          </div>
-        </div>
+        <RightSidebarAd />
       </div>
     </div>
   );
