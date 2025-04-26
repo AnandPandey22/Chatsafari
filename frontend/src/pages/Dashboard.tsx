@@ -131,7 +131,7 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-  // Initialize AdSense script
+  // Load AdSense script once
   useEffect(() => {
     if (!window.adsbygoogle) {
       window.adsbygoogle = [];
@@ -143,7 +143,7 @@ const Dashboard: React.FC = () => {
     }
   }, []);
 
-  // Handle ad initialization
+  // Initialize ads when user logs in
   useEffect(() => {
     if (currentUser) {
       const initializeAds = () => {
@@ -153,41 +153,35 @@ const Dashboard: React.FC = () => {
           (window.adsbygoogle = window.adsbygoogle || []).push({});
           (window.adsbygoogle = window.adsbygoogle || []).push({});
         } catch (err) {
-          console.error('Error loading ads:', err);
+          console.error('Error initializing ads:', err);
         }
       };
 
-      // Initial load
-      initializeAds();
-
-      // Set up an interval to check and reinitialize ads if needed
-      const adCheckInterval = setInterval(() => {
-        const adElements = document.querySelectorAll('.adsbygoogle');
-        if (adElements.length > 0) {
-          adElements.forEach(ad => {
-            if (!ad.hasAttribute('data-adsbygoogle-initialized')) {
-              initializeAds();
-            }
-          });
-        }
-      }, 1000);
-
-      return () => clearInterval(adCheckInterval);
+      // Initialize ads after a short delay
+      const timer = setTimeout(initializeAds, 1000);
+      return () => clearTimeout(timer);
     }
   }, [currentUser]);
 
   // Handle mobile ad visibility
   useEffect(() => {
     if (selectedUser && isMobile) {
-      // Force immediate ad refresh for mobile
-      const mobileAdContainer = document.querySelector('.mobile-ad-container');
-      if (mobileAdContainer) {
-        try {
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (err) {
-          console.error('Error refreshing mobile ad:', err);
+      const refreshMobileAd = () => {
+        const adElement = document.querySelector('.adsbygoogle');
+        if (adElement) {
+          try {
+            // Force ad refresh
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (err) {
+            console.error('Error refreshing mobile ad:', err);
+          }
         }
-      }
+      };
+
+      // Refresh ad immediately and after a short delay to ensure visibility
+      refreshMobileAd();
+      const timer = setTimeout(refreshMobileAd, 500);
+      return () => clearTimeout(timer);
     }
   }, [selectedUser, isMobile]);
 
@@ -389,7 +383,7 @@ const Dashboard: React.FC = () => {
 
           {/* Bottom Ad Space - Always visible in mobile */}
           <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
-            <div className="h-full w-full mobile-ad-container">
+            <div className="h-full w-full">
               <ins 
                 className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
