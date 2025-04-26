@@ -12,6 +12,7 @@ const Dashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [adKey, setAdKey] = useState(0);
+  const [sidebarAdKey, setSidebarAdKey] = useState(0);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
@@ -164,25 +165,30 @@ const Dashboard: React.FC = () => {
     }
   }, [currentUser]);
 
-  // Initialize sidebar ad
+  // Initialize sidebar ad with multiple attempts
   useEffect(() => {
-    const initializeAd = () => {
+    const initializeSidebarAd = () => {
       try {
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
+        setSidebarAdKey(prev => prev + 1);
       } catch (error) {
         console.error('Error loading sidebar ad:', error);
       }
     };
 
     // Initial load
-    initializeAd();
+    initializeSidebarAd();
 
-    // Retry after a short delay to ensure DOM is ready
-    const retryTimer = setTimeout(initializeAd, 1000);
+    // Multiple retry attempts
+    const retryTimers = [
+      setTimeout(initializeSidebarAd, 500),
+      setTimeout(initializeSidebarAd, 1000),
+      setTimeout(initializeSidebarAd, 2000)
+    ];
 
     // Cleanup
-    return () => clearTimeout(retryTimer);
+    return () => retryTimers.forEach(timer => clearTimeout(timer));
   }, []);
 
   // Force ad remount when chat window opens in mobile
@@ -428,7 +434,7 @@ const Dashboard: React.FC = () => {
 
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
-          <div className="h-full w-full">
+          <div className="h-full w-full" key={sidebarAdKey}>
             <ins 
               className="adsbygoogle"
               style={{ 
