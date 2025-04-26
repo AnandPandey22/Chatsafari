@@ -15,18 +15,7 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
-// Initialize ads when selectedUser changes
-  useEffect(() => {
-    // Small delay to ensure DOM is updated
-    setTimeout(() => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading ads:', error);
-      }
-    }, 100);
-  }, [selectedUser]);
+
   
   // Restore session on mount
   useEffect(() => {
@@ -116,36 +105,6 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedUser, setSelectedUser]);
 
- // Add useEffect for loading ads after login
-  useEffect(() => {
-    if (currentUser) {
-      // Load AdSense script if not already loaded
-      if (!window.adsbygoogle) {
-        window.adsbygoogle = [];
-        const script = document.createElement('script');
-        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
-        script.async = true;
-        script.crossOrigin = 'anonymous';
-        document.head.appendChild(script);
-      }
-
-      // Load ads after a short delay to ensure script is loaded
-      const timer = setTimeout(() => {
-        try {
-          // Initialize page-level ads only once
-          (window.adsbygoogle = window.adsbygoogle || []).push({
-            google_ad_client: "ca-pub-9696449443766781",
-            enable_page_level_ads: true
-          });
-        } catch (err) {
-          console.error('Error loading ads:', err);
-        }
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [currentUser]);
-
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
   };
@@ -172,21 +131,7 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
- // Initialize bottom ad once
-  useEffect(() => {
-    const loadBottomAd = () => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading bottom ad:', error);
-      }
-    };
 
-    // Initial load only, no reload on user change
-    const timer = setTimeout(loadBottomAd, 1500); // Delay slightly more than initial script load
-    return () => clearTimeout(timer);
-  }, []); 
 
 // Initialize sidebar ad once on mount
   useEffect(() => {
@@ -400,7 +345,7 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
-         {/* Bottom Ad Space - Always visible in mobile */}
+          {/* Bottom Ad Space - Always visible in mobile */}
           <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
             <div className="h-full w-full">
               <ins 
