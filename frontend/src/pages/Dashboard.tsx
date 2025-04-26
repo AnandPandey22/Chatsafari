@@ -131,24 +131,47 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-
-
-// Initialize sidebar ad once on mount
+  // Add useEffect for loading ads after login
   useEffect(() => {
-    const initializeAd = () => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading sidebar ad:', error);
+    if (currentUser) {
+      // Load AdSense script if not already loaded
+      if (!window.adsbygoogle) {
+        window.adsbygoogle = [];
+        const script = document.createElement('script');
+        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
       }
-    };
 
-    // Initial load with delay after bottom ad
-    const timer = setTimeout(initializeAd, 2000); // Delay more than bottom ad
-    return () => clearTimeout(timer);
-  }, []);
-  
+      // Initialize ads after a short delay to ensure script is loaded
+      const timer = setTimeout(() => {
+        try {
+          // Initialize all ads
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (err) {
+          console.error('Error loading ads:', err);
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser]);
+
+  // Add useEffect to reinitialize ads when chat window opens in mobile
+  useEffect(() => {
+    if (selectedUser && isMobile) {
+      // Reinitialize bottom ad when chat window opens in mobile
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (err) {
+        console.error('Error reinitializing mobile ad:', err);
+      }
+    }
+  }, [selectedUser, isMobile]);
+
   // Handle ad clicks globally
   useEffect(() => {
     const handleAdClick = (event: MouseEvent) => {
