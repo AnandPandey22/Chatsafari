@@ -132,27 +132,22 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
-  // Load AdSense script and initialize ads when user logs in
+  // Load AdSense script once
   useEffect(() => {
-    if (currentUser) {
-      // Remove existing AdSense script if it exists
-      const existingScript = document.querySelector('script[src*="adsbygoogle"]');
-      if (existingScript) {
-        existingScript.remove();
-      }
-
-      // Clear existing adsbygoogle array
+    if (!window.adsbygoogle) {
       window.adsbygoogle = [];
-
-      // Create and append new AdSense script
       const script = document.createElement('script');
       script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
       script.async = true;
       script.crossOrigin = 'anonymous';
       document.head.appendChild(script);
+    }
+  }, []);
 
-      // Initialize ads after script loads
-      script.onload = () => {
+  // Initialize ads when user logs in
+  useEffect(() => {
+    if (currentUser) {
+      const initializeAds = () => {
         try {
           // Initialize all ads
           (window.adsbygoogle = window.adsbygoogle || []).push({});
@@ -162,8 +157,33 @@ const Dashboard: React.FC = () => {
           console.error('Error initializing ads:', err);
         }
       };
+
+      // Initialize ads after a short delay
+      const timer = setTimeout(initializeAds, 1000);
+      return () => clearTimeout(timer);
     }
   }, [currentUser]);
+
+  // Initialize sidebar ad
+  useEffect(() => {
+    const initializeAd = () => {
+      try {
+        // @ts-ignore
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (error) {
+        console.error('Error loading sidebar ad:', error);
+      }
+    };
+
+    // Initial load
+    initializeAd();
+
+    // Retry after a short delay to ensure DOM is ready
+    const retryTimer = setTimeout(initializeAd, 1000);
+
+    // Cleanup
+    return () => clearTimeout(retryTimer);
+  }, []);
 
   // Force ad remount when chat window opens in mobile
   useEffect(() => {
