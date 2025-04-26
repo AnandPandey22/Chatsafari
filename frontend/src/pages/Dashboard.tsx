@@ -144,28 +144,16 @@ const Dashboard: React.FC = () => {
     }
   }, []);
 
-  // Initialize bottom ad
+  // Initialize ads once when user logs in
   useEffect(() => {
     if (currentUser) {
       const timer = setTimeout(() => {
         try {
+          // Initialize both ads
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
           (window.adsbygoogle = window.adsbygoogle || []).push({});
         } catch (err) {
-          console.error('Error initializing bottom ad:', err);
-        }
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [adKey, currentUser]);
-
-  // Initialize sidebar ad
-  useEffect(() => {
-    if (currentUser) {
-      const timer = setTimeout(() => {
-        try {
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        } catch (err) {
-          console.error('Error initializing sidebar ad:', err);
+          console.error('Error initializing ads:', err);
         }
       }, 1500);
       return () => clearTimeout(timer);
@@ -399,7 +387,7 @@ const Dashboard: React.FC = () => {
 
           {/* Bottom Ad Space - Always visible in mobile */}
           <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
-            <div className="h-full w-full" key={adKey}>
+            <div className="h-full w-full">
               <ins 
                 className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
