@@ -196,6 +196,7 @@ People Often feel lonely and bored because they feel they don't have any friends
 
 Sometimes people wants to share something but they do not want to share it with their friends because they have some trust issue but they have to tell that secret to someone then again here comes Chatsafari.com founded by Anand Pandey which gave them option of thousands of people who are online active on chatsafari and with themselves you can share your secrets Anonymously without any security issue because Chatsafari.com is 100% Reliable and fully safe and secure. We do not store any users data that cause harm to our beautiful Users. So if anyone feel lonely, bored they should Join Chatsafari.com to get rid of that stupid boredom and start making new friends On Chatsafari.com. [Start Chatting Now](https://chatsafari.com)!!
   `
+  },
   {
     id: 4,
     title: "How to Make New Friends Online Easily",
