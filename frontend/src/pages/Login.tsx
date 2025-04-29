@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { User } from '../types';
 import { toast } from 'react-hot-toast';
 import { UserCircle, Calendar } from 'lucide-react';
-import Footer from '../components/Footer';
 import { Helmet } from 'react-helmet-async';
+
+// Lazy load components that are not immediately needed
+const Footer = lazy(() => import('../components/Footer'));
 
 // Add type declaration for adsbygoogle
 declare global {
@@ -19,32 +21,41 @@ const Login: React.FC = () => {
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [age, setAge] = useState('');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showAdditionalContent, setShowAdditionalContent] = useState(false);
   const navigate = useNavigate();
   const { setCurrentUser, connect, activeUsers } = useStore();
 
-   // Initialize Google Ads
+  // Load additional content after main content is visible
   useEffect(() => {
-    // Load AdSense script if not already loaded
-    if (!window.adsbygoogle) {
-      window.adsbygoogle = [];
-      const script = document.createElement('script');
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
-      script.async = true;
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-    }
-
-    // Load ads after a short delay to ensure script is loaded
     const timer = setTimeout(() => {
-      try {
-        window.adsbygoogle.push({});
-      } catch (err) {
-        console.error('Error loading ads:', err);
-      }
+      setShowAdditionalContent(true);
     }, 1000);
-
     return () => clearTimeout(timer);
   }, []);
+
+  // Load AdSense after main content
+  useEffect(() => {
+    // Load AdSense script immediately
+    const loadAds = () => {
+      if (!document.querySelector('script[src*="adsbygoogle"]')) {
+        const script = document.createElement('script');
+        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        script.onload = () => {
+          try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (err) {
+            console.error('Error loading ads:', err);
+          }
+        };
+        document.head.appendChild(script);
+      }
+    };
+
+    // Load ads immediately
+    loadAds();
+  }, []); // Remove dependency on showAdditionalContent
 
   // Handle window resize
   useEffect(() => {
@@ -97,8 +108,9 @@ const Login: React.FC = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+  // Main content that loads immediately
+  const renderMainContent = () => (
+    <>
       <Helmet>
         <title>ChatSafari - Free Online Chat Rooms | Talk to Strangers</title>
         <meta name="description" content="Join ChatSafari's free online chat rooms. Talk to strangers, chat with strangers, and enjoy video chat worldwide. No registration required." />
@@ -138,22 +150,6 @@ const Login: React.FC = () => {
       {/* Main Content - Adjusted for fixed header */}
       <main className="flex-1 flex flex-col items-center px-4 sm:px-6 lg:px-8 py-16 mt-16" role="main">
         <div className="w-full max-w-6xl flex flex-col gap-8">
-
-          {/* First Ad - Mobile Only */}
-          {isMobile && (
-            <div className="w-full">
-              <ins
-                className="adsbygoogle"
-                style={{ display: 'block' }}
-                data-ad-client="ca-pub-9696449443766781"
-                data-ad-slot="6743920017"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-              />
-            </div>
-          )}
-          
-          {/* Main Content Area */}
           <section className="flex flex-col lg:flex-row gap-8" aria-label="Login and Introduction">
             {/* Login Form */}
             <div className="lg:w-[500px] w-full">
@@ -233,7 +229,6 @@ const Login: React.FC = () => {
               </div>
             </div>
 
-
             {/* Right side - Content */}
             <div className="w-full lg:flex-1">
               <div className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-lg bg-opacity-90">
@@ -254,104 +249,107 @@ const Login: React.FC = () => {
               </div>
             </div>
           </section>
-
-                 {/* Second Ad - Both Mobile and Web */}
-          <div className="w-full mt-4">
-            <div className="h-full w-full">
-              <ins
-                className="adsbygoogle"
-                style={{ display: 'block', height: '100%', width: '100%' }}
-                data-ad-client="ca-pub-9696449443766781"
-                data-ad-slot="9857777322"
-                data-ad-format="auto"
-                data-full-width-responsive="true"
-              />
-            </div>
-          </div>
-
-
-          {/* Additional Content - Below Login Form */}
-          <section className="max-w-4xl mx-auto text-center py-12" aria-label="About ChatSafari">
-            <p className="text-gray-600 text-lg leading-relaxed">
-              Chatsafari.com is a free chat room and Video chat website where you can have live chat with single girls and boys, 
-              you can Chat with random strangers from USA, Canada, United Kingdom, Australia and people from all over the world, 
-              at the same time in multiple chatrooms and discussion groups, any time you can start a private conversation 
-              to meet girls and boys living nearby in your area.
-            </p>
-          </section>
-
-          {/* Talk to Strangers Section */}
-          <section className="bg-white rounded-xl shadow-md p-8" aria-label="Chat Features">
-            <h2 className="text-3xl font-bold text-violet-600 mb-8 text-center">
-              Talk to Strangers Free On Chatsafari
-            </h2>
-            <div className="max-w-5xl mx-auto space-y-4">
-              <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
-                <p className="text-gray-600 text-lg leading-relaxed">
-                   <a href="https://chatsafari.com/blog/talk-to-strangers-online">Talk to Strangers</a>, Free Chat Rooms, online chat, Random Chat, 1-on-1 live chat with Strangers, Video Chat with girls,Voice Chat, text chat, Ghost Chat etc. these are some services that are fully served by Chatsafari to all its Users so that they all can interact with anyone around the world to Uplift their mind and take a break from their hectic schedule and relax their body and mind. Chatsafari.com also have some different features that users can use to Impress girl and uplift their mood.
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  Free Chat Rooms like  <a href="https://chatib.us">Chatib</a> India Chat Room, USA chat room, Lesbian chat room, Gay Chat room, Teen Chat rooms, Dating Chat Rooms, Girls Chat Room, Ghost Chat Rooms are Available on Chatsafari.com which helps different types of people to interact with their lovable person. Sometimes people get bored talking to their friends and here chatsafari helps them to find a good stranger from a different part of world who does not know about him so that they both can share each others feelings without Judging them. All the features and Chat Rooms are Completely Free, Users don't have to pay anything.
-                </p>
-              </div>
-
-              
-              <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  Talking to strangers online on chatsafari helps people to Uplift their mood because they can share their feelings with real people and have a good conversation with them. Talk to Random cute girls on Chatsafari and start Improving your conversation pull with them so that they get Impressed by you. You can also flirt with girls on chatsafari and they are very polite to all users.
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  Anand Pandey is the Founder of Chatsafari and he launched Chatsafari.com on 14th March 2025. After so many days and too many updates the Chatsafari is Successfully launched. Chatsafari was the First Dream of Anand Pandey which he wanted to accomplish, now since Chatsafari has been launched he wants people to see his work and try Chatsafari for once and give some feedback about the services of chatsafari and if they find some bug they should contact Us so that we can resolve it immediately.
-                  </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  If you are an introvert and want to improve your conversation skill with girls then [Chatsafari.com](https://chatsafari.com/) is One and Only the Best Chatting Platform which can connect you to different girls from so many countries so that you can interact with them and Improve your English Speaking and Conversation Skill. Only Real usera are available on chatsafari from different countries and we do not have Bots who send spamy and fishy messages to users. This is what make Chatsafari.com different from Other Online Chatting Platform.
-                  </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Features Section */}
-          <section className="bg-white rounded-xl shadow-md p-8" aria-label="Why Choose Us">
-            <h3 className="text-3xl font-bold text-violet-600 mb-8 text-center">
-              Why Choose ChatSafari?
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="space-y-4">
-                <h4 className="text-lg font-medium text-violet-600">Real-time Communication</h4>
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  Experience seamless real-time messaging with instant delivery indicators, typing status, and read receipts. 
-                  Share images and connect with users worldwide through our modern, responsive interface.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-lg font-medium text-violet-600">Security & Privacy</h4>
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  Enjoy secure end-to-end encrypted messaging, customizable profiles with avatars, and user presence indicators. 
-                  Your privacy and security are our top priorities. Your Privacy is our Responsibility.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-lg font-medium text-violet-600">Free Chat Rooms</h4>
-                <p className="text-gray-600 text-lg leading-relaxed">
-                 Free Chat Rooms, online chatting and including all features are completely Free on Chatsafari. 
-                 It means Users do not have to pay anything to Talk to strangers like Other chatting websites.
-                </p>
-              </div>
-            </div>
-          </section>
         </div>
       </main>
+    </>
+  );
 
-      <Footer />
+  // Additional content that loads after main content
+  const renderAdditionalContent = () => (
+    <>
+      {/* Talk to Strangers Section */}
+      <section className="bg-white rounded-xl shadow-md p-8 mt-8" aria-label="Chat Features">
+        <h2 className="text-3xl font-bold text-violet-600 mb-8 text-center">
+          Talk to Strangers Free On Chatsafari
+        </h2>
+        <div className="max-w-5xl mx-auto space-y-4">
+          <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Talk to strangers, Free Chat Rooms, online chat, Random Chat, 1-on-1 live chat with Strangers, Video Chat with girls,Voice Chat, text chat, Ghost Chat etc. these are some services that are fully served by Chatsafari to all its Users so that they all can interact with anyone around the world to Uplift their mind and take a break from their hectic schedule and relax their body and mind. Chatsafari.com also have some different features that users can use to Impress girl and uplift their mood.
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Free Chat Rooms like India Chat Room, USA chat room, Lesbian chat room, Gay Chat room, Teen Chat rooms, Dating Chat Rooms, Girls Chat Room, Ghost Chat Rooms are Available on Chatsafari.com which helps different types of people to interact with their lovable person. Sometimes people get bored talking to their friends and here chatsafari helps them to find a good stranger from a different part of world who does not know about him so that they both can share each others feelings without Judging them. All the features and Chat Rooms are Completely Free, Users don't have to pay anything.
+            </p>
+          </div>
 
+          <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Talking to strangers online on chatsafari helps people to Uplift their mood because they can share their feelings with real people and have a good conversation with them. Talk to Random cute girls on Chatsafari and start Improving your conversation pull with them so that they get Impressed by you. You can also flirt with girls on chatsafari and they are very polite to all users.
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Anand Pandey is the Founder of Chatsafari and he launched Chatsafari.com on 14th March 2025. After so many days and too many updates the Chatsafari is Successfully launched. Chatsafari was the First Dream of Anand Pandey which he wanted to accomplish, now since Chatsafari has been launched he wants people to see his work and try Chatsafari for once and give some feedback about the services of chatsafari and if they find some bug they should contact Us so that we can resolve it immediately.
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
+            <p className="text-gray-600 text-lg leading-relaxed">
+              If you are an introvert and want to improve your conversation skill with girls then Chatsafari.com is One and Only the Best Chatting Platform which can connect you to different girls from so many countries so that you can interact with them and Improve your English Speaking and Conversation Skill. Only Real usera are available on chatsafari from different countries and we do not have Bots who send spamy and fishy messages to users. This is what make Chatsafari.com different from Other Online Chatting Platform.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="bg-white rounded-xl shadow-md p-8 mt-8" aria-label="Why Choose Us">
+        <h3 className="text-3xl font-bold text-violet-600 mb-8 text-center">
+          Why Choose ChatSafari?
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="space-y-4">
+            <h4 className="text-lg font-medium text-violet-600">Real-time Communication</h4>
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Experience seamless real-time messaging with instant delivery indicators, typing status, and read receipts. 
+              Share images and connect with users worldwide through our modern, responsive interface.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-lg font-medium text-violet-600">Security & Privacy</h4>
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Enjoy secure end-to-end encrypted messaging, customizable profiles with avatars, and user presence indicators. 
+              Your privacy and security are our top priorities. Your Privacy is our Responsibility.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-lg font-medium text-violet-600">Free Chat Rooms</h4>
+            <p className="text-gray-600 text-lg leading-relaxed">
+             Free Chat Rooms, online chatting and including all features are completely Free on Chatsafari. 
+             It means Users do not have to pay anything to Talk to strangers like Other chatting websites.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Second Ad - Both Mobile and Web */}
+      <div className="w-full mt-4">
+        <div className="min-h-[100px] bg-gray-100 rounded-lg flex items-center justify-center">
+          <ins
+            className="adsbygoogle"
+            style={{ display: 'block', minHeight: '100px', width: '100%' }}
+            data-ad-client="ca-pub-9696449443766781"
+            data-ad-slot="9857777322"
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          />
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {renderMainContent()}
+      
+      {showAdditionalContent && (
+        <Suspense fallback={<div className="h-4" />}>
+          {renderAdditionalContent()}
+          <Footer />
+        </Suspense>
+      )}
     </div>
   );
 };
