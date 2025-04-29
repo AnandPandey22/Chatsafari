@@ -66,236 +66,85 @@ const americanMaleBots: User[] = [
   { id: 'bot-am5', username: 'Henry', gender: 'male', age: 22, isOnline: true, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Henry' }
 ];
 
-// Enhanced bot responses with more context and variety
-const botResponses = {
-  greetings: [
-    'Hey! How are you?',
-    'Hi there! Nice to meet you!',
-    'Hello! How\'s your day going?',
-    'Hey! What\'s up?',
-    'Hi! How are you doing today?',
-    'Hello! Great to see you here!',
-    'Hi! Thanks for messaging me!'
-  ],
-  generic: [
-    'That\'s interesting! Tell me more.',
-    'I\'d love to hear more about that!',
-    'That sounds fascinating!',
-    'That\'s really cool! What else?',
-    'Wow, that\'s great to know!',
-    'I understand what you mean.',
-    'That makes a lot of sense.',
-    'How interesting! And then what happened?',
-    'That\'s amazing! How do you feel about it?',
-    'I totally get what you\'re saying!'
-  ],
-  questions: [
-    'What do you like to do for fun?',
-    'What are your favorite hobbies?',
-    'Where are you from? I\'d love to know!',
-    'What kind of music gets you moving?',
-    'Have you traveled anywhere exciting lately?',
-    'What\'s your favorite type of food?',
-    'Seen any good movies or shows recently?',
-    'What do you do for work? Is it something you enjoy?',
-    'How did you discover ChatSafari?',
-    'What interests you the most in life?'
-  ],
-  positive: [
-    'That\'s wonderful to hear!',
-    'I\'m so glad you shared that!',
-    'That sounds amazing!',
-    'How exciting!',
-    'That must be really great!'
-  ],
-  empathy: [
-    'I understand how you feel.',
-    'That must be quite an experience.',
-    'Thanks for sharing that with me.',
-    'I appreciate you telling me about this.',
-    'That\'s a really interesting perspective.'
-  ],
-  followUp: [
-    'What happened next?',
-    'How did that make you feel?',
-    'Tell me more about that!',
-    'What do you think about that?',
-    'That\'s fascinating, please continue!'
-  ]
-};
+// Set to track users who have already received responses from each bot
+const respondedUsers = new Map<string, Set<string>>();
 
-interface BotContext {
-  lastMessage: string;
-  messageCount: number;
-  topics: Set<string>;
-  name: string;
-  location: string;
-  interests: Set<string>;
-  college: string;
-  hobbies: Set<string>;
-  clothingAsked: boolean;
-}
-
-// Store conversation context for each bot
-const conversationContext = new Map<string, BotContext>();
-
-// Function to analyze message content for topics
-const extractTopics = (message: string): string[] => {
-  const topics = new Set<string>();
-  const lowercaseMsg = message.toLowerCase();
-  
-  // Common topics to track
-  const topicKeywords = {
-    music: ['music', 'song', 'singer', 'band', 'concert'],
-    movies: ['movie', 'film', 'cinema', 'watch', 'netflix'],
-    travel: ['travel', 'trip', 'vacation', 'visit', 'country'],
-    food: ['food', 'eat', 'restaurant', 'cooking', 'dish'],
-    work: ['work', 'job', 'career', 'office', 'business'],
-    hobbies: ['hobby', 'interest', 'passion', 'free time', 'weekend'],
-    sports: ['sport', 'game', 'team', 'play', 'match']
-  };
-
-  Object.entries(topicKeywords).forEach(([topic, keywords]) => {
-    if (keywords.some(keyword => lowercaseMsg.includes(keyword))) {
-      topics.add(topic);
+// Load responded users from localStorage
+const loadRespondedUsers = (): void => {
+  try {
+    const stored = localStorage.getItem('botRespondedUsers');
+    if (stored) {
+      const parsed: { [key: string]: string[] } = JSON.parse(stored);
+      Object.entries(parsed).forEach(([botId, userIds]) => {
+        respondedUsers.set(botId, new Set(userIds));
+      });
     }
-  });
-
-  return Array.from(topics);
+  } catch (error) {
+    console.error('Error loading responded users:', error);
+  }
 };
 
-// Function to get a random response
-const getRandomResponse = (type: keyof typeof botResponses): string => {
-  const responses = botResponses[type];
-  return responses[Math.floor(Math.random() * responses.length)];
+// Save responded users to localStorage
+const saveRespondedUsers = (): void => {
+  try {
+    const toStore: { [key: string]: string[] } = {};
+    respondedUsers.forEach((userIds, botId) => {
+      toStore[botId] = Array.from(userIds);
+    });
+    localStorage.setItem('botRespondedUsers', JSON.stringify(toStore));
+  } catch (error) {
+    console.error('Error saving responded users:', error);
+  }
+};
+
+// Load responded users on module initialization
+loadRespondedUsers();
+
+// Function to get a random greeting
+const getRandomGreeting = (): string => {
+  const greetings = ["Hii", "Hey", "Hello"];
+  return greetings[Math.floor(Math.random() * greetings.length)];
+};
+
+// Check if a user has already received a response from a bot
+export const hasUserReceivedResponse = (userId: string, botId: string): boolean => {
+  const botRespondedUsers = respondedUsers.get(botId);
+  return botRespondedUsers ? botRespondedUsers.has(userId) : false;
+};
+
+// Mark a user as having received a response from a bot
+export const markUserAsResponded = (userId: string, botId: string): void => {
+  if (!respondedUsers.has(botId)) {
+    respondedUsers.set(botId, new Set());
+  }
+  respondedUsers.get(botId)!.add(userId);
+  saveRespondedUsers();
 };
 
 // Enhanced bot response generation with context awareness
 export const generateBotResponse = (message: string, botId: string): string => {
   const bot = allBotUsers.find(bot => bot.id === botId);
-  if (!bot) return "Hey";
+  if (!bot) return "";
 
-  // Get or initialize context for this bot
-  let context = conversationContext.get(botId);
-  if (!context) {
-    context = {
-      lastMessage: '',
-      messageCount: 0,
-      topics: new Set<string>(),
-      name: '',
-      location: '',
-      interests: new Set<string>(),
-      college: '',
-      hobbies: new Set<string>(),
-      clothingAsked: false
-    };
-    conversationContext.set(botId, context);
+  // Get the sender's ID from the message
+  const [senderId] = message.split('|'); // Get sender ID from message format "senderId|content"
+
+  // If this user has already received a response from this bot, return empty string
+  if (hasUserReceivedResponse(senderId, botId)) {
+    return "";
   }
 
-  // Update context
-  context.lastMessage = message;
-  context.messageCount++;
-  const lowercaseMsg = message.toLowerCase();
+  // Mark user as having received a response
+  markUserAsResponded(senderId, botId);
 
-  // Simple greetings with single words
-  if (/^(hi|hey|hello|howdy|greetings)$/i.test(message.trim())) {
-    const responses = ["Hey", "Hi", "Hello"];
-    return responses[Math.floor(Math.random() * responses.length)];
-  }
-
-  // Age responses
-  if (lowercaseMsg.includes("age") || 
-      lowercaseMsg.includes("how old") || 
-      lowercaseMsg.includes("umar") || 
-      lowercaseMsg.includes("tumhari age")) {
-    const age = Math.floor(Math.random() * (27 - 17 + 1)) + 17;
-    return age.toString();
-  }
-
-  // Location responses
-  if (lowercaseMsg.includes("kha se ho") || 
-      lowercaseMsg.includes("kha rhti ho") || 
-      lowercaseMsg.includes("where") && (lowercaseMsg.includes("from") || lowercaseMsg.includes("live")) || 
-      lowercaseMsg.includes("u from")) {
-    const cities = ["Mumbai", "Delhi", "Bangalore", "Pune", "Chennai", "Hyderabad", "Kolkata"];
-    const randomCity = cities[Math.floor(Math.random() * cities.length)];
-    context.location = randomCity;
-    return randomCity;
-  }
-
-  // Clothing responses
-  if (lowercaseMsg.includes("wearing") || 
-      lowercaseMsg.includes("pehna") || 
-      lowercaseMsg.includes("pehni") || 
-      lowercaseMsg.includes("dress")) {
-    if (!context.clothingAsked) {
-      context.clothingAsked = true;
-      return "3 clothes... guess karo kya pehna hai";
-    } else {
-      return "Haha try to guess";
-    }
-  }
-
-  // Study/Education responses
-  if (lowercaseMsg.includes("study") || 
-      lowercaseMsg.includes("padhai") || 
-      lowercaseMsg.includes("course") || 
-      lowercaseMsg.includes("college") || 
-      lowercaseMsg.includes("university")) {
-    const courses = [
-      "B.Tech Computer Science",
-      "BBA",
-      "B.Com",
-      "BA Psychology",
-      "BSc Mathematics",
-      "BA English Literature",
-      "BCA",
-      "BSc Physics",
-      "Hotel Management",
-      "Fashion Designing"
-    ];
-    if (!context.college) {
-      context.college = courses[Math.floor(Math.random() * courses.length)];
-    }
-    return context.college;
-  }
-
-  // Name sharing responses
-  if (lowercaseMsg.includes("i'm ") || lowercaseMsg.includes("im ") || lowercaseMsg.includes("my name")) {
-    const nameMatch = message.match(/(?:I'm|Im|i'm|im|my name is)\s+(\w+)/i);
-    if (nameMatch) {
-      context.name = nameMatch[1];
-      return `Hi ${nameMatch[1]}`;
-    }
-  }
-
-  // For longer messages
-  if (message.length > 50) {
-    const responses = [
-      "Hmm",
-      "Okay",
-      "I see",
-      "Right"
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  }
-
-  // Default responses
-  const defaultResponses = [
-    "Hmm",
-    "Ok",
-    "Acha",
-    "Haan",
-    "Tell me",
-    "Batao"
-  ];
-
-  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+  // Return a random greeting
+  return getRandomGreeting();
 };
 
-// Function to clear conversation context
-export const clearBotContext = (botId: string): void => {
-  conversationContext.delete(botId);
+// Function to clear bot response tracking
+export const clearBotResponses = (): void => {
+  respondedUsers.clear();
+  localStorage.removeItem('botRespondedUsers');
 };
 
 // Combine all bot users
