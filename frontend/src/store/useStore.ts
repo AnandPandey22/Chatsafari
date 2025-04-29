@@ -1,8 +1,9 @@
+
 import { create } from 'zustand';
 import { Socket as SocketType } from 'socket.io-client';
 import io from 'socket.io-client';
 import { User, Message, ChatRoom } from '../types';
-import { allBotUsers, generateBotResponse, updateBotUsersStatus } from '../utils/botUsers';
+import { allBotUsers, generateBotResponse, updateBotUsersStatus, hasUserReceivedResponse } from '../utils/botUsers';
 
 interface ChatStore {
   socket: typeof SocketType | null;
@@ -175,61 +176,64 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
 
           // If receiver is a bot and sender is not a bot, trigger bot response
           if (receiver.id.startsWith('bot-') && !sender.id.startsWith('bot-')) {
-            const { sendMessage } = get();
-            const botUser = receiver;
+            // Check if user has already received a response from this bot
+            if (!hasUserReceivedResponse(sender.id, receiver.id)) {
+              const { sendMessage } = get();
+              const botUser = receiver;
 
-            // Update bot's online status and show them as active
-            set(state => ({
-              activeUsers: state.activeUsers.map(user => 
-                user.id === botUser.id ? { ...user, isOnline: true } : user
-              )
-            }));
-
-            // Calculate reading time based on message length
-            const wordsPerMinute = 200; // Average reading speed
-            const wordCount = message.content.split(' ').length;
-            const readingTimeMs = (wordCount / wordsPerMinute) * 60 * 1000;
-            const minReadingTime = 1000; // Minimum 1 second to read
-            const actualReadingTime = Math.max(minReadingTime, Math.min(readingTimeMs, 5000));
-
-            // After reading time, show typing indicator
-            setTimeout(() => {
+              // Update bot's online status and show them as active
               set(state => ({
                 activeUsers: state.activeUsers.map(user => 
-                  user.id === botUser.id ? { ...user, isTyping: true } : user
+                  user.id === botUser.id ? { ...user, isOnline: true } : user
                 )
               }));
 
-              // Calculate typing time based on response length
-              const typingSpeed = 40; // words per minute
-              const responseLength = message.content.length + 20;
-              const typingTimeMs = (responseLength / (typingSpeed * 5)) * 60 * 1000;
-              const minTypingTime = 1500;
-              const actualTypingTime = Math.max(minTypingTime, Math.min(typingTimeMs, 4000));
+              // Calculate reading time based on message length
+              const wordsPerMinute = 200; // Average reading speed
+              const wordCount = message.content.split(' ').length;
+              const readingTimeMs = (wordCount / wordsPerMinute) * 60 * 1000;
+              const minReadingTime = 1000; // Minimum 1 second to read
+              const actualReadingTime = Math.max(minReadingTime, Math.min(readingTimeMs, 5000));
 
-              // After typing time, send response
+              // After reading time, show typing indicator
               setTimeout(() => {
                 set(state => ({
                   activeUsers: state.activeUsers.map(user => 
-                    user.id === botUser.id ? { ...user, isTyping: false } : user
+                    user.id === botUser.id ? { ...user, isTyping: true } : user
                   )
                 }));
 
-                const botResponse: Message = {
-                  id: crypto.randomUUID(),
-                  senderId: botUser.id,
-                  receiverId: sender.id,
-                  content: generateBotResponse(message.content, botUser.id),
-                  timestamp: Date.now(),
-                  type: 'text',
-                  seen: false,
-                  delivered: true,
-                  reactions: []
-                };
+                // Calculate typing time based on response length
+                const typingSpeed = 40; // words per minute
+                const responseLength = 20; // Fixed length for greeting
+                const typingTimeMs = (responseLength / (typingSpeed * 5)) * 60 * 1000;
+                const minTypingTime = 1500;
+                const actualTypingTime = Math.max(minTypingTime, Math.min(typingTimeMs, 4000));
 
-                sendMessage(botResponse);
-              }, actualTypingTime);
-            }, actualReadingTime);
+                // After typing time, send response
+                setTimeout(() => {
+                  set(state => ({
+                    activeUsers: state.activeUsers.map(user => 
+                      user.id === botUser.id ? { ...user, isTyping: false } : user
+                    )
+                  }));
+
+                  const botResponse: Message = {
+                    id: crypto.randomUUID(),
+                    senderId: botUser.id,
+                    receiverId: sender.id,
+                    content: generateBotResponse(`${sender.id}|${message.content}`, botUser.id),
+                    timestamp: Date.now(),
+                    type: 'text',
+                    seen: false,
+                    delivered: true,
+                    reactions: []
+                  };
+
+                  sendMessage(botResponse);
+                }, actualTypingTime);
+              }, actualReadingTime);
+            }
           }
         }
       } else {
@@ -247,61 +251,64 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
           const receiver = updatedRooms[roomIndex].participants.find(p => p.id === message.receiverId);
           const sender = updatedRooms[roomIndex].participants.find(p => p.id === message.senderId);
           if (receiver && sender && receiver.id.startsWith('bot-') && !sender.id.startsWith('bot-')) {
-            const botUser = receiver;
+            // Check if user has already received a response from this bot
+            if (!hasUserReceivedResponse(sender.id, receiver.id)) {
+              const botUser = receiver;
 
-            // Update bot's online status and show them as active
-            set(state => ({
-              activeUsers: state.activeUsers.map(user => 
-                user.id === botUser.id ? { ...user, isOnline: true } : user
-              )
-            }));
-
-            // Calculate reading time based on message length
-            const wordsPerMinute = 200; // Average reading speed
-            const wordCount = message.content.split(' ').length;
-            const readingTimeMs = (wordCount / wordsPerMinute) * 60 * 1000;
-            const minReadingTime = 1000; // Minimum 1 second to read
-            const actualReadingTime = Math.max(minReadingTime, Math.min(readingTimeMs, 5000));
-
-            // After reading time, show typing indicator
-            setTimeout(() => {
+              // Update bot's online status and show them as active
               set(state => ({
                 activeUsers: state.activeUsers.map(user => 
-                  user.id === botUser.id ? { ...user, isTyping: true } : user
+                  user.id === botUser.id ? { ...user, isOnline: true } : user
                 )
               }));
 
-              // Calculate typing time based on response length
-              const typingSpeed = 40; // words per minute
-              const responseLength = message.content.length + 20;
-              const typingTimeMs = (responseLength / (typingSpeed * 5)) * 60 * 1000;
-              const minTypingTime = 1500;
-              const actualTypingTime = Math.max(minTypingTime, Math.min(typingTimeMs, 4000));
+              // Calculate reading time based on message length
+              const wordsPerMinute = 200; // Average reading speed
+              const wordCount = message.content.split(' ').length;
+              const readingTimeMs = (wordCount / wordsPerMinute) * 60 * 1000;
+              const minReadingTime = 1000; // Minimum 1 second to read
+              const actualReadingTime = Math.max(minReadingTime, Math.min(readingTimeMs, 5000));
 
-              // After typing time, send response
+              // After reading time, show typing indicator
               setTimeout(() => {
                 set(state => ({
                   activeUsers: state.activeUsers.map(user => 
-                    user.id === botUser.id ? { ...user, isTyping: false } : user
+                    user.id === botUser.id ? { ...user, isTyping: true } : user
                   )
                 }));
 
-                const botResponse: Message = {
-                  id: crypto.randomUUID(),
-                  senderId: botUser.id,
-                  receiverId: sender.id,
-                  content: generateBotResponse(message.content, botUser.id),
-                  timestamp: Date.now(),
-                  type: 'text',
-                  seen: false,
-                  delivered: true,
-                  reactions: []
-                };
+                // Calculate typing time based on response length
+                const typingSpeed = 40; // words per minute
+                const responseLength = 20; // Fixed length for greeting
+                const typingTimeMs = (responseLength / (typingSpeed * 5)) * 60 * 1000;
+                const minTypingTime = 1500;
+                const actualTypingTime = Math.max(minTypingTime, Math.min(typingTimeMs, 4000));
 
-                const { sendMessage } = get();
-                sendMessage(botResponse);
-              }, actualTypingTime);
-            }, actualReadingTime);
+                // After typing time, send response
+                setTimeout(() => {
+                  set(state => ({
+                    activeUsers: state.activeUsers.map(user => 
+                      user.id === botUser.id ? { ...user, isTyping: false } : user
+                    )
+                  }));
+
+                  const botResponse: Message = {
+                    id: crypto.randomUUID(),
+                    senderId: botUser.id,
+                    receiverId: sender.id,
+                    content: generateBotResponse(`${sender.id}|${message.content}`, botUser.id),
+                    timestamp: Date.now(),
+                    type: 'text',
+                    seen: false,
+                    delivered: true,
+                    reactions: []
+                  };
+
+                  const { sendMessage } = get();
+                  sendMessage(botResponse);
+                }, actualTypingTime);
+              }, actualReadingTime);
+            }
           }
         }
       }
@@ -640,79 +647,91 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
       // Check if recipient is a bot
       const recipientId = message.receiverId;
       if (recipientId.startsWith('bot-')) {
+        // Check if user has already received a response from this bot
+        if (hasUserReceivedResponse(message.senderId, recipientId)) {
+          // User has already received a response, do nothing
+          return;
+        }
+
         // Handle bot messages locally without server involvement
         const botUser = allBotUsers.find(bot => bot.id === recipientId);
         if (botUser) {
-          // Calculate reading time based on message length and complexity
-          const wordsPerMinute = 200; // Average reading speed
-          const wordCount = message.content.split(' ').length;
-          const readingTimeMs = (wordCount / wordsPerMinute) * 60 * 1000;
-          const minReadingTime = 1000; // Minimum 1 second to read
-          const actualReadingTime = Math.max(minReadingTime, Math.min(readingTimeMs, 5000)); // Cap at 5 seconds
+          // Get bot response
+          const botResponseContent = generateBotResponse(`${message.senderId}|${message.content}`, recipientId);
+          
+          // Only proceed with typing animation and response if we have content
+          if (botResponseContent) {
+            // Calculate reading time based on message length and complexity
+            const wordsPerMinute = 200; // Average reading speed
+            const wordCount = message.content.split(' ').length;
+            const readingTimeMs = (wordCount / wordsPerMinute) * 60 * 1000;
+            const minReadingTime = 1000; // Minimum 1 second to read
+            const actualReadingTime = Math.max(minReadingTime, Math.min(readingTimeMs, 5000)); // Cap at 5 seconds
 
-          // Calculate typing speed (average 40 WPM)
-          const typingSpeed = 40; // words per minute
-          const responseLength = (message.content.length + 20); // Estimate response length
-          const typingTimeMs = (responseLength / (typingSpeed * 5)) * 60 * 1000; // 5 chars per word
-          const minTypingTime = 1500; // Minimum 1.5 seconds to type
-          const actualTypingTime = Math.max(minTypingTime, Math.min(typingTimeMs, 4000)); // Cap at 4 seconds
+            // Calculate typing speed (average 40 WPM)
+            const typingSpeed = 40; // words per minute
+            const responseLength = 20; // Fixed length for greeting
+            const typingTimeMs = (responseLength / (typingSpeed * 5)) * 60 * 1000; // 5 chars per word
+            const minTypingTime = 1500; // Minimum 1.5 seconds to type
+            const actualTypingTime = Math.max(minTypingTime, Math.min(typingTimeMs, 4000));
 
-          // First, bot reads the message (no typing indicator)
-          setTimeout(() => {
-            // After reading, show typing indicator
-            set(state => ({
-              activeUsers: state.activeUsers.map(user => 
-                user.id === recipientId ? { ...user, isTyping: true } : user
-              )
-            }));
-
-            // Then bot types and sends response
+            // First, bot reads the message (no typing indicator)
             setTimeout(() => {
-              // Stop typing indicator
+              // After reading, show typing indicator
               set(state => ({
                 activeUsers: state.activeUsers.map(user => 
-                  user.id === recipientId ? { ...user, isTyping: false } : user
+                  user.id === recipientId ? { ...user, isTyping: true } : user
                 )
               }));
 
-              // Create and send bot response
-              const botResponse: Message = {
-                id: crypto.randomUUID(),
-                senderId: recipientId,
-                receiverId: message.senderId,
-                content: generateBotResponse(message.content, recipientId),
-                timestamp: Date.now(),
-                type: 'text',
-                seen: false,
-                delivered: true,
-                reactions: []
-              };
+              // Then bot types and sends response
+              setTimeout(() => {
+                // Stop typing indicator
+                set(state => ({
+                  activeUsers: state.activeUsers.map(user => 
+                    user.id === recipientId ? { ...user, isTyping: false } : user
+                  )
+                }));
 
-              // Add bot response to local state and chat room
-              get().addMessage(botResponse);
+                // Create and send bot response
+                const botResponse: Message = {
+                  id: crypto.randomUUID(),
+                  senderId: recipientId,
+                  receiverId: message.senderId,
+                  content: botResponseContent,
+                  timestamp: Date.now(),
+                  type: 'text',
+                  seen: false,
+                  delivered: true,
+                  reactions: []
+                };
 
-              // Store in localStorage
-              const roomId = [message.senderId, recipientId].sort().join('-');
-              const chatRooms = JSON.parse(localStorage.getItem('chatRooms') || '[]');
-              const roomIndex = chatRooms.findIndex((room: ChatRoom) => room.id === roomId);
-              
-              if (roomIndex !== -1) {
-                chatRooms[roomIndex].messages.push(botResponse);
-                chatRooms[roomIndex].lastMessage = botResponse;
-              } else {
-                const currentUser = get().currentUser;
-                if (currentUser) {
-                  chatRooms.push({
-                    id: roomId,
-                    participants: [currentUser, botUser],
-                    messages: [message, botResponse],
-                    lastMessage: botResponse
-                  });
+                // Add bot response to local state and chat room
+                get().addMessage(botResponse);
+
+                // Store in localStorage
+                const roomId = [message.senderId, recipientId].sort().join('-');
+                const chatRooms = JSON.parse(localStorage.getItem('chatRooms') || '[]');
+                const roomIndex = chatRooms.findIndex((room: ChatRoom) => room.id === roomId);
+                
+                if (roomIndex !== -1) {
+                  chatRooms[roomIndex].messages.push(botResponse);
+                  chatRooms[roomIndex].lastMessage = botResponse;
+                } else {
+                  const currentUser = get().currentUser;
+                  if (currentUser) {
+                    chatRooms.push({
+                      id: roomId,
+                      participants: [currentUser, botUser],
+                      messages: [message, botResponse],
+                      lastMessage: botResponse
+                    });
+                  }
                 }
-              }
-              localStorage.setItem('chatRooms', JSON.stringify(chatRooms));
-            }, actualTypingTime);
-          }, actualReadingTime);
+                localStorage.setItem('chatRooms', JSON.stringify(chatRooms));
+              }, actualTypingTime);
+            }, actualReadingTime);
+          }
         }
       } else {
         // For non-bot recipients, send message to server
