@@ -42,7 +42,7 @@ Growing up, Anand observed how social platforms became more intrusive and less a
 ## Key Features of ChatSafari
 
 - **No registration required** – Just pick a name, age, and gender, and you’re in.
-- **Anonymous global chat** – Talk to anyone, anytime, without giving away personal info.
+- **Anonymous global chat** – [Talk to strangers](https://chatsafari.com/blog/talk-to-strangers-online), anytime, without giving away personal info.
 - **One-on-one messaging (DMs)** – Connect deeper with individual users.
 - **Real-time active users list** – See who's online and start chatting instantly.
 - **Fun features** like message reactions, media sharing, typing indicators, and gender-based avatars.
