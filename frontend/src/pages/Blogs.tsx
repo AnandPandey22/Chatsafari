@@ -173,7 +173,7 @@ Join the growing community of Chatsafari users today and experience the future o
   },
   {
     id: 3,
-    title: "Talk to Strangers On Chatsafari",
+    title: "Talk to Strangers",
     slug: "talk-to-strangers-online",
     thumbnail: "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=500&q=80",
     excerpt: "Talk to strangers online free Chat Room on chatsafari without registration, USA Chatroooms, Free Online chat, Chat with strangers",
