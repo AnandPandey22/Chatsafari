@@ -271,7 +271,7 @@ I can say you will found a beautiful Indian girl as your best friend in Indian C
   {
     id: 7,
     title: "USA Chat Rooms",
-    slug: "USA-Chat-rooms-free-online",
+    slug: "USA-Chat-rooms",
     thumbnail: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&q=80",
     excerpt: "USA Free Online chat rooms talk to starnger girls and the citizens of USA and SEXY cute girls On chatsafari",
     date: "2024-03-08",
