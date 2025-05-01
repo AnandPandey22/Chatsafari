@@ -200,7 +200,7 @@ Sometimes people wants to share something but they do not want to share it with 
   {
     id: 4,
     title: "How to Make New Friends Online Easily",
-    slug: "how-to-make-new-friends-online-girls",
+    slug: "how-to-make-new-friends-online-chat",
     thumbnail: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&q=80",
     excerpt: "How to make online friends on chatsafari.com easy tips and simple guide ",
     date: "2024-03-15",
@@ -224,7 +224,7 @@ Making new friends online is not a very hard task because Chatsafari.com founded
   {
     id: 5,
     title: "Free Online Chat Rooms",
-    slug: "Online-chat-rooms",
+    slug: "online-chat-rooms",
     thumbnail: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&q=80",
     excerpt: "Talk to strangers on free online chat rooms like indian chat rooms, USA chat rooms, Korean Chat rooms",
     date: "2024-03-12",
