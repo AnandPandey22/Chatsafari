@@ -253,7 +253,7 @@ So don't go anywhere Join [Chatsafari.com](https://chatsafari.com) Now!!
   {
     id: 6,
     title: "Indian Chat Room",
-    slug: "Indian-chat-rooms",
+    slug: "Indian-chat-room",
     thumbnail: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=500&q=80",
     excerpt: "Talk to hot and cute girls on Indian Chat Room free without registration",
     date: "2024-03-10",
