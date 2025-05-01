@@ -42,7 +42,7 @@ Growing up, Anand observed how social platforms became more intrusive and less a
 ## Key Features of ChatSafari
 
 - **No registration required** – Just pick a name, age, and gender, and you’re in.
-- **Anonymous global chat** – [Talk to strangers](https://chatsafari.com/blog/talk-to-strangers-online), anytime, without giving away personal info.
+- **Anonymous global chat** – [Talk to strangers](https://chatsafari.com/blog/talk-to-strangers-girls), anytime, without giving away personal info.
 - **One-on-one messaging (DMs)** – Connect deeper with individual users.
 - **Real-time active users list** – See who's online and start chatting instantly.
 - **Fun features** like message reactions, media sharing, typing indicators, and gender-based avatars.
@@ -200,7 +200,7 @@ Sometimes people wants to share something but they do not want to share it with 
   {
     id: 4,
     title: "How to Make New Friends Online Easily",
-    slug: "how-to-make-new-friends-online-easy-way",
+    slug: "how-to-make-new-friends-online",
     thumbnail: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&q=80",
     excerpt: "How to make online friends on chatsafari.com easy tips and simple guide ",
     date: "2024-03-15",
@@ -224,7 +224,7 @@ Making new friends online is not a very hard task because Chatsafari.com founded
   {
     id: 5,
     title: "Free Online Chat Rooms",
-    slug: "Online-chat-rooms",
+    slug: "Online-chat-rooms-Chatsafari",
     thumbnail: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&q=80",
     excerpt: "Talk to strangers on free online chat rooms like indian chat rooms, USA chat rooms, Korean Chat rooms",
     date: "2024-03-12",
@@ -253,7 +253,7 @@ So don't go anywhere Join [Chatsafari.com](https://chatsafari.com) Now!!
   {
     id: 6,
     title: "Indian Chat Room",
-    slug: "Indian-chat-room",
+    slug: "Indian-chat-rooms",
     thumbnail: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=500&q=80",
     excerpt: "Talk to hot and cute girls on Indian Chat Room free without registration",
     date: "2024-03-10",
@@ -271,7 +271,7 @@ I can say you will found a beautiful Indian girl as your best friend in Indian C
   {
     id: 7,
     title: "USA Chat Rooms",
-    slug: "USA-Chat-rooms-free",
+    slug: "USA-Chat-rooms-free-online",
     thumbnail: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=500&q=80",
     excerpt: "USA Free Online chat rooms talk to starnger girls and the citizens of USA and SEXY cute girls On chatsafari",
     date: "2024-03-08",
