@@ -7,13 +7,6 @@ import { Helmet } from 'react-helmet-async';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-// Define the adsbygoogle type
-declare global {
-  interface Window {
-    adsbygoogle: any[];
-  }
-}
-
 // Define the Blog interface here to match the structure in Blogs.tsx
 interface Blog {
   id: number;
@@ -43,11 +36,6 @@ const BlogPost: React.FC = () => {
   const [post, setPost] = useState<BlogPostType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Handle scrolling to top when clicking a blog link
-  const handleBlogClick = () => {
-    window.scrollTo(0, 0);
-  };
-
   useEffect(() => {
     setIsLoading(true);
     const foundPost = blogs.find(p => p.slug === slug);
@@ -65,9 +53,9 @@ const BlogPost: React.FC = () => {
         tags: [] // Default empty tags array
       };
       setPost(convertedPost);
-      
-      // Scroll to the top when post changes
-      window.scrollTo(0, 0);
+
+     // Scroll to the top when post changes
+      window.scrollTo(0, 0); 
     } else {
       setPost(null);
     }
@@ -81,7 +69,7 @@ const BlogPost: React.FC = () => {
     return shuffled.slice(0, 3);
   };
 
-  if (isLoading) {
+ if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -91,7 +79,7 @@ const BlogPost: React.FC = () => {
       </div>
     );
   }
-
+  
   if (!post) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -143,26 +131,23 @@ const BlogPost: React.FC = () => {
     "inLanguage": "en-US"
   };
 
-  // Ensure we have a valid meta description
-  const metaDescription = post.excerpt ? post.excerpt.trim() : `Read about ${post.title} on ChatSafari - the platform for anonymous chat without registration.`;
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* @ts-ignore - TS is having issues with Helmet from react-helmet-async */}
       <Helmet>
         <title>{post.title} | ChatSafari Blog</title>
-        <meta name="description" content={metaDescription} />
+        <meta name="description" content={post.excerpt} />
         <link rel="canonical" href={`https://chatsafari.com/blog/${post.slug}`} />
         <script type="application/ld+json">
           {JSON.stringify(jsonLd)}
         </script>
         <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={metaDescription} />
+        <meta property="og:description" content={post.excerpt} />
         <meta property="og:image" content={post.imageUrl} />
         <meta property="og:url" content={`https://chatsafari.com/blog/${post.slug}`} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={post.title} />
-        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:description" content={post.excerpt} />
         <meta name="twitter:image" content={post.imageUrl} />
       </Helmet>
 
@@ -176,7 +161,7 @@ const BlogPost: React.FC = () => {
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
-            <span className="text-2xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
+             <span className="text-2xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
               ChatSafari
             </span>
             <div className="w-20"></div>
@@ -185,188 +170,138 @@ const BlogPost: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Article Content */}
-          <div className="flex-1">
-            <article className="bg-white rounded-xl shadow-md overflow-hidden">
-              {/* Thumbnail */}
-              <div className="relative h-64 sm:h-96">
-                <img
-                  src={post.imageUrl}
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <article className="bg-white rounded-xl shadow-md overflow-hidden">
+          {/* Thumbnail */}
+          <div className="relative h-64 sm:h-96">
+            <img
+              src={post.imageUrl}
+              alt={post.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
 
+          {/* Content */}
+         <div className="p-6 sm:p-8 md:p-10">
+            <div className="text-sm text-gray-500 mb-4">{post.date}</div>
+           
+            {/* Start Chatting Button */}
+            <div className="mb-6 flex justify-center">
+              <a 
+                href="https://chatsafari.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center bg-violet-600 text-white hover:bg-violet-700 font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+              >
+                Start Chatting 
+              </a>
+            </div>
+           
+            <h1 className="text-3xl sm:text-4xl font-bold text-violet-700 mb-6">{post.title}</h1>
+            
+            <div className="prose prose-violet prose-lg max-w-none custom-blog-content blog-content-no-title">
+              {post.content ? (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {post.content}
+                </ReactMarkdown>
+              ) : (
+                <p>{post.excerpt}</p>
+              )}
+            </div>
+            
+            {/* Start Chatting Now Section */}
+            <div className="mt-12 relative overflow-hidden rounded-xl">
+              {/* Background with gradient and pattern */}
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500 via-violet-600 to-indigo-700 opacity-90"></div>
+              <div className="absolute inset-0" style={{ 
+                backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+                backgroundSize: '30px 30px'
+              }}></div>
+              
               {/* Content */}
-              <div className="p-6 sm:p-8 md:p-10">
-                <div className="text-sm text-gray-500 mb-4">{post.date}</div>
+              <div className="relative p-8 sm:p-10">
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-1 mb-4">
+                    <Sparkles className="h-4 w-4 text-yellow-300 mr-2" />
+                    <span className="text-white text-sm font-medium">Join Our Growing Community</span>
+                  </div>
+                  <h2 className="text-3xl font-bold text-white mb-3">Experience ChatSafari Today</h2>
+                  <p className="text-violet-100 max-w-2xl mx-auto text-lg">
+                    Connect with thousands of active users from around the world in a secure, friendly environment.
+                  </p>
+                </div>
                 
-                {/* Start Chatting Button */}
-                <div className="mb-6 flex justify-center">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <div className="flex flex-col items-center text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl">
+                    <div className="bg-white/20 p-3 rounded-full mb-3">
+                      <Users className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-white text-xl">10,000+</h3>
+                    <p className="text-violet-100">Active Users</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl">
+                    <div className="bg-white/20 p-3 rounded-full mb-3">
+                      <MessageCircle className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-white text-xl">1M+</h3>
+                    <p className="text-violet-100">Messages Daily</p>
+                  </div>
+                  
+                  <div className="flex flex-col items-center text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl">
+                    <div className="bg-white/20 p-3 rounded-full mb-3">
+                      <Globe className="h-6 w-6 text-white" />
+                    </div>
+                    <h3 className="font-bold text-white text-xl">150+</h3>
+                    <p className="text-violet-100">Countries</p>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col md:flex-row items-center justify-center gap-4">
                   <a 
                     href="https://chatsafari.com" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center bg-violet-600 text-white hover:bg-violet-700 font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105"
+                    className="inline-flex items-center justify-center bg-white text-violet-700 hover:bg-violet-50 font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 w-full md:w-auto"
                   >
-                    Start Chatting 
+                    Start Chatting
                   </a>
-                </div>
-                
-                {/* First Ad Unit - Above H1 */}
-                <div className="mb-6">
-                  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781"
-                    crossOrigin="anonymous"></script>
-                  <ins className="adsbygoogle"
-                    style={{ display: 'block' }}
-                    data-ad-client="ca-pub-9696449443766781"
-                    data-ad-slot="7423185675"
-                    data-ad-format="auto"
-                    data-full-width-responsive="true"></ins>
-                  <script>
-                    {(() => {
-                      (window.adsbygoogle = window.adsbygoogle || []).push({});
-                      return null;
-                    })()}
-                  </script>
-                </div>
-                
-                <h1 className="text-3xl sm:text-4xl font-bold text-violet-700 mb-6">{post.title}</h1>
-                
-                <div className="prose prose-violet prose-lg max-w-none custom-blog-content blog-content-no-title">
-                  {post.content ? (
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {post.content}
-                    </ReactMarkdown>
-                  ) : (
-                    <p>{post.excerpt}</p>
-                  )}
-                </div>
-                
-                {/* Start Chatting Now Section */}
-                <div className="mt-12 relative overflow-hidden rounded-xl w-full">
-                  {/* Background with gradient and pattern */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-violet-500 via-violet-600 to-indigo-700 opacity-90"></div>
-                  <div className="absolute inset-0" style={{ 
-                    backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
-                    backgroundSize: '30px 30px'
-                  }}></div>
-                  
-                  {/* Content */}
-                  <div className="relative p-8 sm:p-10">
-                    <div className="text-center mb-8">
-                      <div className="inline-flex items-center justify-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-1 mb-4">
-                        <Sparkles className="h-4 w-4 text-yellow-300 mr-2" />
-                        <span className="text-white text-sm font-medium">Join Our Growing Community</span>
-                      </div>
-                      <h2 className="text-3xl font-bold text-white mb-3">Experience ChatSafari Today</h2>
-                      <p className="text-violet-100 max-w-2xl mx-auto text-lg">
-                        Connect with thousands of active users from around the world in a secure, friendly environment.
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                      <div className="flex flex-col items-center text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl">
-                        <div className="bg-white/20 p-3 rounded-full mb-3">
-                          <Users className="h-6 w-6 text-white" />
-                        </div>
-                        <h3 className="font-bold text-white text-xl">10,000+</h3>
-                        <p className="text-violet-100">Active Users</p>
-                      </div>
-                      
-                      <div className="flex flex-col items-center text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl">
-                        <div className="bg-white/20 p-3 rounded-full mb-3">
-                          <MessageCircle className="h-6 w-6 text-white" />
-                        </div>
-                        <h3 className="font-bold text-white text-xl">1M+</h3>
-                        <p className="text-violet-100">Messages Daily</p>
-                      </div>
-                      
-                      <div className="flex flex-col items-center text-center p-4 bg-white/10 backdrop-blur-sm rounded-xl">
-                        <div className="bg-white/20 p-3 rounded-full mb-3">
-                          <Globe className="h-6 w-6 text-white" />
-                        </div>
-                        <h3 className="font-bold text-white text-xl">150+</h3>
-                        <p className="text-violet-100">Countries</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-                      <a 
-                        href="https://chatsafari.com" 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center bg-white text-violet-700 hover:bg-violet-50 font-bold py-3 px-8 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 w-full md:w-auto"
-                      >
-                        Start Chatting
-                      </a>
-                      <div className="flex items-center text-sm text-violet-100">
-                        <Shield className="h-4 w-4 mr-1 text-yellow-300" />
-                        <span>End-to-end encrypted</span>
-                      </div>
-                    </div>
+                  <div className="flex items-center text-sm text-violet-100">
+                    <Shield className="h-4 w-4 mr-1 text-yellow-300" />
+                    <span>End-to-end encrypted</span>
                   </div>
                 </div>
               </div>
-            </article>
-
-            {/* Related Posts */}
-            <div className="mt-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {relatedPosts.map((post) => (
-                  <article key={post.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                    <div className="relative h-48">
-                      <img
-                        src={post.thumbnail}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <div className="text-sm text-gray-500 mb-2">{post.date}</div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{post.title}</h3>
-                      <p className="text-gray-600 mb-4">{post.excerpt}</p>
-                      <Link
-                        to={`/blog/${post.slug}`}
-                        onClick={handleBlogClick}
-                        className="text-violet-600 hover:text-violet-700 font-medium"
-                      >
-                        Read more →
-                      </Link>
-                    </div>
-                  </article>
-                ))}
-              </div>
             </div>
           </div>
+        </article>
 
-          {/* Right Side Ad */}
-          <div className="lg:w-80 lg:sticky lg:top-24 lg:self-start">
-            <div className="bg-white rounded-xl shadow-md p-4">
-              <div className="min-h-[600px]">
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781"
-                  crossOrigin="anonymous"></script>
-                <ins className="adsbygoogle"
-                  style={{ 
-                    display: 'block',
-                    minHeight: '600px',
-                    width: '100%'
-                  }}
-                  data-ad-client="ca-pub-9696449443766781"
-                  data-ad-slot="1867080000"
-                  data-ad-format="vertical"
-                  data-full-width-responsive="true"></ins>
-                <script>
-                  {(() => {
-                    (window.adsbygoogle = window.adsbygoogle || []).push({});
-                    return null;
-                  })()}
-                </script>
-              </div>
-            </div>
+        {/* Related Posts */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {relatedPosts.map((post) => (
+              <article key={post.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <div className="relative h-48">
+                  <img
+                    src={post.thumbnail}
+                    alt={post.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <div className="text-sm text-gray-500 mb-2">{post.date}</div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{post.title}</h3>
+                  <p className="text-gray-600 mb-4">{post.excerpt}</p>
+                  <Link
+                    to={`/blog/${post.slug}`}
+                    className="text-violet-600 hover:text-violet-700 font-medium"
+                  >
+                    Read more →
+                  </Link>
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       </main>
