@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Users, MessageCircle, Globe, Shield, Sparkles } from 'lucide-react';
 import { blogs } from './Blogs';
@@ -43,31 +43,6 @@ const BlogPost: React.FC = () => {
   const [post, setPost] = useState<BlogPostType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [adsLoaded, setAdsLoaded] = useState(false);
-  const [adLoadAttempts, setAdLoadAttempts] = useState(0);
-  const MAX_LOAD_ATTEMPTS = 3;
-
-  // Function to load ads
-  const loadAds = useCallback(() => {
-    if (adLoadAttempts >= MAX_LOAD_ATTEMPTS) return;
-
-    try {
-      // Push ads to adsbygoogle array
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-      
-      // Increment attempts
-      setAdLoadAttempts(prev => prev + 1);
-      
-      // Set ads as loaded
-      setAdsLoaded(true);
-    } catch (error) {
-      console.error('Error loading ads:', error);
-      // Retry after a delay if we haven't exceeded max attempts
-      if (adLoadAttempts < MAX_LOAD_ATTEMPTS) {
-        setTimeout(loadAds, 1000);
-      }
-    }
-  }, [adLoadAttempts]);
 
   // Handle scrolling to top when clicking a blog link
   const handleBlogClick = () => {
@@ -82,13 +57,13 @@ const BlogPost: React.FC = () => {
       const convertedPost: BlogPostType = {
         id: foundPost.id.toString(),
         title: foundPost.title,
-        content: foundPost.content || '',
-        author: 'ChatSafari Team',
+        content: foundPost.content || '', // Provide default empty string if content is undefined
+        author: 'ChatSafari Team', // Default author
         date: foundPost.date,
         imageUrl: foundPost.thumbnail,
         slug: foundPost.slug,
         excerpt: foundPost.excerpt,
-        tags: []
+        tags: [] // Default empty tags array
       };
       setPost(convertedPost);
       
@@ -96,16 +71,19 @@ const BlogPost: React.FC = () => {
       window.scrollTo(0, 0);
 
       // Load ads after content is loaded
-      const loadAdsTimeout = setTimeout(() => {
-        loadAds();
-      }, 1000);
-
-      return () => clearTimeout(loadAdsTimeout);
+      setTimeout(() => {
+        setAdsLoaded(true);
+        // Push ads after a short delay to ensure proper loading
+        setTimeout(() => {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        }, 100);
+      }, 500);
     } else {
       setPost(null);
     }
     setIsLoading(false);
-  }, [slug, loadAds]);
+  }, [slug]);
 
   // Get 3 random related posts excluding current post
   const getRelatedPosts = () => {
