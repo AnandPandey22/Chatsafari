@@ -200,7 +200,7 @@ Sometimes people wants to share something but they do not want to share it with 
   {
     id: 4,
     title: "How to Make New Friends Online Easily",
-    slug: "how-to-make-new-friends-online-chat",
+    slug: "how-to-make-new-friends-online-girls",
     thumbnail: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&q=80",
     excerpt: "How to make online friends on chatsafari.com easy tips and simple guide ",
     date: "2024-03-15",
