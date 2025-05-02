@@ -224,7 +224,7 @@ Making new friends online is not a very hard task because Chatsafari.com founded
   {
     id: 5,
     title: "Free Online Chat Rooms",
-    slug: "online-chat-rooms",
+    slug: "online-chat-rooms-Free",
     thumbnail: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=500&q=80",
     excerpt: "Talk to strangers on free online chat rooms like indian chat rooms, USA chat rooms, Korean Chat rooms",
     date: "2024-03-12",
