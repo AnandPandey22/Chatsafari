@@ -305,7 +305,7 @@ const Login: React.FC = () => {
               </div>
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
                 <p className="text-gray-600 text-lg leading-relaxed">
-                  Anand Pandey is the Founder of Chatsafari and he launched Chatsafari.com on 14th March 2025. After so many days and too many updates the Chatsafari is Successfully launched. Chatsafari was the First Dream of Anand Pandey which he wanted to accomplish, now since Chatsafari has been launched he wants people to see his work and try Chatsafari for once and give some feedback about the services of chatsafari and if they find some bug they should contact Us so that we can resolve it immediately.
+                  Arthur is the Founder of Chatsafari and he launched Chatsafari.com on 14th March 2025. After so many days and too many updates the Chatsafari is Successfully launched. Chatsafari was the First Dream of Arthur which he wanted to accomplish, now since Chatsafari has been launched he wants people to see his work and try Chatsafari for once and give some feedback about the services of chatsafari and if they find some bug they should contact Us so that we can resolve it immediately.
                   </p>
               </div>
               <div className="bg-gray-50 rounded-lg p-6 hover:bg-violet-50 transition-colors">
