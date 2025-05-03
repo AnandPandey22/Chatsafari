@@ -11,22 +11,13 @@ const Dashboard: React.FC = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [adKey, setAdKey] = useState(0);
+  const hasOpenedFirstChat = useRef(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
 
-// Initialize ads when selectedUser changes
-  useEffect(() => {
-    // Small delay to ensure DOM is updated
-    setTimeout(() => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading ads:', error);
-      }
-    }, 100);
-  }, [selectedUser]);
+
   
   // Restore session on mount
   useEffect(() => {
@@ -116,32 +107,6 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedUser, setSelectedUser]);
 
- // Add useEffect for loading ads after login
-  useEffect(() => {
-    if (currentUser) {
-      // Load AdSense script if not already loaded
-      if (!window.adsbygoogle) {
-        window.adsbygoogle = [];
-        const script = document.createElement('script');
-        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
-        script.async = true;
-        script.crossOrigin = 'anonymous';
-        document.head.appendChild(script);
-      }
-
-      // Load ads after a short delay to ensure script is loaded
-      const timer = setTimeout(() => {
-        try {
-          window.adsbygoogle.push({});
-        } catch (err) {
-          console.error('Error loading ads:', err);
-        }
-      }, 1000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [currentUser]);
-
   const handleLogoutClick = () => {
     setShowLogoutConfirm(true);
   };
@@ -168,57 +133,74 @@ const Dashboard: React.FC = () => {
   // Calculate total notifications
   const totalNotifications = Object.values(notifications).reduce((sum, count) => sum + count, 0);
 
- // Initialize bottom ad when selectedUser changes
+  // Load AdSense script
   useEffect(() => {
-    const loadBottomAd = () => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({
-          google_ad_client: "ca-pub-9696449443766781",
-          enable_page_level_ads: true,
-          onclick: function(ads: { url: string }) {
-            const newWindow = window.open(ads.url, '_blank');
-            if (newWindow) {
-              newWindow.focus();
-            }
-            return false;
-          }
-        });
-      } catch (error) {
-        console.error('Error loading bottom ad:', error);
-      }
-    };
-
-    // Initial load
-    loadBottomAd();
-
-    // Reload when user changes
-    if (selectedUser) {
-      setTimeout(loadBottomAd, 1000);
+    if (!window.adsbygoogle) {
+      window.adsbygoogle = [];
+      const script = document.createElement('script');
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
     }
-  }, [selectedUser]);
-
-// Initialize sidebar ad once on mount
-  useEffect(() => {
-    const initializeAd = () => {
-      try {
-        // @ts-ignore
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (error) {
-        console.error('Error loading sidebar ad:', error);
-      }
-    };
-
-    // Initial load
-    initializeAd();
-
-    // Retry after a short delay to ensure DOM is ready
-    const retryTimer = setTimeout(initializeAd, 1000);
-
-    // Cleanup
-    return () => clearTimeout(retryTimer);
   }, []);
-  
+
+  // Initialize ads once when user logs in
+  useEffect(() => {
+    if (currentUser) {
+      const timer = setTimeout(() => {
+        try {
+          // Initialize both ads
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (err) {
+          console.error('Error initializing ads:', err);
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser]);
+
+  // Handle first chat window open in mobile
+  useEffect(() => {
+    if (selectedUser && isMobile && !hasOpenedFirstChat.current) {
+      hasOpenedFirstChat.current = true;
+      setAdKey(prev => prev + 1);
+      
+      // Initialize the mobile ad
+      const timer = setTimeout(() => {
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+        } catch (err) {
+          console.error('Error initializing mobile ad:', err);
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedUser, isMobile]);
+
+  // Handle mobile ad visibility
+  useEffect(() => {
+    if (selectedUser && isMobile) {
+      const refreshMobileAd = () => {
+        const adElement = document.querySelector('.adsbygoogle');
+        if (adElement) {
+          try {
+            // Force ad refresh
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (err) {
+            console.error('Error refreshing mobile ad:', err);
+          }
+        }
+      };
+
+      // Refresh ad immediately and after a short delay to ensure visibility
+      refreshMobileAd();
+      const timer = setTimeout(refreshMobileAd, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedUser, isMobile]);
+
   // Handle ad clicks globally
   useEffect(() => {
     const handleAdClick = (event: MouseEvent) => {
@@ -415,9 +397,9 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
-         {/* Bottom Ad Space - Always visible in mobile */}
+          {/* Bottom Ad Space - Always visible in mobile */}
           <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
-            <div className="h-full w-full">
+            <div className="h-full w-full" key={adKey}>
               <ins 
                 className="adsbygoogle"
                 style={{ display: 'block', height: '100%', width: '100%' }}
@@ -426,7 +408,6 @@ const Dashboard: React.FC = () => {
                 data-ad-format="auto"
                 data-full-width-responsive="true"
                 data-ad-targeting="target=_blank"
-                key={`bottom-${selectedUser?.id || 'default'}`}
               ></ins>
             </div>
           </div>
@@ -434,22 +415,21 @@ const Dashboard: React.FC = () => {
 
         {/* Right Sidebar - Ad Space (desktop only) */}
         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
-         <div className="h-full w-full">
-          <ins 
+          <div className="h-full w-full">
+            <ins 
               className="adsbygoogle"
               style={{ 
                 display: 'block', 
                 height: '100%', 
                 width: '100%',
-                minHeight: '250px' // Ensure minimum height for ad
+                minHeight: '250px'
               }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="8719654150"
               data-ad-format="auto"
               data-full-width-responsive="true"
-              data-adtest="on" // Enable test mode to help debug
             ></ins>
-           </div>
+          </div>
         </div>
       </div>
     </div>
