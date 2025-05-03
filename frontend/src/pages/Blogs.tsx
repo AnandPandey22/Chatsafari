@@ -16,28 +16,28 @@ interface Blog {
 export const blogs: Blog[] = [
   {
     id: 1,
-    title: "The Founder Of Chatsafari: Anand Pandey",
-    slug: "Founder-of-Chatsafari-Anand-Pandey",
+    title: "The Founder Of Chatsafari: Arthur",
+    slug: "Founder-of-Chatsafari-Arthur",
     thumbnail: "https://i.postimg.cc/VNLGbKH2/A-digital-photograph-features-a-portrait-of-the-fo.jpg",
     excerpt: "Read the Mindset Of Founder Of chatsafari and the story behind the development of this new Secure Chatting Platform",
     date: "2024-03-21",
     content: `
 
-In an age dominated by social media giants and complex registration processes, one teenager dared to simplify how people connect online. Meet **Anand Pandey**, the visionary **19-year-old founder of ChatSafari**, a platform that has taken the internet by storm since its launch on **March 14, 2025**.
+In an age dominated by social media giants and complex registration processes, one teenager dared to simplify how people connect online. Meet **Arthur**, the visionary **19-year-old founder of ChatSafari**, a platform that has taken the internet by storm since its launch on **March 14, 2025**.
 
 ## A Fresh Take on Digital Conversations
 
-ChatSafari isn’t just another chatting app. It was designed with a mission: **to let people chat freely, safely, and anonymously**—without the need for registration. Anand realized that many users, especially young people, crave genuine conversations without the burden of creating accounts or worrying about their data being stored.
+ChatSafari isn’t just another chatting app. It was designed with a mission: **to let people chat freely, safely, and anonymously**—without the need for registration. Arthur realized that many users, especially young people, crave genuine conversations without the burden of creating accounts or worrying about their data being stored.
 
 With 	[ChatSafari](https://chatsafari.com), users can **dive straight into global conversations**, meet strangers, share stories, and make connections that matter—all while staying anonymous. It’s a digital jungle where voices are heard without filters or profiles, yet designed thoughtfully to ensure safety and respect.
 
 ## The Teen Behind the Tech
 
-**Anand Pandey**, a 19-year-old tech enthusiast, is deeply passionate about computer science and has a strong love for coding. With a solid grasp of various programming languages and a relentless drive to learn, he dedicates himself to expanding his knowledge every single day. **Anand** has completed multiple MERN Stack projects, showcasing his skills in full-stack development. His most notable achievement so far is **Chatsafari**, a real-time chatting website, which also happens to be his first solo project. As the **founder of Chatsafari**, **Anand** is not only applying his technical skills but also learning new and impactful things regularly to make tools and platforms that can benefit others. His journey is just beginning, and his passion ensures that he’s always one step ahead in the world of tech.
+**Arthur**, a 19-year-old tech enthusiast, is deeply passionate about computer science and has a strong love for coding. With a solid grasp of various programming languages and a relentless drive to learn, he dedicates himself to expanding his knowledge every single day. **Arthur** has completed multiple MERN Stack projects, showcasing his skills in full-stack development. His most notable achievement so far is **Chatsafari**, a real-time chatting website, which also happens to be his first solo project. As the **founder of Chatsafari**, **Arthur** is not only applying his technical skills but also learning new and impactful things regularly to make tools and platforms that can benefit others. His journey is just beginning, and his passion ensures that he’s always one step ahead in the world of tech.
 
-**Anand Pandey** isn’t your typical tech founder. At just 19 years old, he single-handedly envisioned and brought ChatSafari to life. What began as a passion project quickly turned into a full-fledged platform with a growing global user base. His knack for understanding what the youth want in online communication is what sets him apart.
+**Arthur** isn’t your typical tech founder. At just 19 years old, he single-handedly envisioned and brought ChatSafari to life. What began as a passion project quickly turned into a full-fledged platform with a growing global user base. His knack for understanding what the youth want in online communication is what sets him apart.
 
-Growing up, Anand observed how social platforms became more intrusive and less about meaningful interactions. This sparked his idea: **a platform built around simplicity, freedom, and real-time conversation**. And that’s exactly what ChatSafari delivers.
+Growing up, Arthur observed how social platforms became more intrusive and less about meaningful interactions. This sparked his idea: **a platform built around simplicity, freedom, and real-time conversation**. And that’s exactly what ChatSafari delivers.
 
 ## Key Features of ChatSafari
 
@@ -50,17 +50,17 @@ Growing up, Anand observed how social platforms became more intrusive and less a
 
 ## From Idea to Reality
 
-Launching a chat platform in today’s competitive tech space is no small feat. **Anand Pandey** not only designed the concept but also oversaw the development and deployment of both the frontend and backend. His platform is optimized for **both PC and mobile users**.
+Launching a chat platform in today’s competitive tech space is no small feat. **Arthur** not only designed the concept but also oversaw the development and deployment of both the frontend and backend. His platform is optimized for **both PC and mobile users**.
 
-Despite its recent launch, ChatSafari is already gaining traction—thanks to its unique value proposition and clean, user-friendly design. Anand is also actively working on blog content and SEO strategies to boost the site’s visibility and attract more users globally.
+Despite its recent launch, ChatSafari is already gaining traction—thanks to its unique value proposition and clean, user-friendly design. Arthur is also actively working on blog content and SEO strategies to boost the site’s visibility and attract more users globally.
 
 ## What’s Next?
 
-**Anand Pandey** isn’t stopping here. His roadmap for **ChatSafari** includes features like **voice messages**, **user blocking/reporting**, **profile customization**, and **Google AdSense monetization** through engaging blog content. His goal? **To make ChatSafari the go-to platform for safe, anonymous, and fun conversations across the globe**.
+**Arthur** isn’t stopping here. His roadmap for **ChatSafari** includes features like **voice messages**, **user blocking/reporting**, **profile customization**, and **Google AdSense monetization** through engaging blog content. His goal? **To make ChatSafari the go-to platform for safe, anonymous, and fun conversations across the globe**.
 
 ## Final Thoughts
 
-In a digital world craving authenticity, Anand Pandey is a breath of fresh air. With ChatSafari, he’s not just changing how we chat—he’s creating a space where people from all walks of life can connect without judgment. It’s rare to see such ambition and clarity at 19, and it’s safe to say, Anand Pandey is just getting started.
+In a digital world craving authenticity, Arthur is a breath of fresh air. With ChatSafari, he’s not just changing how we chat—he’s creating a space where people from all walks of life can connect without judgment. It’s rare to see such ambition and clarity at 19, and it’s safe to say, Arthur is just getting started.
   `
 },
   {
@@ -76,7 +76,7 @@ In a digital world craving authenticity, Anand Pandey is a breath of fresh air. 
 
 ## What is Chatsafari?
 
-[ChatSafari](https://chatsafari.com) popularly known as Safari Chat OR Chat Safari. Chatsafari is a revolutionary chat platform founded by 19-year-old visionary Founder [Anand Pandey](https://chatsafari.com/blog/Founder-of-Chatsafari-Anand-Pandey). It's designed to let people chat freely, safely, and anonymously without the burden of registration processes. The platform's core mission is to simplify online communication while maintaining the highest standards of privacy and security. Since its launch, Chatsafari has attracted a growing global user base, thanks to its unique approach to digital communication. [ChatSafari](https://chatsafari.com) helps users to talk to strangers without any registration. [Start Chatting Now](https://chatsafari.com) On Chatsafari today with Strangers around the World!!
+[ChatSafari](https://chatsafari.com) popularly known as Safari Chat OR Chat Safari. Chatsafari is a revolutionary chat platform founded by 19-year-old visionary Founder [Arthur](https://chatsafari.com/blog/Founder-of-Chatsafari-Arthur). It's designed to let people chat freely, safely, and anonymously without the burden of registration processes. The platform's core mission is to simplify online communication while maintaining the highest standards of privacy and security. Since its launch, Chatsafari has attracted a growing global user base, thanks to its unique approach to digital communication. [ChatSafari](https://chatsafari.com) helps users to talk to strangers without any registration. [Start Chatting Now](https://chatsafari.com) On Chatsafari today with Strangers around the World!!
 
 ## Key Features Of Chatsafari
 
@@ -190,11 +190,11 @@ Nowadays, Due to the hectic lifestyle people are feeling very bored and lonely. 
 
 There are so many times we feel lonely and want to share our thoughts as well as viewpoints with someone. Loneliness is the byproduct of modern day living. Many times we do not get any opportunity to channelize out thoughts. This is the reason why people resort to anonymous chat sites. Chatsafari.com is one such Platform which allows you to Talk to strangers without any privacy issue and with fully privacy.
 
-Expressing our thoughts are our human rights but see because of not having any friend we are not even able to fulfill our rights which makes us fully uncomfortable and boring. But if u talk to strangers on Chatsafari.com which is founded by Anand Pandey, it will helps you to connect with anonymous people from different part of world and they will never harm you instead you can share your feelings, insight thoughts and many more things with them. It will help you to have an exchange of words which will help you to build a good conversation.
+Expressing our thoughts are our human rights but see because of not having any friend we are not even able to fulfill our rights which makes us fully uncomfortable and boring. But if u talk to strangers on Chatsafari.com which is founded by Arthur, it will helps you to connect with anonymous people from different part of world and they will never harm you instead you can share your feelings, insight thoughts and many more things with them. It will help you to have an exchange of words which will help you to build a good conversation.
 
 People Often feel lonely and bored because they feel they don't have any friends and even no one helps them to find new friends. They fully lost their confidence to start talking to new people in real life and here comes Chatsafari.com which initially helps those people to start hanging out with the real people through Online Chats and later if they feel good they can meet in real life which will be nice for them.
 
-Sometimes people wants to share something but they do not want to share it with their friends because they have some trust issue but they have to tell that secret to someone then again here comes Chatsafari.com founded by Anand Pandey which gave them option of thousands of people who are online active on chatsafari and with themselves you can share your secrets Anonymously without any security issue because Chatsafari.com is 100% Reliable and fully safe and secure. We do not store any users data that cause harm to our beautiful Users. So if anyone feel lonely, bored they should Join Chatsafari.com to get rid of that stupid boredom and start making new friends On Chatsafari.com. [Start Chatting Now](https://chatsafari.com)!!
+Sometimes people wants to share something but they do not want to share it with their friends because they have some trust issue but they have to tell that secret to someone then again here comes Chatsafari.com founded by Arthur which gave them option of thousands of people who are online active on chatsafari and with themselves you can share your secrets Anonymously without any security issue because Chatsafari.com is 100% Reliable and fully safe and secure. We do not store any users data that cause harm to our beautiful Users. So if anyone feel lonely, bored they should Join Chatsafari.com to get rid of that stupid boredom and start making new friends On Chatsafari.com. [Start Chatting Now](https://chatsafari.com)!!
   `
   },
   {
@@ -206,7 +206,7 @@ Sometimes people wants to share something but they do not want to share it with 
     date: "2024-03-15",
    content: `
 
-Making new friends online is not a very hard task because Chatsafari.com founded by Anand Pandey, makes it very easy for anyone to make many new online friends as well as real friends through online chatting by using Chatsafari. Nowadays, Friends are very important part of our life. We love to share our feelings with them, we deeply wants to live good moments of our life with them but due to this growing age people get busy with their work and forget their past old and bold Friendships and their lovable Friends which is really bad for them. It feels very bad that time when you wants to share something very important with your friends but you found that you really do not have any of  your friends to listen you. That's why having friends is kind of blessing and if you do not have any friends Just Join chatsafari.com which is 100% Free and secure platform which will always helps you to make new friends and carry a good conversation with them from any part of the world without any registration. Simply visit [chatsafari.com](https://chatsafari.com) and enter your username which u want then age and select gender and click join now, hooray you are in to your dashboard where you will see thousands of people from different part of world and they are eager to talk to you. So [Start Chatting](https://chatsafari.com) now!!
+Making new friends online is not a very hard task because Chatsafari.com founded by Arthur, makes it very easy for anyone to make many new online friends as well as real friends through online chatting by using Chatsafari. Nowadays, Friends are very important part of our life. We love to share our feelings with them, we deeply wants to live good moments of our life with them but due to this growing age people get busy with their work and forget their past old and bold Friendships and their lovable Friends which is really bad for them. It feels very bad that time when you wants to share something very important with your friends but you found that you really do not have any of  your friends to listen you. That's why having friends is kind of blessing and if you do not have any friends Just Join chatsafari.com which is 100% Free and secure platform which will always helps you to make new friends and carry a good conversation with them from any part of the world without any registration. Simply visit [chatsafari.com](https://chatsafari.com) and enter your username which u want then age and select gender and click join now, hooray you are in to your dashboard where you will see thousands of people from different part of world and they are eager to talk to you. So [Start Chatting](https://chatsafari.com) now!!
 
 ## 5 Tips To Make New Friends Online
 
@@ -282,7 +282,7 @@ I can say you will found a beautiful Indian girl as your best friend in Indian C
 
 [USA Chat Room](https://chatsafari.com) will help you to connect with the hot, sexy and cute girls of America and you will get a chance too impress them by your conversation and then you can also became their friends. It is also possible that they fall in love with you and that's how you will find your Soulmate through Online Chatting with the help of Chatsafari.com then you both can also share your pictures and videos on ChatSafari.com and it might be possible you will get a chance to have sexting with any girl. Any thing is possible so don't waste your time Join Chatsafari.com to find hot and sexy girls for you and to have a good conversation with them.
 
-If someone wanted to learn English for speaking purpose for conversation purpose then I must say they should join USA Chat Room Available on Chatsafari.com Founded by Anand Pandey. It will help them a lot to learn English when they will interact with English speaking people in USA Chat room. When you will spend some time while talking to English speaking people there is high chance that soon you will start speaking English fluently. If you are suffering from loneliness and boredom and finding a way to get rid of this then you have to start Talking to strangers on chatsafari.com
+If someone wanted to learn English for speaking purpose for conversation purpose then I must say they should join USA Chat Room Available on Chatsafari.com Founded by Arthur. It will help them a lot to learn English when they will interact with English speaking people in USA Chat room. When you will spend some time while talking to English speaking people there is high chance that soon you will start speaking English fluently. If you are suffering from loneliness and boredom and finding a way to get rid of this then you have to start Talking to strangers on chatsafari.com
 
 
 Wanna [chat with hot girls](https://chatsafari.com) of America then Join USA Chat Room Available on Chatsafari.com where you will get thousands of USA hot Girls and it might be possible you will get one of them or they will become your Online Friend. So [start chatting](https://chatsafari.com) from today.
