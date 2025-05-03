@@ -77,7 +77,6 @@ const BlogPost: React.FC = () => {
         setTimeout(() => {
           (window.adsbygoogle = window.adsbygoogle || []).push({});
           (window.adsbygoogle = window.adsbygoogle || []).push({});
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
         }, 100);
       }, 500);
     } else {
@@ -252,23 +251,6 @@ const BlogPost: React.FC = () => {
                     <p>{post.excerpt}</p>
                   )}
                 </div>
-
-                                {/* Ad Unit - Above Start Chatting Now Section */}
-                {adsLoaded && (
-                  <div className="mb-6">
-                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781"
-                      crossOrigin="anonymous"></script>
-                    <ins className="adsbygoogle"
-                      style={{ 
-                        display: 'block',
-                        width: '100%'
-                      }}
-                      data-ad-client="ca-pub-9696449443766781"
-                      data-ad-slot="7992552962"
-                      data-ad-format="auto"
-                      data-full-width-responsive="true"></ins>
-                  </div>
-                )}
                 
                 {/* Start Chatting Now Section */}
                 <div className="mt-12 relative overflow-hidden rounded-xl w-full">
