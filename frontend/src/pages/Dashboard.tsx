@@ -398,11 +398,11 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Bottom Ad Space - Always visible in mobile */}
-          <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
+          <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200 pt-2`}>
             <div className="h-full w-full" key={adKey}>
               <ins 
                 className="adsbygoogle"
-                style={{ display: 'block', height: '100%', width: '100%' }}
+                style={{ display: 'block', height: '100%', width: '100%', paddingTop: '20px' }}
                 data-ad-client="ca-pub-9696449443766781"
                 data-ad-slot="1455746969"
                 data-ad-format="auto"
