@@ -70,6 +70,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
     }
   };
 
+  // Scroll messages when new ones arrive or when chat window is opened
+  useEffect(() => {
+    if (selectedUser) {
+      // Scroll to bottom when chat window is opened
+      scrollToBottom();
+      
+      // Also scroll when messages change
+      if (chatRooms.length > 0) {
+        const lastRoom = chatRooms[chatRooms.length - 1];
+        if (lastRoom.messages.length > 0) {
+          scrollToBottom();
+        }
+      }
+    }
+  }, [selectedUser, chatRooms]);
+
   // Handle keyboard appearance on mobile
   useEffect(() => {
     if (isMobile) {
@@ -106,16 +122,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
       };
     }
   }, [isMobile]);
-
-  // Scroll messages when new ones arrive
-  useEffect(() => {
-    if (chatRooms.length > 0) {
-      const lastRoom = chatRooms[chatRooms.length - 1];
-      if (lastRoom.messages.length > 0) {
-        scrollToBottom();
-      }
-    }
-  }, [chatRooms]);
 
   useEffect(() => {
     // Initialize notification sound
