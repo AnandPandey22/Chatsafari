@@ -368,6 +368,23 @@ const Dashboard: React.FC = () => {
             isMobile && !selectedUser ? 'hidden' : 'flex'
           } flex-1 flex-col overflow-hidden`}
         >
+          {/* Mobile Ad Space - Only visible in mobile above chat */}
+          {isMobile && (
+            <div className="bg-white border-b border-gray-200">
+              <div className="h-full w-full" key={adKey}>
+                <ins 
+                  className="adsbygoogle"
+                  style={{ display: 'block', height: '100%', width: '100%' }}
+                  data-ad-client="ca-pub-9696449443766781"
+                  data-ad-slot="1455746969"
+                  data-ad-format="auto"
+                  data-full-width-responsive="true"
+                  data-ad-targeting="target=_blank"
+                ></ins>
+              </div>
+            </div>
+          )}
+
           {/* Chat Window Container */}
           <div className={`${isMobile ? 'h-[410px]' : 'h-[530px]'} overflow-hidden`}>
             {selectedUser ? (
@@ -397,8 +414,8 @@ const Dashboard: React.FC = () => {
             )}
           </div>
 
-          {/* Bottom Ad Space - Always visible in mobile */}
-          <div className={`${isMobile ? 'block' : 'flex-1'} bg-white border-t border-gray-200`}>
+          {/* Bottom Ad Space - Only visible in desktop */}
+          <div className={`${isMobile ? 'hidden' : 'flex-1'} bg-white border-t border-gray-200`}>
             <div className="h-full w-full" key={adKey}>
               <ins 
                 className="adsbygoogle"
