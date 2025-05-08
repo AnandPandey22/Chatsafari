@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { Image, Smile, Send, ArrowLeft, Paperclip } from 'lucide-react';
+import { Image, Smile, Send, ArrowLeft, Paperclip, Ban } from 'lucide-react';
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
@@ -55,6 +55,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   const { selectedUser, setSelectedUser, currentUser, addMessage, chatRooms, socket } = useStore();
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  const [blockedUsers, setBlockedUsers] = useState<string[]>(() => {
+    const saved = localStorage.getItem('blockedUsers');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [isBlocked, setIsBlocked] = useState(false);
   const messageEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const notificationSound = useRef<HTMLAudioElement | null>(null);
@@ -164,15 +170,24 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
     };
   }, []);
 
+  // Check if user is blocked when component mounts or selectedUser changes
+  useEffect(() => {
+    if (selectedUser) {
+      setIsBlocked(blockedUsers.includes(selectedUser.id));
+    }
+  }, [selectedUser, blockedUsers]);
+
   // Play notification sound when receiving a new message
   useEffect(() => {
     const lastMessage = chatRooms[chatRooms.length - 1]?.messages[chatRooms[chatRooms.length - 1].messages.length - 1];
-    if (lastMessage && lastMessage.senderId !== currentUser?.id) {
+    if (lastMessage && 
+        lastMessage.senderId !== currentUser?.id && 
+        !blockedUsers.includes(lastMessage.senderId)) {
       notificationSound.current?.play().catch(error => {
         console.error('Error playing notification sound:', error);
       });
     }
-  }, [chatRooms, currentUser?.id]);
+  }, [chatRooms, currentUser?.id, blockedUsers]);
 
   // Handle typing indicator
   useEffect(() => {
@@ -253,6 +268,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   const roomId = [currentUser.id, selectedUser.id].sort().join('-');
   const currentRoom = chatRooms.find((room: ChatRoom) => room.id === roomId);
   const messages = currentRoom?.messages || [];
+
+  // Filter messages from blocked users
+  const filteredMessages = messages.filter(msg => !blockedUsers.includes(msg.senderId));
 
   const handleBack = () => {
     setSelectedUser(null);
@@ -397,6 +415,35 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
       window.removeEventListener('dragstart', preventDrag);
     };
   }, []);
+
+  // Add block/unblock user functionality
+  const handleBlockToggle = () => {
+    if (selectedUser && currentUser) {
+      if (isBlocked) {
+        // Unblock user
+        const newBlockedUsers = blockedUsers.filter(id => id !== selectedUser.id);
+        setBlockedUsers(newBlockedUsers);
+        localStorage.setItem('blockedUsers', JSON.stringify(newBlockedUsers));
+        setIsBlocked(false);
+        toast.success(`You have unblocked ${selectedUser.username}`);
+      } else {
+        // Show block confirmation
+        setShowBlockConfirm(true);
+      }
+    }
+  };
+
+  const handleBlockConfirm = () => {
+    if (selectedUser && currentUser) {
+      const newBlockedUsers = [...blockedUsers, selectedUser.id];
+      setBlockedUsers(newBlockedUsers);
+      localStorage.setItem('blockedUsers', JSON.stringify(newBlockedUsers));
+      setIsBlocked(true);
+      setShowBlockConfirm(false);
+      toast.error(`You have blocked ${selectedUser.username}`);
+      setSelectedUser(null); // Close the chat window
+    }
+  };
 
   const renderMessage = (message: Message) => {
     const isCurrentUser = message.senderId === currentUser?.id;
@@ -785,7 +832,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   return (
     <div className="flex flex-col h-full">
       {/* Header - Fixed */}
-      <div className="shrink-0 p-4 border-b border-gray-200 flex items-center space-x-4 bg-white">
+      <div className="shrink-0 p-4 border-b border-gray-200 flex items-center justify-between bg-white">
+        <div className="flex items-center space-x-4">
         {isMobile && (
           <button 
             onClick={handleBack} 
@@ -812,7 +860,46 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
             <span className="text-sm text-gray-500">{selectedUser.age} years</span>
           </div>
         </div>
+        </div>
+        <button
+          onClick={handleBlockToggle}
+          className={`${
+            isBlocked 
+              ? 'text-green-600 hover:text-green-700 hover:bg-green-50' 
+              : 'text-red-600 hover:text-red-700 hover:bg-red-50'
+          } transition duration-150 ease-in-out px-3 py-1 rounded-md ${
+            isMobile ? 'text-sm -mt-2 -mr-2' : ''
+          }`}
+        >
+          {isBlocked ? 'Unblock' : 'Block'}
+        </button>
       </div>
+
+      {/* Block Confirmation Popup */}
+      {showBlockConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Block User</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to block {selectedUser.username}?
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowBlockConfirm(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBlockConfirm}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-150 ease-in-out"
+              >
+                Block
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Messages - Scrollable */}
       <div 
@@ -826,9 +913,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
             </div>
           </div>
           
-          {messages.map((msg) => renderMessage(msg))}
+          {filteredMessages.map((msg) => renderMessage(msg))}
           
-          {isTyping && (
+          {isTyping && !blockedUsers.includes(selectedUser.id) && (
             <div className="flex items-center space-x-2 text-gray-500 text-sm">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -845,6 +932,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
 
       {/* Input - Fixed */}
       <div className="shrink-0 p-4 border-t border-gray-200 bg-white">
+        {!isBlocked ? (
         <div className="flex items-center space-x-2">
           <label className="cursor-pointer text-gray-600 hover:text-violet-600 transition duration-150 ease-in-out relative group">
             <Paperclip size={20} />
@@ -879,6 +967,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
             <Send size={20} />
           </button>
         </div>
+        ) : (
+          <div className="text-center text-red-600 py-2">
+            You have blocked this user
+          </div>
+        )}
         {showEmojiPicker && (
           <div className="absolute bottom-20 right-4">
             <EmojiPicker
