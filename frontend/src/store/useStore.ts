@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { Socket as SocketType } from 'socket.io-client';
 import io from 'socket.io-client';
@@ -569,13 +568,19 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
       console.log('Received message:', message);
       const { currentUser, selectedUser } = get();
       
+      // Get blocked users from localStorage
+      const blockedUsers = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
+      
       // Add message to state
       get().addMessage(message);
 
       // Only play sound and show notification if:
       // 1. Message is from someone else
       // 2. We're not currently chatting with that person
-      if (message.senderId !== currentUser?.id && selectedUser?.id !== message.senderId) {
+      // 3. The sender is not blocked
+      if (message.senderId !== currentUser?.id && 
+          selectedUser?.id !== message.senderId && 
+          !blockedUsers.includes(message.senderId)) {
         notificationSound.play().catch(console.error);
         // Update notification count
         set(state => ({
