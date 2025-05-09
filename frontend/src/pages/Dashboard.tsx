@@ -386,7 +386,7 @@ const Dashboard: React.FC = () => {
           )}
 
           {/* Chat Window Container */}
-          <div className={`${isMobile ? 'h-[410px]' : 'h-[530px]'} overflow-hidden`}>
+         <div className={`${isMobile ? 'h-[410px]' : 'h-[530px]'} overflow-hidden ${isMobile ? 'pt-5 bg-violet-50' : ''}`}>
             {selectedUser ? (
               <ChatWindow isMobile={isMobile} />
             ) : (
