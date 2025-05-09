@@ -439,11 +439,11 @@ const Dashboard: React.FC = () => {
                 display: 'block', 
                 height: '100%', 
                 width: '100%',
-                minHeight: '250px'
+                minHeight: '600px'
               }}
               data-ad-client="ca-pub-9696449443766781"
               data-ad-slot="8719654150"
-              data-ad-format="auto"
+              data-ad-format="vertical"
               data-full-width-responsive="true"
             ></ins>
           </div>
