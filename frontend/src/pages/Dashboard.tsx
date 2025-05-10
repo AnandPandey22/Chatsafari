@@ -161,6 +161,37 @@ const Dashboard: React.FC = () => {
     }
   }, [currentUser]);
 
+  // Add retry logic for right sidebar ad
+  useEffect(() => {
+    if (currentUser && !isMobile) {
+      let retryCount = 0;
+      const maxRetries = 3;
+      const retryInterval = 2000; // 2 seconds between retries
+
+      const initializeRightSidebarAd = () => {
+        const rightSidebarAd = document.querySelector('.right-sidebar-ad');
+        if (rightSidebarAd) {
+          try {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            console.log('Right sidebar ad initialized successfully');
+          } catch (err) {
+            console.error('Error initializing right sidebar ad:', err);
+            if (retryCount < maxRetries) {
+              retryCount++;
+              setTimeout(initializeRightSidebarAd, retryInterval);
+            }
+          }
+        } else if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(initializeRightSidebarAd, retryInterval);
+        }
+      };
+
+      // Initial attempt
+      setTimeout(initializeRightSidebarAd, 1500);
+    }
+  }, [currentUser, isMobile]);
+
   // Handle first chat window open in mobile
   useEffect(() => {
     if (selectedUser && isMobile && !hasOpenedFirstChat.current) {
@@ -434,7 +465,7 @@ const Dashboard: React.FC = () => {
         <div className="hidden lg:block w-[320px] h-[830px] border-l border-gray-200 bg-white">
           <div className="h-full w-full">
             <ins 
-              className="adsbygoogle"
+              className="adsbygoogle right-sidebar-ad"
               style={{ 
                 display: 'block', 
                 height: '100%', 
