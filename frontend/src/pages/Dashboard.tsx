@@ -156,7 +156,7 @@ const Dashboard: React.FC = () => {
         } catch (err) {
           console.error('Error initializing ads:', err);
         }
-      }, 1500);
+      }, 1000);
       return () => clearTimeout(timer);
     }
   }, [currentUser]);
@@ -174,7 +174,7 @@ const Dashboard: React.FC = () => {
         } catch (err) {
           console.error('Error initializing mobile ad:', err);
         }
-      }, 1500);
+      }, 1000);
       return () => clearTimeout(timer);
     }
   }, [selectedUser, isMobile]);
