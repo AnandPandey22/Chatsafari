@@ -22,63 +22,58 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { setCurrentUser, connect, activeUsers } = useStore();
 
-   // Initialize Google Ads
-  useEffect(() => {
-    // Load AdSense script if not already loaded
-    if (!window.adsbygoogle) {
-      window.adsbygoogle = [];
-      const script = document.createElement('script');
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
-      script.async = true;
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-    }
-
-    // Load ads after a short delay to ensure script is loaded
-    const timer = setTimeout(() => {
-      try {
-        window.adsbygoogle.push({});
-      } catch (err) {
-        console.error('Error loading ads:', err);
-      }
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Add retry logic for second ad unit
+  // Initialize Google Ads with combined logic
   useEffect(() => {
     let retryCount = 0;
-    const maxRetries = 5; // Increased max retries
-    const retryInterval = 2000; // 2 seconds between retries
+    const maxRetries = 8; // Increased max retries
+    const retryInterval = 1500; // Reduced interval to 1.5 seconds
     let retryTimer: NodeJS.Timeout;
 
-    const initializeSecondAd = () => {
+    const initializeAds = () => {
+      // Load AdSense script if not already loaded
+      if (!window.adsbygoogle) {
+        window.adsbygoogle = [];
+        const script = document.createElement('script');
+        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781';
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
+      }
+
       const secondAd = document.querySelector('.second-ad-unit');
       if (secondAd) {
         try {
-          // Force refresh the ad
+          // Force refresh all ads
           (window.adsbygoogle = window.adsbygoogle || []).push({});
-          console.log('Second ad unit initialized successfully');
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          console.log('Ads initialized successfully');
         } catch (err) {
-          console.error('Error initializing second ad unit:', err);
+          console.error('Error initializing ads:', err);
           if (retryCount < maxRetries) {
             retryCount++;
-            retryTimer = setTimeout(initializeSecondAd, retryInterval);
+            retryTimer = setTimeout(initializeAds, retryInterval);
           }
         }
       } else if (retryCount < maxRetries) {
         retryCount++;
-        retryTimer = setTimeout(initializeSecondAd, retryInterval);
+        retryTimer = setTimeout(initializeAds, retryInterval);
       }
     };
 
-    // Initial attempt with a longer delay
-    const initialTimer = setTimeout(initializeSecondAd, 2000);
+    // Initial attempt with a shorter delay
+    const initialTimer = setTimeout(initializeAds, 1000);
+
+    // Additional attempt after a longer delay
+    const backupTimer = setTimeout(() => {
+      if (retryCount === 0) {
+        initializeAds();
+      }
+    }, 5000);
 
     // Cleanup function
     return () => {
       clearTimeout(initialTimer);
+      clearTimeout(backupTimer);
       clearTimeout(retryTimer);
     };
   }, []);
@@ -302,6 +297,7 @@ const Login: React.FC = () => {
                 data-ad-slot="9857777322"
                 data-ad-format="auto"
                 data-full-width-responsive="true"
+                data-adtest="on"
               />
             </div>
           </div>
