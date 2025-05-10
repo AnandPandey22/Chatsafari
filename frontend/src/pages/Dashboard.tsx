@@ -47,7 +47,12 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     // Function to handle back button press
     const handlePopState = (event: PopStateEvent) => {
-      // Always prevent default to handle back button ourselves
+      // If we're on the login page (after logout), allow default behavior to leave the site
+      if (!currentUser) {
+        return;
+      }
+      
+      // Prevent default for other cases to handle back button ourselves
       event.preventDefault();
       
       // If chat window is open, close it
@@ -64,15 +69,20 @@ const Dashboard: React.FC = () => {
     };
 
     // Function to handle beforeunload event
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
-      return '';
+   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      // Only prevent default if user is logged in
+      if (currentUser) {
+        event.preventDefault();
+        event.returnValue = '';
+        return '';
+      }
     };
 
     // Add initial states when component mounts
-    window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
-    window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
+    if (currentUser) {
+      window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
+      window.history.pushState({ page: 'dashboard' }, '', '/dashboard');
+    }
 
     // Add event listeners
     window.addEventListener('popstate', handlePopState);
@@ -83,7 +93,7 @@ const Dashboard: React.FC = () => {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [selectedUser, setSelectedUser]);
+  }, [selectedUser, setSelectedUser, currentUser]);
 
   // Handle Alt+Left arrow key
   useEffect(() => {
