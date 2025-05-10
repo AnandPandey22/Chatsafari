@@ -46,6 +46,35 @@ const Login: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Add retry logic for second ad unit
+  useEffect(() => {
+    let retryCount = 0;
+    const maxRetries = 3;
+    const retryInterval = 2000; // 2 seconds between retries
+
+    const initializeSecondAd = () => {
+      const secondAd = document.querySelector('.second-ad-unit');
+      if (secondAd) {
+        try {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          console.log('Second ad unit initialized successfully');
+        } catch (err) {
+          console.error('Error initializing second ad unit:', err);
+          if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(initializeSecondAd, retryInterval);
+          }
+        }
+      } else if (retryCount < maxRetries) {
+        retryCount++;
+        setTimeout(initializeSecondAd, retryInterval);
+      }
+    };
+
+    // Initial attempt
+    setTimeout(initializeSecondAd, 1500);
+  }, []);
+
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
@@ -259,7 +288,7 @@ const Login: React.FC = () => {
           <div className="w-full mt-4">
             <div className="h-full w-full">
               <ins
-                className="adsbygoogle"
+                className="adsbygoogle second-ad-unit"
                 style={{ display: 'block', height: '100%', width: '100%' }}
                 data-ad-client="ca-pub-9696449443766781"
                 data-ad-slot="9857777322"
