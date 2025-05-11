@@ -406,6 +406,8 @@ If you’re looking for an online chatting dating experience without the hassle,
 
 At the End of discussion, Chatsafari’s free online chat with no registration feature is a game-changer for anyone interested in chatting or dating online. The ability to connect instantly with strangers from all over the world makes it an exciting space for meeting new people. Whether you want to date, make friends, or just pass the time with interesting conversations, Chatsafari has it all. So why wait? Dive into the world of free online chatting today and discover what [Chatsafari](https://chatsafari.com) has to offer!
   `
+},
+  {
     id: 11,
     title: "Dating and Chat Tips To Impress a Girl",
     slug: "dating-tips-to-impress-girl",
