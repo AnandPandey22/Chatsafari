@@ -2115,7 +2115,7 @@ In conclusion, [Safari chat](https://chatsafari.com) offers a unique and enjoyab
     id: 40,
     title: "Pakistani Free Online Chat Rooms",
     slug: "pakistani-free-online-chat-rooms",
-    thumbnail: "https://images.unsplash.com/photo-1610312631997-edf6737ae0a0?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    thumbnail: "https://images.unsplash.com/photo-1621071812100-988cdf0e95d5?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     excerpt: "Talk to hot and sexy girls of pakistan in pakistani free online chat room offered by chatsafari.com, Join Now to chat and meet with pakistani girls",
     date: "2023-12-12",
     content: `
