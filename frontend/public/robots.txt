@@ -24,6 +24,7 @@ Disallow: /login
 Disallow: /dashboard
 Disallow: /api/
 Disallow: /admin/
+Disallow: /cdn-cgi/l/email-protection
 
 # Crawl-delay
 Crawl-delay: 1
