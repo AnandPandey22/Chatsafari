@@ -2622,7 +2622,7 @@ To thrive in the modern era, chat platforms must prioritize privacy, usability, 
   },
   {
     id: 53,
-    title: "Why Registration-Free Chat is the Future of Online Communication"
+    title: "Why Registration-Free Chat is the Future of Online Communication",
     slug: "why-registration-free-online-chat-is-future",
     thumbnail: "https://plus.unsplash.com/premium_photo-1684761949804-fd8eb9a5b6cc?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     excerpt: "Why registration free online chat is the future of online communication, you can chat with strangers, talk to girls free on chatsafari.com",
