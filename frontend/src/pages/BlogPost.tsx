@@ -75,7 +75,7 @@ const BlogPost: React.FC = () => {
       // Small delay to ensure DOM is updated before reinitializing ads
       setTimeout(() => {
         setAdsLoaded(true);
-      }, 100);
+      }, 500);
     } else {
       setPost(null);
     }
@@ -91,33 +91,23 @@ const BlogPost: React.FC = () => {
       let retryTimer: NodeJS.Timeout;
 
       const initializeBlogAds = () => {
-        // Clear any existing ads first
-        const existingAds = document.querySelectorAll('.adsbygoogle');
-        existingAds.forEach(ad => {
-          if (ad.parentNode) {
-            ad.parentNode.removeChild(ad);
-          }
-        });
-
-        // Create new ad elements
-        const firstAd = document.querySelector('.blog-first-ad');
-        const sidebarAd = document.querySelector('.blog-sidebar-ad');
-        const contentAd = document.querySelector('.blog-content-ad');
-
         try {
           // Initialize first ad
+          const firstAd = document.querySelector('.blog-first-ad');
           if (firstAd) {
             (window.adsbygoogle = window.adsbygoogle || []).push({});
             console.log('Blog first ad initialized successfully');
           }
 
           // Initialize sidebar ad
+          const sidebarAd = document.querySelector('.blog-sidebar-ad');
           if (sidebarAd) {
             (window.adsbygoogle = window.adsbygoogle || []).push({});
             console.log('Blog sidebar ad initialized successfully');
           }
 
           // Initialize content ad
+          const contentAd = document.querySelector('.blog-content-ad');
           if (contentAd) {
             (window.adsbygoogle = window.adsbygoogle || []).push({});
             console.log('Blog content ad initialized successfully');
@@ -137,18 +127,17 @@ const BlogPost: React.FC = () => {
         }
       };
 
-      // Initial attempt with a shorter delay
-      const initialTimer = setTimeout(initializeBlogAds, 1000);
+      // Initial attempt
+      initializeBlogAds();
 
       // Backup attempt after a longer delay
       const backupTimer = setTimeout(() => {
         if (retryCount === 0) {
           initializeBlogAds();
         }
-      }, 5000);
+      }, 3000);
 
       return () => {
-        clearTimeout(initialTimer);
         clearTimeout(backupTimer);
         clearTimeout(retryTimer);
       };
@@ -296,8 +285,6 @@ const BlogPost: React.FC = () => {
                 {/* First Ad Unit - Above H1 */}
                 {adsLoaded && (
                   <div className="mb-6">
-                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781"
-                      crossOrigin="anonymous"></script>
                     <ins className="adsbygoogle blog-first-ad"
                       style={{ 
                         display: 'block',
@@ -327,8 +314,6 @@ const BlogPost: React.FC = () => {
                 {/* Ad Unit - Above Start Chatting Now Section */}
                 {adsLoaded && (
                   <div className="mb-6">
-                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781"
-                      crossOrigin="anonymous"></script>
                     <ins className="adsbygoogle blog-content-ad"
                       style={{ 
                         display: 'block',
@@ -445,8 +430,6 @@ const BlogPost: React.FC = () => {
             <div className="hidden lg:block lg:w-80 lg:sticky lg:top-24 lg:self-start">
               <div className="bg-white rounded-xl shadow-md p-4">
                 <div className="min-h-[600px]">
-                  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781"
-                    crossOrigin="anonymous"></script>
                   <ins className="adsbygoogle blog-sidebar-ad"
                     style={{ 
                       display: 'block',
