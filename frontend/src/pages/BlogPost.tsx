@@ -219,17 +219,18 @@ const BlogPost: React.FC = () => {
       <Helmet>
         <title>{post.title} | ChatSafari Blog</title>
         <meta name="description" content={post.excerpt} />
+        <meta property="og:title" content={`${post.title} | ChatSafari Blog`} />
+        <meta property="og:description" content={post.excerpt} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`https://chatsafari.com/blog/${post.slug}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${post.title} | ChatSafari Blog`} />
+        <meta name="twitter:description" content={post.excerpt} />
         <link rel="canonical" href={`https://chatsafari.com/blog/${post.slug}`} />
         <script type="application/ld+json">
           {JSON.stringify(jsonLd)}
         </script>
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.excerpt} />
         <meta property="og:image" content={post.imageUrl} />
-        <meta property="og:url" content={`https://chatsafari.com/blog/${post.slug}`} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post.title} />
-        <meta name="twitter:description" content={post.excerpt} />
         <meta name="twitter:image" content={post.imageUrl} />
       </Helmet>
 
