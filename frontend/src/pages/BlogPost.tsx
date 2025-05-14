@@ -219,6 +219,7 @@ const BlogPost: React.FC = () => {
       <Helmet>
         <title>{post.title} | ChatSafari Blog</title>
         <meta name="description" content={post.excerpt} />
+        <meta name="robots" content="index, follow" />
         <meta property="og:title" content={`${post.title} | ChatSafari Blog`} />
         <meta property="og:description" content={post.excerpt} />
         <meta property="og:type" content="article" />
