@@ -70,20 +70,90 @@ const BlogPost: React.FC = () => {
       // Scroll to the top when post changes
       window.scrollTo(0, 0);
 
-      // Load ads after content is loaded
+      // Reset ads and set ads loaded state
+      setAdsLoaded(false);
+      // Small delay to ensure DOM is updated before reinitializing ads
       setTimeout(() => {
         setAdsLoaded(true);
-        // Push ads after a short delay to ensure proper loading
-        setTimeout(() => {
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-        }, 100);
-      }, 500);
+      }, 100);
     } else {
       setPost(null);
     }
     setIsLoading(false);
   }, [slug]);
+
+  // Add retry logic for blog post ads
+  useEffect(() => {
+    if (adsLoaded) {
+      let retryCount = 0;
+      const maxRetries = 8;
+      const retryInterval = 1500;
+      let retryTimer: NodeJS.Timeout;
+
+      const initializeBlogAds = () => {
+        // Clear any existing ads first
+        const existingAds = document.querySelectorAll('.adsbygoogle');
+        existingAds.forEach(ad => {
+          if (ad.parentNode) {
+            ad.parentNode.removeChild(ad);
+          }
+        });
+
+        // Create new ad elements
+        const firstAd = document.querySelector('.blog-first-ad');
+        const sidebarAd = document.querySelector('.blog-sidebar-ad');
+        const contentAd = document.querySelector('.blog-content-ad');
+
+        try {
+          // Initialize first ad
+          if (firstAd) {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            console.log('Blog first ad initialized successfully');
+          }
+
+          // Initialize sidebar ad
+          if (sidebarAd) {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            console.log('Blog sidebar ad initialized successfully');
+          }
+
+          // Initialize content ad
+          if (contentAd) {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            console.log('Blog content ad initialized successfully');
+          }
+
+          // If any ad failed to initialize and we haven't exceeded retries
+          if ((!firstAd || !sidebarAd || !contentAd) && retryCount < maxRetries) {
+            retryCount++;
+            retryTimer = setTimeout(initializeBlogAds, retryInterval);
+          }
+        } catch (err) {
+          console.error('Error initializing blog ads:', err);
+          if (retryCount < maxRetries) {
+            retryCount++;
+            retryTimer = setTimeout(initializeBlogAds, retryInterval);
+          }
+        }
+      };
+
+      // Initial attempt with a shorter delay
+      const initialTimer = setTimeout(initializeBlogAds, 1000);
+
+      // Backup attempt after a longer delay
+      const backupTimer = setTimeout(() => {
+        if (retryCount === 0) {
+          initializeBlogAds();
+        }
+      }, 5000);
+
+      return () => {
+        clearTimeout(initialTimer);
+        clearTimeout(backupTimer);
+        clearTimeout(retryTimer);
+      };
+    }
+  }, [adsLoaded]);
 
   // Get 3 random related posts excluding current post
   const getRelatedPosts = () => {
@@ -228,15 +298,17 @@ const BlogPost: React.FC = () => {
                   <div className="mb-6">
                     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781"
                       crossOrigin="anonymous"></script>
-                    <ins className="adsbygoogle"
+                    <ins className="adsbygoogle blog-first-ad"
                       style={{ 
                         display: 'block',
-                        width: '100%'
+                        width: '100%',
+                        minHeight: '250px'
                       }}
                       data-ad-client="ca-pub-9696449443766781"
                       data-ad-slot="7423185675"
                       data-ad-format="auto"
-                      data-full-width-responsive="true"></ins>
+                      data-full-width-responsive="true"
+                      data-adtest="on"></ins>
                   </div>
                 )}
                 
@@ -251,6 +323,25 @@ const BlogPost: React.FC = () => {
                     <p>{post.excerpt}</p>
                   )}
                 </div>
+                
+                {/* Ad Unit - Above Start Chatting Now Section */}
+                {adsLoaded && (
+                  <div className="mb-6">
+                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781"
+                      crossOrigin="anonymous"></script>
+                    <ins className="adsbygoogle blog-content-ad"
+                      style={{ 
+                        display: 'block',
+                        width: '100%',
+                        minHeight: '250px'
+                      }}
+                      data-ad-client="ca-pub-9696449443766781"
+                      data-ad-slot="7992552962"
+                      data-ad-format="auto"
+                      data-full-width-responsive="true"
+                      data-adtest="on"></ins>
+                  </div>
+                )}
                 
                 {/* Start Chatting Now Section */}
                 <div className="mt-12 relative overflow-hidden rounded-xl w-full">
@@ -356,7 +447,7 @@ const BlogPost: React.FC = () => {
                 <div className="min-h-[600px]">
                   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781"
                     crossOrigin="anonymous"></script>
-                  <ins className="adsbygoogle"
+                  <ins className="adsbygoogle blog-sidebar-ad"
                     style={{ 
                       display: 'block',
                       minHeight: '600px',
@@ -365,7 +456,8 @@ const BlogPost: React.FC = () => {
                     data-ad-client="ca-pub-9696449443766781"
                     data-ad-slot="1867080000"
                     data-ad-format="vertical"
-                    data-full-width-responsive="true"></ins>
+                    data-full-width-responsive="true"
+                    data-adtest="on"></ins>
                 </div>
               </div>
             </div>
