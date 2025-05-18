@@ -380,7 +380,7 @@ Dating chat rooms offer an innovative and convenient way to meet new people and 
   {
     id: 10,
     title: "Free Online Chat With No Registration",
-    slug: "free-online-chat-with-no-registration",
+    slug: "online-chat-with-no-registration",
     thumbnail: "https://plus.unsplash.com/premium_photo-1719053463353-98e4344eebaf?q=80&w=2012&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     excerpt: "Free online chat without registration and talk to strangers in free online chat rooms available on chatsafari.com, Talk to girls on chatsafari",
     date: "2024-02-28",
@@ -1242,7 +1242,7 @@ So, why not try it out? Visit Chatsafari.com today, jump into the gay chat rooms
   {
     id: 25,
     title: "Lesbian Chat Rooms Online Free",
-    slug: "online-lesbian-chat-room-free",
+    slug: "lesbian-chat-rooms-online-free",
     thumbnail: "https://plus.unsplash.com/premium_photo-1664301142023-b16e8de7bb21?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     excerpt: "Online Lesbian chat rooms are available on chatsafari.com for free without any subscription fee just visit chatsafari.com to meet your soulmate, Chatsafari works for everyone",
     date: "2024-01-20",
@@ -2035,8 +2035,8 @@ At the end of discussion, if you're looking to engage in free online chat rooms 
   },
   {
     id: 37,
-    title: "100% Free Online Dating in Safari",
-    slug: "100%-free-online-dating-in-safari",
+    title: "Free Online Dating in Safari",
+    slug: "free-online-dating-in-safari",
     thumbnail: "https://plus.unsplash.com/premium_photo-1719575633395-68e2684f017a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     excerpt: "Join Chatsafari to Start meeting singles in Safari today with our free online personals and free safari chat! Safari is full of single men and women like u looking for dates.",
     date: "2023-12-20",
