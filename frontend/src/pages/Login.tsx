@@ -176,7 +176,7 @@ const Login: React.FC = () => {
             <div className="w-full">
               <ins
                 className="adsbygoogle"
-                style={{ display: 'block' }}
+                style={{ display: 'block',  minHeight: '100px' }}
                 data-ad-client="ca-pub-9696449443766781"
                 data-ad-slot="6743920017"
                 data-ad-format="auto"
