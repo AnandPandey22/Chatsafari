@@ -173,7 +173,7 @@ const Login: React.FC = () => {
 
           {/* First Ad - Mobile Only */}
           {isMobile && (
-            <div className="w-full">
+            <div className="w-full -mt-4">
               <ins
                 className="adsbygoogle"
                 style={{ display: 'block', minHeight: '250px' }}
