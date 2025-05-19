@@ -22,11 +22,11 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { setCurrentUser, connect, activeUsers } = useStore();
 
-   // Initialize Google Ads with combined logic
+  // Initialize Google Ads with combined logic
   useEffect(() => {
     let retryCount = 0;
-    const maxRetries = 8;
-    const retryInterval = 1500;
+    const maxRetries = 8; // Increased max retries
+    const retryInterval = 1500; // Reduced interval to 1.5 seconds
     let retryTimer: NodeJS.Timeout;
 
     const initializeAds = () => {
@@ -77,51 +77,6 @@ const Login: React.FC = () => {
       clearTimeout(retryTimer);
     };
   }, []);
-
-  // Specific initialization for mobile-only first ad
-  useEffect(() => {
-    if (isMobile) {
-      let mobileRetryCount = 0;
-      const maxMobileRetries = 5;
-      const mobileRetryInterval = 1000; // Faster retries for mobile
-      let mobileRetryTimer: NodeJS.Timeout;
-
-      const initializeMobileAd = () => {
-        const mobileAd = document.querySelector('.mobile-first-ad');
-        if (mobileAd) {
-          try {
-            (window.adsbygoogle = window.adsbygoogle || []).push({});
-            console.log('Mobile first ad initialized successfully');
-          } catch (err) {
-            console.error('Error initializing mobile first ad:', err);
-            if (mobileRetryCount < maxMobileRetries) {
-              mobileRetryCount++;
-              mobileRetryTimer = setTimeout(initializeMobileAd, mobileRetryInterval);
-            }
-          }
-        } else if (mobileRetryCount < maxMobileRetries) {
-          mobileRetryCount++;
-          mobileRetryTimer = setTimeout(initializeMobileAd, mobileRetryInterval);
-        }
-      };
-
-      // Quick initial attempt for mobile
-      const mobileInitialTimer = setTimeout(initializeMobileAd, 500);
-
-      // Backup attempt for mobile
-      const mobileBackupTimer = setTimeout(() => {
-        if (mobileRetryCount === 0) {
-          initializeMobileAd();
-        }
-      }, 3000);
-
-      return () => {
-        clearTimeout(mobileInitialTimer);
-        clearTimeout(mobileBackupTimer);
-        clearTimeout(mobileRetryTimer);
-      };
-    }
-  }, [isMobile]);
 
   // Handle window resize
   useEffect(() => {
@@ -220,13 +175,12 @@ const Login: React.FC = () => {
           {isMobile && (
             <div className="w-full">
               <ins
-                className="adsbygoogle mobile-first-ad"
-                style={{ display: 'block', minHeight: '250px' }}
+                className="adsbygoogle"
+                style={{ display: 'block' }}
                 data-ad-client="ca-pub-9696449443766781"
                 data-ad-slot="6743920017"
                 data-ad-format="auto"
                 data-full-width-responsive="true"
-                data-adtest="on"
               />
             </div>
           )}
@@ -338,7 +292,7 @@ const Login: React.FC = () => {
             <div className="h-full w-full">
               <ins
                 className="adsbygoogle second-ad-unit"
-                style={{ display: 'block', height: '100%', width: '100%', minHeight: '250px' }}
+                 style={{ display: 'block', height: '100%', width: '100%', minHeight: '250px' }}
                 data-ad-client="ca-pub-9696449443766781"
                 data-ad-slot="9857777322"
                 data-ad-format="auto"
