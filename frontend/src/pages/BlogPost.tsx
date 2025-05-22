@@ -296,8 +296,7 @@ const BlogPost: React.FC = () => {
                       data-ad-client="ca-pub-9696449443766781"
                       data-ad-slot="7423185675"
                       data-ad-format="auto"
-                      data-full-width-responsive="true"
-                      data-adtest="on"></ins>
+                      data-full-width-responsive="true"></ins>
                   </div>
                 )}
                 
@@ -325,8 +324,7 @@ const BlogPost: React.FC = () => {
                       data-ad-client="ca-pub-9696449443766781"
                       data-ad-slot="7992552962"
                       data-ad-format="auto"
-                      data-full-width-responsive="true"
-                      data-adtest="on"></ins>
+                      data-full-width-responsive="true"></ins>
                   </div>
                 )}
                 
@@ -441,8 +439,7 @@ const BlogPost: React.FC = () => {
                     data-ad-client="ca-pub-9696449443766781"
                     data-ad-slot="1867080000"
                     data-ad-format="vertical"
-                    data-full-width-responsive="true"
-                    data-adtest="on"></ins>
+                    data-full-width-responsive="true"></ins>
                 </div>
               </div>
             </div>
