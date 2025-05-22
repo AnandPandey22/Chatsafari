@@ -297,7 +297,6 @@ const Login: React.FC = () => {
                 data-ad-slot="9857777322"
                 data-ad-format="auto"
                 data-full-width-responsive="true"
-                data-adtest="on"
               />
             </div>
           </div>
