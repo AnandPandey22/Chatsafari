@@ -322,7 +322,7 @@ const BlogPost: React.FC = () => {
                         minHeight: '250px'
                       }}
                       data-ad-client="ca-pub-9696449443766781"
-                      data-ad-slot="7992552962"
+                      data-ad-slot=""
                       data-ad-format="auto"
                       data-full-width-responsive="true"></ins>
                   </div>
