@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 // Add type declarations for gtag and adsbygoogle
 declare global {
@@ -109,9 +110,10 @@ const ConsentManager: React.FC = () => {
 
   if (!showBanner) return null;
 
-  return (
+  const bannerContent = (
     <div 
       className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4 z-[99999] pointer-events-auto"
+      style={{ isolation: 'isolate' }}
       onClick={(e) => e.stopPropagation()}
     >
       <div className="max-w-7xl mx-auto">
@@ -125,6 +127,7 @@ const ConsentManager: React.FC = () => {
             <button
               onClick={togglePrivacyDetails}
               className="text-sm text-violet-600 hover:text-violet-700 mt-2 pointer-events-auto"
+              type="button"
             >
               {showPrivacyDetails ? 'Hide Details' : 'Show Details'}
             </button>
@@ -157,12 +160,14 @@ const ConsentManager: React.FC = () => {
             <button
               onClick={handleRejectAll}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 pointer-events-auto"
+              type="button"
             >
               Reject All
             </button>
             <button
               onClick={handleAcceptAll}
               className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 pointer-events-auto"
+              type="button"
             >
               Accept All
             </button>
@@ -171,6 +176,9 @@ const ConsentManager: React.FC = () => {
       </div>
     </div>
   );
+
+  // Use createPortal to render the banner at the root level
+  return createPortal(bannerContent, document.body);
 };
 
 export default ConsentManager;
