@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 
 // Add type declarations for gtag and adsbygoogle
 declare global {
@@ -22,6 +21,20 @@ interface ConsentState {
   personalization: boolean;
 }
 
+// List of EU country codes
+const EU_COUNTRIES = [
+  'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU',
+  'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'
+];
+
+// US state codes (for CCPA compliance)
+const US_STATES = [
+  'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL',
+  'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT',
+  'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI',
+  'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
+];
+
 const ConsentManager: React.FC = () => {
   const [showBanner, setShowBanner] = useState(false);
   const [showPrivacyDetails, setShowPrivacyDetails] = useState(false);
@@ -33,15 +46,48 @@ const ConsentManager: React.FC = () => {
   });
 
   useEffect(() => {
-    // Check if consent was previously given
-    const savedConsent = localStorage.getItem('consent');
-    if (!savedConsent) {
-      setShowBanner(true);
-    } else {
-      const parsedConsent = JSON.parse(savedConsent);
-      setConsent(parsedConsent);
-      updateConsentState(parsedConsent);
-    }
+    const checkUserLocation = async () => {
+      try {
+        // First check if consent was previously given
+        const savedConsent = localStorage.getItem('consent');
+        if (savedConsent) {
+          const parsedConsent = JSON.parse(savedConsent);
+          setConsent(parsedConsent);
+          updateConsentState(parsedConsent);
+          return;
+        }
+
+        // If no consent saved, check user's location
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        
+        const countryCode = data.country_code;
+        const region = data.region_code;
+
+        // Show banner only for EU countries or US states
+        const shouldShowBanner = 
+          EU_COUNTRIES.includes(countryCode) || 
+          (countryCode === 'US' && US_STATES.includes(region));
+
+        if (shouldShowBanner) {
+          setShowBanner(true);
+        } else {
+          // For non-EU/US users, automatically grant consent
+          updateConsentState({
+            analytics: true,
+            ads: true,
+            functionality: true,
+            personalization: true
+          });
+        }
+      } catch (error) {
+        console.error('Error checking user location:', error);
+        // In case of error, show the banner to be safe
+        setShowBanner(true);
+      }
+    };
+
+    checkUserLocation();
   }, []);
 
   const updateConsentState = (newConsent: ConsentState) => {
@@ -110,10 +156,9 @@ const ConsentManager: React.FC = () => {
 
   if (!showBanner) return null;
 
-  const bannerContent = (
+  return (
     <div 
       className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4 z-[99999] pointer-events-auto"
-      style={{ isolation: 'isolate' }}
       onClick={(e) => e.stopPropagation()}
     >
       <div className="max-w-7xl mx-auto">
@@ -127,7 +172,6 @@ const ConsentManager: React.FC = () => {
             <button
               onClick={togglePrivacyDetails}
               className="text-sm text-violet-600 hover:text-violet-700 mt-2 pointer-events-auto"
-              type="button"
             >
               {showPrivacyDetails ? 'Hide Details' : 'Show Details'}
             </button>
@@ -160,14 +204,12 @@ const ConsentManager: React.FC = () => {
             <button
               onClick={handleRejectAll}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 pointer-events-auto"
-              type="button"
             >
               Reject All
             </button>
             <button
               onClick={handleAcceptAll}
               className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 pointer-events-auto"
-              type="button"
             >
               Accept All
             </button>
@@ -176,9 +218,6 @@ const ConsentManager: React.FC = () => {
       </div>
     </div>
   );
-
-  // Use createPortal to render the banner at the root level
-  return createPortal(bannerContent, document.body);
 };
 
 export default ConsentManager;
