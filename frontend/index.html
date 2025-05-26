@@ -96,45 +96,15 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   
-   <script>
-// Define dataLayer and the gtag function.
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-
-// Set default consent to 'denied' as a placeholder
-// Determine actual values based on your own requirements
-gtag('consent', 'default', {
-  'ad_storage': 'denied',
-  'ad_user_data': 'denied',
-  'ad_personalization': 'denied',
-  'analytics_storage': 'denied'
-});
-</script>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FV52YJDMHF">
-</script>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FV52YJDMHF"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
-
   gtag('js', new Date());
-  gtag('config', 'G-FV52YJDMHF');
-</script>
 
-<!-- Create one update function for each consent parameter -->
-<script>
-  function consentGrantedAdStorage() {
-    gtag('consent', 'update', {
-      'ad_storage': 'granted'
-    });
-  }
-</script>
-<!-- Invoke your consent functions when a user interacts with your banner -->
-<body>
-  ...
-  <button onclick="consentGrantedAdStorage">Yes</button>
-  ...
-</body>
+  gtag('config', 'G-FV52YJDMHF');
+</script> 
   
   <!-- Google AdSense Script -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781" crossorigin="anonymous"></script>
