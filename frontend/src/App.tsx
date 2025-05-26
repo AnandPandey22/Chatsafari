@@ -12,7 +12,6 @@ import BlogPost from './pages/BlogPost';
 import { Toaster } from 'react-hot-toast';
 import { useStore } from './store/useStore';
 import { useEffect } from 'react';
-import ConsentManager from './components/ConsentManager';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -74,7 +73,6 @@ const App: React.FC = () => {
           {/* Catch all - redirect to main route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <ConsentManager />
       </Router>
     </HelmetProvider>
   );
