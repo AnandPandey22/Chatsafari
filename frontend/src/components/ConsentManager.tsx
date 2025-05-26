@@ -19,10 +19,11 @@ const ConsentManager: React.FC = () => {
     // Initialize Google's consent management
     if (window.gtag) {
       // Set default consent to 'denied' for analytics and ad storage
+      // but allow functionality_storage for basic site operation
       window.gtag('consent', 'default', {
         'analytics_storage': 'denied',
         'ad_storage': 'denied',
-        'functionality_storage': 'denied',
+        'functionality_storage': 'granted', // Allow basic functionality
         'personalization_storage': 'denied',
         'security_storage': 'granted'
       });
@@ -46,4 +47,4 @@ const ConsentManager: React.FC = () => {
   return null;
 };
 
-export default ConsentManager; 
+export default ConsentManager;
