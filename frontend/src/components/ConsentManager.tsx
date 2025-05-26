@@ -73,7 +73,9 @@ const ConsentManager: React.FC = () => {
     setShowBanner(false);
   };
 
-  const handleAcceptAll = () => {
+  const handleAcceptAll = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     updateConsentState({
       analytics: true,
       ads: true,
@@ -82,7 +84,9 @@ const ConsentManager: React.FC = () => {
     });
   };
 
-  const handleRejectAll = () => {
+  const handleRejectAll = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     updateConsentState({
       analytics: false,
       ads: false,
@@ -91,18 +95,25 @@ const ConsentManager: React.FC = () => {
     });
   };
 
-  const handleSavePreferences = () => {
+  const handleSavePreferences = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     updateConsentState(consent);
   };
 
-  const togglePrivacyDetails = () => {
+  const togglePrivacyDetails = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setShowPrivacyDetails(!showPrivacyDetails);
   };
 
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4 z-[9999] pointer-events-auto">
+    <div 
+      className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t border-gray-200 p-4 z-[99999] pointer-events-auto"
+      onClick={(e) => e.stopPropagation()}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex-1">
