@@ -3,34 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     
-    <!-- ✅ Google Analytics + Consent Setup -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV52YJDMHF"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+<script>
+// Define dataLayer and the gtag function.
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
 
-    // Block ads/analytics until user gives consent
-    gtag('consent', 'default', {
-      'ad_storage': 'denied',
-      'analytics_storage': 'denied'
+// Set default consent to 'denied' as a placeholder
+// Determine actual values based on your own requirements
+gtag('consent', 'default', {
+  'ad_storage': 'denied',
+  'ad_user_data': 'denied',
+  'ad_personalization': 'denied',
+  'analytics_storage': 'denied'
+});
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FV52YJDMHF">
+</script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+
+  gtag('js', new Date());
+  gtag('config', 'G-FV52YJDMHF');
+</script>
+
+<!-- Create one update function for each consent parameter -->
+<script>
+  function consentGrantedAdStorage() {
+    gtag('consent', 'update', {
+      'ad_storage': 'granted'
     });
-
-    // Initialize GA
-    gtag('js', new Date());
-    gtag('config', 'G-FV52YJDMHF');
-
-    // Detect consent after user responds to AdSense message
-    window.__tcfapi('addEventListener', 2, function(tcData, success) {
-      if (success && tcData.eventStatus === 'useractioncomplete') {
-        if (tcData.purpose.consents[1] && tcData.purpose.consents[10]) {
-          gtag('consent', 'update', {
-            'ad_storage': 'granted',
-            'analytics_storage': 'granted'
-          });
-        }
-      }
-    });
-  </script>
+  }
+</script>
+<!-- Invoke your consent functions when a user interacts with your banner -->
+<body>
+  ...
+  <button onclick="consentGrantedAdStorage">Yes</button>
+  ...
+</body>
    <!-- Favicon Configuration -->
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
