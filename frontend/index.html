@@ -2,6 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    
+    <!-- ✅ Google Analytics + Consent Setup -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV52YJDMHF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+
+    // Block ads/analytics until user gives consent
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'analytics_storage': 'denied'
+    });
+
+    // Initialize GA
+    gtag('js', new Date());
+    gtag('config', 'G-FV52YJDMHF');
+
+    // Detect consent after user responds to AdSense message
+    window.__tcfapi('addEventListener', 2, function(tcData, success) {
+      if (success && tcData.eventStatus === 'useractioncomplete') {
+        if (tcData.purpose.consents[1] && tcData.purpose.consents[10]) {
+          gtag('consent', 'update', {
+            'ad_storage': 'granted',
+            'analytics_storage': 'granted'
+          });
+        }
+      }
+    });
+  </script>
    <!-- Favicon Configuration -->
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
@@ -96,33 +125,7 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
   
-    <!-- Google tag (gtag.js) with Consent Mode -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FV52YJDMHF"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-
-  // Set default consent to denied
-  gtag('consent', 'default', {
-    'ad_storage': 'denied',
-    'analytics_storage': 'denied'
-  });
-
-  gtag('js', new Date());
-  gtag('config', 'G-FV52YJDMHF');
-
-  // Wait for TCF v2 consent and update
-  window.__tcfapi && window.__tcfapi('addEventListener', 2, function(tcData, success) {
-    if (success && tcData.eventStatus === 'useractioncomplete') {
-      if (tcData.purpose.consents[1] && tcData.purpose.consents[10]) {
-        gtag('consent', 'update', {
-          'ad_storage': 'granted',
-          'analytics_storage': 'granted'
-        });
-      }
-    }
-  });
-</script>
+   
   
   <!-- Google AdSense Script -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781" crossorigin="anonymous"></script>
