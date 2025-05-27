@@ -12,6 +12,7 @@ import BlogPost from './pages/BlogPost';
 import { Toaster } from 'react-hot-toast';
 import { useStore } from './store/useStore';
 import { useEffect } from 'react';
+import ConsentBanner from './components/ConsentBanner';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -38,6 +39,7 @@ const App: React.FC = () => {
     <HelmetProvider>
       <Router>
         <Toaster position="top-center" />
+        <ConsentBanner />
         <Routes>
           {/* Main route - show Login for both development and production */}
           <Route path="/" element={<Login />} />
