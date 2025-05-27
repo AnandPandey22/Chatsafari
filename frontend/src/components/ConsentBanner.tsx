@@ -29,17 +29,15 @@ const ConsentBanner: React.FC = () => {
     return !localStorage.getItem('consentPreferences');
   });
 
-  useEffect(() => {
-    if (isVisible) {
-       window.gtag('consent', 'default', {
-        'analytics_storage': preferences.analytics ? 'granted' : 'denied',
-        'ad_storage': preferences.personalizedAds ? 'granted' : 'denied',
-        'ad_user_data': preferences.personalizedAds ? 'granted' : 'denied',
-        'ad_personalization': preferences.personalizedAds ? 'granted' : 'denied',
-        'wait_for_update': 500
-      });
-    }
-  }, [isVisible]);
+   useEffect(() => {
+    window.gtag('consent', 'default', {
+      'analytics_storage': preferences.analytics ? 'granted' : 'denied',
+      'ad_storage': preferences.personalizedAds ? 'granted' : 'denied',
+      'ad_user_data': preferences.personalizedAds ? 'granted' : 'denied',
+      'ad_personalization': preferences.personalizedAds ? 'granted' : 'denied',
+      'wait_for_update': 500
+    });
+  }, [preferences]);
 
   const updateConsentState = (newPreferences: ConsentPreferences) => {
     window.gtag('consent', 'update', {
