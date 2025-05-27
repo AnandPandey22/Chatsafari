@@ -97,14 +97,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 
   <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FV52YJDMHF"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV52YJDMHF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      
+      // Consent Mode v2 defaults
+      gtag('consent', 'default', {
+        'analytics_storage': 'denied',
+        'ad_storage': 'denied',
+        'ad_user_data': 'denied',
+        'ad_personalization': 'denied',
+        'wait_for_update': 500
+      });
 
-  gtag('config', 'G-FV52YJDMHF');
-</script> 
+      gtag('js', new Date());
+      gtag('config', 'G-FV52YJDMHF', {
+        'consent_mode': 'enabled'
+      });
+    </script>
   
   <!-- Google AdSense Script -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9696449443766781" crossorigin="anonymous"></script>
