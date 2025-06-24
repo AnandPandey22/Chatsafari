@@ -87,7 +87,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   const ringtoneAudioRef = useRef<HTMLAudioElement | null>(null);
   const lastOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
   const [callAccepted, setCallAccepted] = useState(false);
-  const [callHandled, setCallHandled] = useState(false);
+  const [callHandled, setCallHandled] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    if (!currentUser || !selectedUser) return false;
+    const key = `callHandled-${currentUser?.id}-${selectedUser?.id}`;
+    return localStorage.getItem(key) === 'true';
+  });
+  const [callHandledReady, setCallHandledReady] = useState(false);
 
   // Auto scroll to bottom for messages only
   const scrollToBottom = () => {
@@ -267,18 +273,33 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
     });
   }, [socket, selectedUser, currentUser]);
 
+  // Persist callHandled in localStorage per user pair
+  useEffect(() => {
+    if (!currentUser || !selectedUser) return;
+    const key = `callHandled-${currentUser.id}-${selectedUser.id}`;
+    const handled = localStorage.getItem(key) === 'true';
+    setCallHandled(handled);
+    setCallHandledReady(true);
+  }, [currentUser, selectedUser]);
+
   // Handle call request/consent messages
   const handleApproveCall = (msg: Message) => {
-    if (!socket || !currentUser) return;
+    if (!socket || !currentUser || !selectedUser) return;
     socket.emit('call:respond', { senderId: msg.senderId, receiverId: msg.receiverId, approved: true });
     setCallConsent(true);
     setCallHandled(true);
+    // Persist
+    const key = `callHandled-${currentUser.id}-${selectedUser.id}`;
+    localStorage.setItem(key, 'true');
   };
   const handleDeclineCall = (msg: Message) => {
-    if (!socket || !currentUser) return;
+    if (!socket || !currentUser || !selectedUser) return;
     socket.emit('call:respond', { senderId: msg.senderId, receiverId: msg.receiverId, approved: false });
     setPendingCallRequest(false);
     setCallHandled(true);
+    // Persist
+    const key = `callHandled-${currentUser.id}-${selectedUser.id}`;
+    localStorage.setItem(key, 'true');
   };
   const handleRequestCall = (callType: 'audio' | 'video') => {
     if (!socket || !currentUser || !selectedUser) return;
@@ -870,7 +891,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
 
     // Special rendering for call request/consent
     if (message.type === 'call_request') {
-      // If callHandled, do not render the call card
+      // If callHandledReady is not true, don't render the call card yet
+      if (!callHandledReady) return null;
       if (callHandled) return null;
       // If this is a decline message, just show the text
       const isDecline = message.content.toLowerCase().includes('declined');
@@ -1198,33 +1220,29 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
       )}
 
       {/* Messages - Scrollable */}
-      <div 
-        ref={chatContainerRef}
-        className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 min-h-0"
-      >
-        <div className="p-4 space-y-4">
-          <div className="flex justify-center">
-            <div className="bg-white rounded-full py-2 px-4 text-sm text-gray-500 shadow-sm">
-              Start of your conversation with {selectedUser.username}
-            </div>
-          </div>
-          
-          {filteredMessages.map((msg) => renderMessage(msg))}
-          
-          {isTyping && !blockedUsers.includes(selectedUser.id) && (
-            <div className="flex items-center space-x-2 text-gray-500 text-sm">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+      {callHandledReady ? (
+        <div className="flex-1 overflow-y-auto" ref={chatContainerRef}>
+          <div className="p-4 space-y-4">
+            <div className="flex justify-center">
+              <div className="bg-white rounded-full py-2 px-4 text-base font-medium text-gray-500 shadow-sm">
+                Start of your conversation with {selectedUser.username}
               </div>
-              <span>{selectedUser.username} is typing...</span>
             </div>
-          )}
-          
-          <div ref={messageEndRef} />
+            {filteredMessages.map((msg) => renderMessage(msg))}
+            {isTyping && !blockedUsers.includes(selectedUser.id) && (
+              <div className="flex items-center space-x-2 text-gray-500 text-sm">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+                <span>{selectedUser.username} is typing...</span>
+              </div>
+            )}
+            <div ref={messageEndRef} />
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {/* Input - Fixed */}
       <div className="shrink-0 p-4 border-t border-gray-200 bg-white">
