@@ -12,7 +12,7 @@ export interface Message {
   senderId: string;
   receiverId: string;
   content: string;
-  type: 'text' | 'image' | 'emoji';
+  type: 'text' | 'image' | 'emoji' | 'call_request' | 'call_consent';
   timestamp: number;
   seen: boolean;
   delivered: boolean;
