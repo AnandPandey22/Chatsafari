@@ -18,6 +18,7 @@ const io = new Server(httpServer, {
   },
   pingTimeout: 60000, // 60 seconds
   pingInterval: 25000, // 25 seconds
+  maxHttpBufferSize: 25 * 1024 * 1024, // 25MB
 });
 
 app.use(cors());
@@ -35,6 +36,14 @@ const socketUserMap = new Map<string, string>(); // Maps socket.id to user.id
 const userChatRooms = new Map<string, Set<string>>(); // Track which chat rooms each user is part of
 const typingUsers = new Map<string, Set<string>>(); // Track who is typing to whom
 
+// In-memory map to store mutual call consent between user pairs
+const callConsents = new Map<string, boolean>(); // key: sorted userId-userId, value: true if consented
+
+// Helper to get consent key
+function getConsentKey(userId1: string, userId2: string): string {
+  return [userId1, userId2].sort().join('-');
+}
+
 // Function to clear all data
 function clearAllData() {
   users.clear();
@@ -43,6 +52,7 @@ function clearAllData() {
   socketUserMap.clear();
   userChatRooms.clear();
   typingUsers.clear();
+  callConsents.clear();
 
   // Force disconnect all sockets
   io.sockets.sockets.forEach((socket) => {
@@ -368,6 +378,147 @@ io.on('connection', (socket: Socket) => {
   socket.on('disconnect', () => {
     console.log('Socket disconnected:', socket.id);
     handleUserDisconnect(socket.id);
+  });
+
+  // Handle call request (as a special message in DM)
+  socket.on('call:request', (data) => {
+    // data: { senderId, receiverId, callType ('audio'|'video') }
+    const { senderId, receiverId, callType } = data;
+    const sender = users.get(socket.id);
+    if (!sender) return;
+    const roomId = getOrCreateChatRoom(senderId, receiverId);
+    const message = {
+      id: `callreq-${Date.now()}`,
+      senderId,
+      receiverId,
+      content: `${sender.username} wants to start a video or audio call with you.`,
+      type: 'call_request' as 'call_request',
+      timestamp: Date.now(),
+      seen: false,
+      delivered: true,
+      reactions: [],
+    };
+    // Store message in chat room
+    const roomMessages = chatRooms.get(roomId) || [];
+    chatRooms.set(roomId, [...roomMessages, message]);
+    // Send to both users
+    socket.emit('message:receive', { roomId, message });
+    const receiverSocketId = userSocketMap.get(receiverId);
+    if (receiverSocketId) {
+      const receiverSocket = io.sockets.sockets.get(receiverSocketId);
+      if (receiverSocket) {
+        receiverSocket.emit('message:receive', { roomId, message });
+      }
+    }
+  });
+
+  // Handle call request response (approve/decline)
+  socket.on('call:respond', (data) => {
+    // data: { senderId, receiverId, approved: boolean }
+    const { senderId, receiverId, approved } = data;
+    const responder = users.get(socket.id);
+    if (!responder) return;
+    const roomId = getOrCreateChatRoom(senderId, receiverId);
+    if (approved) {
+      // Store consent
+      callConsents.set(getConsentKey(senderId, receiverId), true);
+      // Send consent message ONLY to the original sender (not the one who approved)
+      const consentMessage = {
+        id: `consent-${Date.now()}`,
+        senderId: receiverId, // the one who approved
+        receiverId: senderId,
+        content: `${responder.username} accepted your call request. You can now call each other!`,
+        type: 'call_consent' as 'call_consent',
+        timestamp: Date.now(),
+        seen: false,
+        delivered: true,
+        reactions: [],
+      };
+      const roomMessages = chatRooms.get(roomId) || [];
+      chatRooms.set(roomId, [...roomMessages, consentMessage]);
+      // Notify ONLY the original sender
+      const senderSocketId = userSocketMap.get(senderId);
+      if (senderSocketId) {
+        const senderSocket = io.sockets.sockets.get(senderSocketId);
+        if (senderSocket) {
+          senderSocket.emit('message:receive', { roomId, message: consentMessage });
+        }
+      }
+      // Do NOT send consent message to the user who approved
+    } else {
+      // Send decline message to sender
+      const declineMessage = {
+        id: `decline-${Date.now()}`,
+        senderId: receiverId,
+        receiverId: senderId,
+        content: `${responder.username} declined your call request.`,
+        type: 'call_request' as 'call_request',
+        timestamp: Date.now(),
+        seen: false,
+        delivered: true,
+        reactions: [],
+      };
+      const senderSocketId = userSocketMap.get(senderId);
+      if (senderSocketId) {
+        const senderSocket = io.sockets.sockets.get(senderSocketId);
+        if (senderSocket) {
+          senderSocket.emit('message:receive', { roomId, message: declineMessage });
+        }
+      }
+    }
+  });
+
+  // Helper event to check if consent exists for a user pair
+  socket.on('call:consent:check', (data, callback) => {
+    // data: { userId1, userId2 }
+    const { userId1, userId2 } = data;
+    const consent = callConsents.get(getConsentKey(userId1, userId2)) || false;
+    callback(consent);
+  });
+
+  // WebRTC signaling events
+  socket.on('webrtc:offer', ({ to, from, offer, callType }) => {
+    const receiverSocketId = userSocketMap.get(to);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('webrtc:offer', { from, offer, callType });
+    }
+  });
+
+  socket.on('webrtc:answer', ({ to, from, answer }) => {
+    console.log('[SIGNAL] webrtc:answer received from', from, 'to', to);
+    const receiverSocketId = userSocketMap.get(to);
+    if (receiverSocketId) {
+      console.log('[SIGNAL] Relaying webrtc:answer to socket:', receiverSocketId);
+      io.to(receiverSocketId).emit('webrtc:answer', { from, answer });
+    } else {
+      console.log('[SIGNAL] No receiver socket found for user:', to);
+    }
+  });
+
+  socket.on('webrtc:ice-candidate', ({ to, from, candidate }) => {
+    const receiverSocketId = userSocketMap.get(to);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('webrtc:ice-candidate', { from, candidate });
+    }
+  });
+
+  socket.on('webrtc:hangup', ({ to, from }) => {
+    console.log('[SIGNAL] webrtc:hangup received from', from, 'to', to);
+    const receiverSocketId = userSocketMap.get(to);
+    if (receiverSocketId) {
+      console.log('[SIGNAL] Relaying webrtc:hangup to socket:', receiverSocketId);
+      io.to(receiverSocketId).emit('webrtc:hangup', { from });
+    } else {
+      console.log('[SIGNAL] No receiver socket found for user:', to);
+    }
+  });
+
+  // Relay call:accepted event from callee to caller
+  socket.on('call:accepted', ({ to, from }) => {
+    const receiverSocketId = userSocketMap.get(to);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('call:accepted', { from });
+    }
   });
 });
 
