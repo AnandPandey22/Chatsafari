@@ -87,6 +87,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   const ringtoneAudioRef = useRef<HTMLAudioElement | null>(null);
   const lastOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
   const [callAccepted, setCallAccepted] = useState(false);
+  const [callHandled, setCallHandled] = useState(false);
 
   // Auto scroll to bottom for messages only
   const scrollToBottom = () => {
@@ -271,11 +272,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
     if (!socket || !currentUser) return;
     socket.emit('call:respond', { senderId: msg.senderId, receiverId: msg.receiverId, approved: true });
     setCallConsent(true);
+    setCallHandled(true);
   };
   const handleDeclineCall = (msg: Message) => {
     if (!socket || !currentUser) return;
     socket.emit('call:respond', { senderId: msg.senderId, receiverId: msg.receiverId, approved: false });
     setPendingCallRequest(false);
+    setCallHandled(true);
   };
   const handleRequestCall = (callType: 'audio' | 'video') => {
     if (!socket || !currentUser || !selectedUser) return;
@@ -698,61 +701,61 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        toast.error('Only image files are allowed');
-        return;
-      }
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+          toast.error('Only image files are allowed');
+          return;
+        }
 
       const uploadPromise = new Promise(async (resolve, reject) => {
         try {
-          // Upload to Cloudinary
-          const formData = new FormData();
-          formData.append('file', file);
-          formData.append('upload_preset', 'chatsafari_images');
+        // Upload to Cloudinary
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'chatsafari_images');
 
-          const response = await fetch(`https://api.cloudinary.com/v1_1/duzw0d3lr/image/upload`, {
-            method: 'POST',
-            body: formData
-          });
+        const response = await fetch(`https://api.cloudinary.com/v1_1/duzw0d3lr/image/upload`, {
+          method: 'POST',
+          body: formData
+        });
 
-          const result = await response.json();
+        const result = await response.json();
 
-          if (result.secure_url) {
-            const imageUrl = result.secure_url;
-            const newMessage: Message = {
-              id: crypto.randomUUID(),
-              senderId: currentUser.id,
-              receiverId: selectedUser.id,
-              content: imageUrl,
-              type: 'image',
-              timestamp: Date.now(),
-              seen: false,
-              delivered: false,
-              reactions: [],
-            };
+        if (result.secure_url) {
+          const imageUrl = result.secure_url;
+        const newMessage: Message = {
+          id: crypto.randomUUID(),
+          senderId: currentUser.id,
+          receiverId: selectedUser.id,
+            content: imageUrl,
+          type: 'image',
+          timestamp: Date.now(),
+          seen: false,
+          delivered: false,
+          reactions: [],
+        };
 
-            if (socket) {
-              socket.emit('message:send', newMessage, (error: any) => {
-                if (error) {
-                  console.error('Error sending image:', error);
+        if (socket) {
+        socket.emit('message:send', newMessage, (error: any) => {
+          if (error) {
+            console.error('Error sending image:', error);
                   reject('Failed to send image. Please try again.');
                 } else {
-                  addMessage(newMessage);
-                  scrollToBottom();
+          addMessage(newMessage);
+          scrollToBottom();
                   resolve('Image sent successfully!');
                 }
-              });
-            } else {
+        });
+        } else {
               reject('Connection lost. Please try again.');
-            }
+          }
           } else {
             reject('Failed to upload image. Please try again.');
-          }
-        } catch (error) {
-          console.error('Error in handleImageUpload:', error);
-          reject('Failed to process image. Please try again.');
         }
+      } catch (error) {
+        console.error('Error in handleImageUpload:', error);
+          reject('Failed to process image. Please try again.');
+      }
       });
 
       toast.promise(uploadPromise, {
@@ -867,6 +870,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
 
     // Special rendering for call request/consent
     if (message.type === 'call_request') {
+      // If callHandled, do not render the call card
+      if (callHandled) return null;
       // If this is a decline message, just show the text
       const isDecline = message.content.toLowerCase().includes('declined');
       return (
@@ -886,6 +891,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
       );
     }
     if (message.type === 'call_consent') {
+      // Only show to the original call requester
+      if (currentUser?.id !== message.receiverId) return null;
       return (
         <div key={message.id} className="flex justify-center mb-4">
           <div className="bg-white border border-gray-200 shadow-sm text-green-800 px-4 py-2 rounded-xl mt-2 text-center">
