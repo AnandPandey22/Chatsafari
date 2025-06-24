@@ -1224,7 +1224,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
         <div className="flex-1 overflow-y-auto" ref={chatContainerRef}>
           <div className="p-4 space-y-4">
             <div className="flex justify-center">
-              <div className="bg-white rounded-full py-2 px-4 text-base font-medium text-gray-500 shadow-sm">
+              <div className="bg-white rounded-full py-2 px-4 text-base text-gray-500 shadow-sm">
                 Start of your conversation with {selectedUser.username}
               </div>
             </div>
