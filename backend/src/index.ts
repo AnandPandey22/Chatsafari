@@ -232,10 +232,11 @@ io.on('connection', (socket: Socket) => {
   });
 
   // Handle message send
-  socket.on('message:send', (message: Message) => {
+  socket.on('message:send', (message: Message, callback: (error?: string) => void) => {
     const sender = users.get(socket.id);
     if (!sender) {
       console.log('Message rejected - sender not found:', socket.id);
+      if (callback) callback('Sender not found.');
       return;
     }
 
@@ -248,17 +249,16 @@ io.on('connection', (socket: Socket) => {
     chatRooms.set(roomId, [...roomMessages, messageWithDelivery]);
 
     // Send to both sender and receiver with delivery status
-    socket.emit('message:receive', { roomId, message: messageWithDelivery });
-    
-    // Find receiver's socket and send them the message
     const receiverSocketId = userSocketMap.get(message.receiverId);
+
+    // Send to receiver if online
     if (receiverSocketId) {
-      const receiverSocket = io.sockets.sockets.get(receiverSocketId);
-      if (receiverSocket) {
-        receiverSocket.emit('message:receive', { roomId, message: messageWithDelivery });
-        // Send delivery confirmation to sender
-        socket.emit('message:delivered', { messageId: message.id });
-      }
+      io.to(receiverSocketId).emit('message:receive', { roomId, message: messageWithDelivery });
+    }
+
+    // Acknowledge to sender
+    if (callback) {
+      callback(); // Acknowledge success
     }
   });
 
@@ -519,6 +519,11 @@ io.on('connection', (socket: Socket) => {
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('call:accepted', { from });
     }
+  });
+
+  // Handle message seen
+  socket.on('message:seen', ({ roomId, messageId }: { roomId: string; messageId: string }) => {
+    // Implementation of message:seen event
   });
 });
 
