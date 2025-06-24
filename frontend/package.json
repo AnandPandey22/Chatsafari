@@ -14,6 +14,7 @@
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
     "@types/socket.io-client": "^1.4.36",
+    "cloudinary": "^1.41.3",
     "date-fns": "^3.3.1",
     "emoji-picker-react": "^4.8.0",
     "lucide-react": "^0.344.0",
@@ -22,9 +23,10 @@
     "react-helmet-async": "^2.0.5",
     "react-hot-toast": "^2.4.1",
     "react-markdown": "^10.1.0",
+    "react-responsive": "^10.0.1",
     "react-router-dom": "^6.22.2",
     "remark-gfm": "^4.0.1",
-    "socket.io-client": "^4.7.4",
+    "socket.io-client": "^4.8.1",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
