@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useStore } from '../store/useStore';
-import { Image, Smile, Send, ArrowLeft, Paperclip, Ban } from 'lucide-react';
+import { Image, Smile, Send, ArrowLeft, Paperclip, Ban, Phone, Video, MoreVertical } from 'lucide-react';
 import EmojiPicker, { EmojiClickData } from 'emoji-picker-react';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { ChatRoom, User, Message } from '../types';
+import CallModal from './CallModal';
 
 // Add CSS for secure image display
 const secureImageStyles = `
@@ -52,10 +53,11 @@ interface ChatWindowProps {
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
-  const { selectedUser, setSelectedUser, currentUser, addMessage, chatRooms, socket } = useStore();
+  const { selectedUser, setSelectedUser, currentUser, addMessage, chatRooms, socket, activeUsers } = useStore();
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  const [showUnblockConfirm, setShowUnblockConfirm] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState<string[]>(() => {
     const saved = localStorage.getItem('blockedUsers');
     return saved ? JSON.parse(saved) : [];
@@ -68,6 +70,23 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   const [isSecureMode, setIsSecureMode] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [callConsent, setCallConsent] = useState(false);
+  const [pendingCallRequest, setPendingCallRequest] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isCallOpen, setIsCallOpen] = useState(false);
+  const [isFullDesktop, setIsFullDesktop] = useState(false);
+  const [callType, setCallType] = useState<'audio' | 'video'>('video');
+  const [isIncoming, setIsIncoming] = useState(false);
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [callFrom, setCallFrom] = useState<string | null>(null);
+  const [callTo, setCallTo] = useState<string | null>(null);
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const callingAudioRef = useRef<HTMLAudioElement | null>(null);
+  const ringtoneAudioRef = useRef<HTMLAudioElement | null>(null);
+  const lastOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
+  const [callAccepted, setCallAccepted] = useState(false);
 
   // Auto scroll to bottom for messages only
   const scrollToBottom = () => {
@@ -239,6 +258,369 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
     };
   }, []);
 
+  // Check call consent on chat load
+  useEffect(() => {
+    if (!socket || !selectedUser || !currentUser) return;
+    socket.emit('call:consent:check', { userId1: currentUser.id, userId2: selectedUser.id }, (consent: boolean) => {
+      setCallConsent(consent);
+    });
+  }, [socket, selectedUser, currentUser]);
+
+  // Handle call request/consent messages
+  const handleApproveCall = (msg: Message) => {
+    if (!socket || !currentUser) return;
+    socket.emit('call:respond', { senderId: msg.senderId, receiverId: msg.receiverId, approved: true });
+    setCallConsent(true);
+  };
+  const handleDeclineCall = (msg: Message) => {
+    if (!socket || !currentUser) return;
+    socket.emit('call:respond', { senderId: msg.senderId, receiverId: msg.receiverId, approved: false });
+    setPendingCallRequest(false);
+  };
+  const handleRequestCall = (callType: 'audio' | 'video') => {
+    if (!socket || !currentUser || !selectedUser) return;
+    socket.emit('call:request', { senderId: currentUser.id, receiverId: selectedUser.id, callType });
+    setPendingCallRequest(true);
+  };
+
+  // Listen for call_request and call_consent messages to update state
+  useEffect(() => {
+    if (!socket) return;
+    const onMessageReceive = ({ roomId, message }: { roomId: string; message: Message }) => {
+      if (message.type === 'call_consent') {
+        setCallConsent(true);
+        setPendingCallRequest(false);
+      }
+      if (message.type === 'call_request' && message.senderId === selectedUser?.id && message.receiverId === currentUser?.id) {
+        setPendingCallRequest(false);
+      }
+    };
+    socket.on('message:receive', onMessageReceive);
+    return () => {
+      socket.off('message:receive', onMessageReceive);
+    };
+  }, [socket, selectedUser, currentUser]);
+
+  // When clicking outside the menu, close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const menu = document.querySelector('.relative.ml-2');
+      if (menu && !menu.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    };
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+
+  // Utility: get media constraints
+  const getMediaConstraints = (type: 'audio' | 'video') =>
+    type === 'video' ? { video: true, audio: true } : { video: false, audio: true };
+
+  // Outgoing call logic
+  const handleStartCall = async (type: 'audio' | 'video') => {
+    setCallType(type);
+    setIsIncoming(false);
+    setIsCallOpen(true);
+    setCallTo(selectedUser!.id);
+    setCallFrom(currentUser!.id);
+    setIsFullDesktop(false);
+    setCallAccepted(false);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(getMediaConstraints(type));
+      setLocalStream(stream);
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: ["stun:bn-turn1.xirsys.com"] },
+          {
+            username: "YMdnu0mLvhUm6utweJE76hcGQvYp1uoDHaJBFHYnrtp9ZaiO4jdfOe3GF6qjYR7hAAAAAGhaNFdhYXl1c2htZWhyYQ==",
+            credential: "2efdbc74-50ba-11f0-b047-0242ac140004",
+            urls: [
+              "turn:bn-turn1.xirsys.com:80?transport=udp",
+              "turn:bn-turn1.xirsys.com:3478?transport=udp",
+              "turn:bn-turn1.xirsys.com:80?transport=tcp",
+              "turn:bn-turn1.xirsys.com:3478?transport=tcp",
+              "turns:bn-turn1.xirsys.com:443?transport=tcp",
+              "turns:bn-turn1.xirsys.com:5349?transport=tcp"
+            ]
+          }
+        ]
+      });
+      peerConnectionRef.current = pc;
+      stream.getTracks().forEach(track => pc.addTrack(track, stream));
+      pc.onicecandidate = (event) => {
+        if (event.candidate && socket && selectedUser) {
+          socket!.emit('webrtc:ice-candidate', {
+            to: selectedUser.id,
+            from: currentUser!.id,
+            candidate: event.candidate,
+          });
+        }
+      };
+      pc.ontrack = (event) => {
+        setRemoteStream(event.streams[0]);
+      };
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      if (socket && selectedUser) {
+        socket!.emit('webrtc:offer', {
+          to: selectedUser.id,
+          from: currentUser!.id,
+          offer,
+          callType: type,
+        });
+      }
+    } catch (err) {
+      toast.error('Could not start call: ' + err);
+      setIsCallOpen(false);
+    }
+  };
+
+  // Incoming call: Accept
+  const handleAccept = async () => {
+    stopCallSounds();
+    setCallAccepted(true);
+    setIsIncoming(false);
+    try {
+      if (!currentUser) return;
+      // Notify caller to stop calling sound instantly
+      if (socket && callFrom && currentUser) {
+        socket.emit('call:accepted', { to: callFrom, from: currentUser.id });
+      }
+      const stream = await navigator.mediaDevices.getUserMedia(getMediaConstraints(callType));
+      setLocalStream(stream);
+      setCallTo(callFrom);
+      setCallFrom(currentUser.id);
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: ["stun:bn-turn1.xirsys.com"] },
+          {
+            username: "YMdnu0mLvhUm6utweJE76hcGQvYp1uoDHaJBFHYnrtp9ZaiO4jdfOe3GF6qjYR7hAAAAAGhaNFdhYXl1c2htZWhyYQ==",
+            credential: "2efdbc74-50ba-11f0-b047-0242ac140004",
+            urls: [
+              "turn:bn-turn1.xirsys.com:80?transport=udp",
+              "turn:bn-turn1.xirsys.com:3478?transport=udp",
+              "turn:bn-turn1.xirsys.com:80?transport=tcp",
+              "turn:bn-turn1.xirsys.com:3478?transport=tcp",
+              "turns:bn-turn1.xirsys.com:443?transport=tcp",
+              "turns:bn-turn1.xirsys.com:5349?transport=tcp"
+            ]
+          }
+        ]
+      });
+      peerConnectionRef.current = pc;
+      stream.getTracks().forEach(track => pc.addTrack(track, stream));
+      pc.onicecandidate = (event) => {
+        if (event.candidate && socket && callFrom) {
+          socket!.emit('webrtc:ice-candidate', {
+            to: callFrom,
+            from: currentUser.id,
+            candidate: event.candidate,
+          });
+        }
+      };
+      pc.ontrack = (event) => {
+        setRemoteStream(event.streams[0]);
+      };
+      if (socket) {
+        socket.on('webrtc:answer', async ({ answer }: { answer: RTCSessionDescriptionInit }) => {
+          await pc.setRemoteDescription(new RTCSessionDescription(answer));
+          stopCallSounds();
+          setCallAccepted(true);
+        });
+      }
+      // Listen for ICE candidates
+      if (socket) {
+        socket.on('webrtc:ice-candidate', ({ candidate }: { candidate: RTCIceCandidateInit }) => {
+          if (candidate && peerConnectionRef.current && peerConnectionRef.current.signalingState !== 'closed') {
+            peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+          }
+        });
+      }
+      // Set remote offer
+      if (socket && callFrom && lastOfferRef.current) {
+        await pc.setRemoteDescription(new RTCSessionDescription(lastOfferRef.current));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        socket!.emit('webrtc:answer', {
+          to: callFrom,
+          from: currentUser.id,
+          answer,
+        });
+      }
+    } catch (err) {
+      toast.error('Could not accept call: ' + err);
+      setIsCallOpen(false);
+    }
+  };
+
+  // Listen for signaling events
+  useEffect(() => {
+    if (!socket) return;
+    // Incoming offer
+    const handleOffer = async ({ from, offer, callType }: { from: string; offer: RTCSessionDescriptionInit; callType: 'audio' | 'video' }) => {
+      setCallType(callType);
+      setIsIncoming(true);
+      setIsCallOpen(true);
+      setCallFrom(from);
+      setCallTo(currentUser!.id);
+      lastOfferRef.current = offer;
+      setCallAccepted(false);
+    };
+    // Incoming answer
+    const handleAnswer = async ({ answer }: { answer: RTCSessionDescriptionInit }) => {
+      const pc = peerConnectionRef.current;
+      if (pc) {
+        await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        stopCallSounds();
+        setCallAccepted(true);
+      }
+    };
+    // Incoming ICE candidate
+    const handleCandidate = ({ candidate }: { candidate: RTCIceCandidateInit }) => {
+      const pc = peerConnectionRef.current;
+      if (pc && candidate && pc.signalingState !== 'closed') {
+        pc.addIceCandidate(new RTCIceCandidate(candidate));
+      }
+    };
+    // Hangup
+    const handleHangup = () => {
+      console.log('[SIGNAL] webrtc:hangup received, cleaning up call (modal should close)');
+      cleanupCall();
+      setCallAccepted(false);
+    };
+    // Call accepted (for caller to stop calling sound instantly)
+    const handleCallAccepted = () => {
+      stopCallSounds();
+      setCallAccepted(true);
+    };
+    socket.on('webrtc:offer', handleOffer);
+    socket.on('webrtc:answer', handleAnswer);
+    socket.on('webrtc:ice-candidate', handleCandidate);
+    socket.on('webrtc:hangup', handleHangup);
+    socket.on('call:accepted', handleCallAccepted);
+    return () => {
+      socket.off('webrtc:offer', handleOffer);
+      socket.off('webrtc:answer', handleAnswer);
+      socket.off('webrtc:ice-candidate', handleCandidate);
+      socket.off('webrtc:hangup', handleHangup);
+      socket.off('call:accepted', handleCallAccepted);
+    };
+  }, [socket, currentUser?.id]);
+
+  // Cleanup function
+  const cleanupCall = () => {
+    console.log('[DEBUG] cleanupCall called');
+    setIsCallOpen(false);
+    setIsIncoming(false);
+    setIsFullDesktop(false);
+    setLocalStream(null);
+    setRemoteStream(null);
+    setCallAccepted(false);
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
+  };
+
+  // Hangup handler
+  const handleHangup = () => {
+    stopCallSounds();
+    if (socket && (callTo || callFrom)) {
+      console.log('[SIGNAL] Emitting webrtc:hangup to', (callTo || callFrom));
+      socket.emit('webrtc:hangup', {
+        to: (callTo || callFrom)!,
+        from: currentUser!.id,
+      });
+    }
+    cleanupCall();
+  };
+
+  // Decline handler
+  const handleDecline = () => {
+    stopCallSounds();
+    if (socket && callFrom) {
+      socket!.emit('webrtc:hangup', {
+        to: callFrom,
+        from: currentUser!.id,
+      });
+    }
+    cleanupCall();
+  };
+
+  // Call close handler
+  const handleCallClose = () => {
+    stopCallSounds();
+    cleanupCall();
+  };
+
+  // Mute handler (optional, for future)
+  const handleMute = () => {
+    if (localStream) {
+      localStream.getAudioTracks().forEach(track => {
+        track.enabled = !track.enabled;
+      });
+      setIsMuted(!isMuted);
+    }
+  };
+
+  // Play/stop call sounds
+  useEffect(() => {
+    if (isCallOpen && !isIncoming && !callAccepted) {
+      // Outgoing call: play calling.mp3
+      if (!callingAudioRef.current) {
+        callingAudioRef.current = new Audio('/calling.mp3');
+        callingAudioRef.current.loop = true;
+      }
+      callingAudioRef.current.currentTime = 0;
+      callingAudioRef.current.play().catch(() => {});
+    } else if (callingAudioRef.current) {
+      callingAudioRef.current.pause();
+      callingAudioRef.current.currentTime = 0;
+    }
+    if (isCallOpen && isIncoming && !callAccepted) {
+      // Incoming call: play ringtone.mp3
+      if (!ringtoneAudioRef.current) {
+        ringtoneAudioRef.current = new Audio('/ringtone.mp3');
+        ringtoneAudioRef.current.loop = true;
+      }
+      ringtoneAudioRef.current.currentTime = 0;
+      ringtoneAudioRef.current.play().catch(() => {});
+    } else if (ringtoneAudioRef.current) {
+      ringtoneAudioRef.current.pause();
+      ringtoneAudioRef.current.currentTime = 0;
+    }
+    // Cleanup on unmount
+    return () => {
+      if (callingAudioRef.current) {
+        callingAudioRef.current.pause();
+        callingAudioRef.current.currentTime = 0;
+      }
+      if (ringtoneAudioRef.current) {
+        ringtoneAudioRef.current.pause();
+        ringtoneAudioRef.current.currentTime = 0;
+      }
+    };
+  }, [isCallOpen, isIncoming, callAccepted]);
+
+  // Stop sounds on accept, decline, or hangup
+  const stopCallSounds = () => {
+    if (callingAudioRef.current) {
+      callingAudioRef.current.pause();
+      callingAudioRef.current.currentTime = 0;
+    }
+    if (ringtoneAudioRef.current) {
+      ringtoneAudioRef.current.pause();
+      ringtoneAudioRef.current.currentTime = 0;
+    }
+  };
+
   if (!selectedUser || !currentUser) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 rounded-xl">
@@ -317,36 +699,32 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
     const file = e.target.files?.[0];
     if (file) {
       try {
-        // Check file size (limit to 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-          toast.error('Image size should be less than 10MB');
-          return;
-        }
-
         // Check file type
         if (!file.type.startsWith('image/')) {
           toast.error('Only image files are allowed');
           return;
         }
 
-        // Convert image to base64 with additional security measures
-        const base64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            // Add a small random noise to the image data to prevent exact matches
-            const base64Data = reader.result as string;
-            const randomNoise = Math.random().toString(36).substring(7);
-            resolve(`${base64Data}#${randomNoise}`);
-          };
-          reader.readAsDataURL(file);
+        // Upload to Cloudinary
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', 'chatsafari_images');
+
+        const response = await fetch(`https://api.cloudinary.com/v1_1/duzw0d3lr/image/upload`, {
+          method: 'POST',
+          body: formData
         });
 
-        // Create and send image message
+        const result = await response.json();
+
+        if (result.secure_url) {
+          const imageUrl = result.secure_url;
+          // Create and send image message with Cloudinary URL
         const newMessage: Message = {
           id: crypto.randomUUID(),
           senderId: currentUser.id,
           receiverId: selectedUser.id,
-          content: base64,
+            content: imageUrl,
           type: 'image',
           timestamp: Date.now(),
           seen: false,
@@ -369,6 +747,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
         });
         } else {
           toast.error('Connection lost. Please try again.');
+          }
         }
       } catch (error) {
         console.error('Error in handleImageUpload:', error);
@@ -445,323 +824,90 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
     }
   };
 
+  const handleBlockMenuClick = () => {
+    if (selectedUser && currentUser) {
+      if (isBlocked) {
+        // Show unblock confirmation
+        setShowUnblockConfirm(true);
+      } else {
+        // Show block confirmation
+        setShowBlockConfirm(true);
+      }
+    }
+  };
+
+  const handleUnblockConfirm = () => {
+    if (selectedUser && currentUser) {
+      const newBlockedUsers = blockedUsers.filter(id => id !== selectedUser.id);
+      setBlockedUsers(newBlockedUsers);
+      localStorage.setItem('blockedUsers', JSON.stringify(newBlockedUsers));
+      setIsBlocked(false);
+      toast.success(`You have unblocked ${selectedUser.username}`);
+      setShowMenu(false);
+      setShowUnblockConfirm(false);
+    }
+  };
+
+  // Lookup user objects for caller and callee
+  const callerUser = isIncoming ? activeUsers.find(u => u.id === callFrom) : currentUser;
+  const calleeUser = isIncoming ? currentUser : activeUsers.find(u => u.id === callTo);
+
   const renderMessage = (message: Message) => {
     const isCurrentUser = message.senderId === currentUser?.id;
+    const isReceiver = message.receiverId === currentUser?.id;
     const messageClass = isCurrentUser ? 'bg-violet-600 text-white' : 'bg-white text-gray-900';
     const containerClass = isCurrentUser ? 'justify-end' : 'justify-start';
 
+    // Special rendering for call request/consent
+    if (message.type === 'call_request') {
+      // If this is a decline message, just show the text
+      const isDecline = message.content.toLowerCase().includes('declined');
+      return (
+        <div key={message.id} className={`flex ${containerClass} mb-4`}>
+          <div className={`flex flex-col max-w-[90%] ${isCurrentUser ? 'items-end' : 'items-start'}`}>
+            <div className={`rounded-lg px-4 py-2 ${messageClass} shadow-sm break-words w-full`}>
+              <p className="whitespace-pre-wrap break-words">{message.content}</p>
+              {!isDecline && isReceiver && !callConsent && (
+                <div className="flex space-x-2 mt-2">
+                  <button className="bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-full mr-2 transition" onClick={() => handleApproveCall(message)}>Approve</button>
+                  <button onClick={() => handleDeclineCall(message)} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-full transition">Decline</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    if (message.type === 'call_consent') {
+      return (
+        <div key={message.id} className="flex justify-center mb-4">
+          <div className="bg-white border border-gray-200 shadow-sm text-green-800 px-4 py-2 rounded-xl mt-2 text-center">
+            {message.content}
+          </div>
+        </div>
+      );
+    }
+    // Default rendering for other message types
     // Check if the message is an image
     const isImage = message.content.startsWith('data:image/') || 
-                   message.content.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-
+                   message.content.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                   message.content.includes('cloudinary.com');
     return (
       <div key={message.id} className={`flex ${containerClass} mb-4`}>
         <div className={`flex flex-col max-w-[90%] ${isCurrentUser ? 'items-end' : 'items-start'}`}>
           <div className={`rounded-lg px-4 py-2 ${messageClass} shadow-sm break-words w-full`}>
             {isImage ? (
               <div 
-                className="relative group secure-image-container cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  const newWindow = window.open('', '_blank');
-                  if (newWindow) {
-                    newWindow.document.write(`
-                      <html>
-                        <head>
-                          <title>Secure Image View</title>
-                          <style>
-                            @media print {
-                              body * {
-                                visibility: hidden;
-                              }
-                              body {
-                                background: white;
-                              }
-                            }
-                            body {
-                              margin: 0;
-                              background: #000; 
-                              display: flex; 
-                              justify-content: center; 
-                              align-items: center; 
-                              min-height: 100vh;
-                              user-select: none;
-                              -webkit-user-select: none;
-                              -moz-user-select: none;
-                              -ms-user-select: none;
-                              overflow: hidden;
-                              -webkit-print-color-adjust: exact;
-                              print-color-adjust: exact;
-                            }
-                            .image-container {
-                              position: relative;
-                              max-width: 100%;
-                              max-height: 100vh;
-                              display: flex;
-                              justify-content: center;
-                              align-items: center;
-                              -webkit-print-color-adjust: exact;
-                              print-color-adjust: exact;
-                            }
-                            img {
-                              max-width: 100%; 
-                              max-height: 100vh; 
-                              object-fit: contain;
-                              pointer-events: none;
-                              -webkit-user-drag: none;
-                              -khtml-user-drag: none;
-                              -moz-user-drag: none;
-                              -o-user-drag: none;
-                              user-drag: none;
-                              -webkit-touch-callout: none;
-                              -webkit-tap-highlight-color: transparent;
-                              -webkit-print-color-adjust: exact;
-                              print-color-adjust: exact;
-                            }
-                            .close-btn {
-                              position: fixed;
-                              top: 20px;
-                              right: 20px;
-                              background: rgba(0,0,0,0.5);
-                              color: white;
-                              border: none;
-                              border-radius: 50%;
-                              width: 40px;
-                              height: 40px;
-                              cursor: pointer;
-                              display: flex;
-                              align-items: center;
-                              justify-content: center;
-                              z-index: 1000;
-                            }
-                            .watermark {
-                              position: fixed;
-                              bottom: 20px;
-                              right: 20px;
-                              color: rgba(255,255,255,0.3);
-                              font-family: Arial, sans-serif;
-                              font-size: 12px;
-                              pointer-events: none;
-                            }
-                          </style>
-                        </head>
-                        <body>
-                          <button class="close-btn" onclick="window.close()">×</button>
-                          <div class="image-container">
-                            <img src="${message.content}" alt="Full size image">
-                          </div>
-                          <div class="watermark">ChatSafari - Secure Image View</div>
-                          <script>
-                            // Prevent right-click
-                            document.addEventListener('contextmenu', (e) => e.preventDefault());
-                            
-                            // Prevent keyboard shortcuts
-                            document.addEventListener('keydown', (e) => {
-                              if (
-                                (e.ctrlKey && e.key === 'p') || // Print screen
-                                (e.ctrlKey && e.key === 's') || // Save
-                                (e.ctrlKey && e.key === 'u') || // View source
-                                (e.ctrlKey && e.shiftKey && e.key === 'i') || // Developer tools
-                                (e.ctrlKey && e.shiftKey && e.key === 'j') || // Developer console
-                                (e.ctrlKey && e.shiftKey && e.key === 'c') || // Developer inspect
-                                (e.ctrlKey && e.shiftKey && e.key === 'k') || // Developer console
-                                (e.ctrlKey && e.key === 'u') || // View source
-                                (e.key === 'PrintScreen') || // Print screen key
-                                (e.altKey && e.key === 'PrintScreen') || // Alt + Print screen
-                                (e.ctrlKey && e.key === 'c') || // Copy
-                                (e.ctrlKey && e.key === 'v') || // Paste
-                                (e.ctrlKey && e.key === 'x') || // Cut
-                                (e.ctrlKey && e.key === 'a') || // Select all
-                                (e.ctrlKey && e.key === 'z') || // Undo
-                                (e.ctrlKey && e.key === 'y') || // Redo
-                                (e.ctrlKey && e.key === 'r') || // Refresh
-                                (e.ctrlKey && e.key === 'f') || // Find
-                                (e.ctrlKey && e.key === 'g') || // Find next
-                                (e.ctrlKey && e.key === 'h') || // Replace
-                                (e.ctrlKey && e.key === 'l') || // Focus address bar
-                                (e.ctrlKey && e.key === 'w') || // Close tab
-                                (e.ctrlKey && e.key === 't') || // New tab
-                                (e.ctrlKey && e.key === 'n') || // New window
-                                (e.ctrlKey && e.key === 'm') || // Minimize
-                                (e.ctrlKey && e.key === 'b') || // Bold
-                                (e.ctrlKey && e.key === 'i') || // Italic
-                                (e.ctrlKey && e.key === 'u') || // Underline
-                                (e.ctrlKey && e.key === '1') || // Heading 1
-                                (e.ctrlKey && e.key === '2') || // Heading 2
-                                (e.ctrlKey && e.key === '3') || // Heading 3
-                                (e.ctrlKey && e.key === '4') || // Heading 4
-                                (e.ctrlKey && e.key === '5') || // Heading 5
-                                (e.ctrlKey && e.key === '6') || // Heading 6
-                                (e.ctrlKey && e.key === '7') || // Ordered list
-                                (e.ctrlKey && e.key === '8') || // Unordered list
-                                (e.ctrlKey && e.key === '9') || // Subscript
-                                (e.ctrlKey && e.key === '0') || // Superscript
-                                (e.ctrlKey && e.key === '=') || // Zoom in
-                                (e.ctrlKey && e.key === '-') || // Zoom out
-                                (e.ctrlKey && e.key === '0') || // Reset zoom
-                                (e.ctrlKey && e.key === '\\') || // Toggle sidebar
-                                (e.ctrlKey && e.key === ']') || // Indent
-                                (e.ctrlKey && e.key === '[') || // Outdent
-                                (e.ctrlKey && e.key === ';') || // Toggle comment
-                                (e.ctrlKey && e.key === '/') || // Toggle comment
-                                (e.ctrlKey && e.key === 'k') || // Delete line
-                                (e.ctrlKey && e.key === 'd') || // Select word
-                                (e.ctrlKey && e.key === 'e') || // Center line
-                                (e.ctrlKey && e.key === 'f') || // Find
-                                (e.ctrlKey && e.key === 'g') || // Find next
-                                (e.ctrlKey && e.key === 'h') || // Replace
-                                (e.ctrlKey && e.key === 'i') || // Toggle case
-                                (e.ctrlKey && e.key === 'j') || // Join lines
-                                (e.ctrlKey && e.key === 'k') || // Delete line
-                                (e.ctrlKey && e.key === 'l') || // Select line
-                                (e.ctrlKey && e.key === 'm') || // Toggle comment
-                                (e.ctrlKey && e.key === 'n') || // New line
-                                (e.ctrlKey && e.key === 'o') || // Open file
-                                (e.ctrlKey && e.key === 'p') || // Quick open
-                                (e.ctrlKey && e.key === 'q') || // Quit
-                                (e.ctrlKey && e.key === 'r') || // Refresh
-                                (e.ctrlKey && e.key === 's') || // Save
-                                (e.ctrlKey && e.key === 't') || // New tab
-                                (e.ctrlKey && e.key === 'u') || // Undo
-                                (e.ctrlKey && e.key === 'v') || // Paste
-                                (e.ctrlKey && e.key === 'w') || // Close tab
-                                (e.ctrlKey && e.key === 'x') || // Cut
-                                (e.ctrlKey && e.key === 'y') || // Redo
-                                (e.ctrlKey && e.key === 'z') || // Undo
-                                (e.key === 'F12') || // Developer tools
-                                (e.key === 'PrintScreen') || // Print screen
-                                (e.altKey && e.key === 'PrintScreen') || // Alt + Print screen
-                                (e.key === 'F5') || // Refresh
-                                (e.key === 'F11') || // Fullscreen
-                                (e.key === 'F12') || // Developer tools
-                                (e.key === 'Escape') || // Escape
-                                (e.key === 'Tab') || // Tab
-                                (e.key === 'Space') || // Space
-                                (e.key === 'Enter') || // Enter
-                                (e.key === 'Backspace') || // Backspace
-                                (e.key === 'Delete') || // Delete
-                                (e.key === 'Insert') || // Insert
-                                (e.key === 'Home') || // Home
-                                (e.key === 'End') || // End
-                                (e.key === 'PageUp') || // PageUp
-                                (e.key === 'PageDown') || // PageDown
-                                (e.key === 'ArrowLeft') || // ArrowLeft
-                                (e.key === 'ArrowRight') || // ArrowRight
-                                (e.key === 'ArrowUp') || // ArrowUp
-                                (e.key === 'ArrowDown') // ArrowDown
-                              ) {
-                                e.preventDefault();
-                              }
-                            });
-
-                            // Prevent drag and drop
-                            document.addEventListener('dragstart', (e) => e.preventDefault());
-                            document.addEventListener('drop', (e) => e.preventDefault());
-                            document.addEventListener('dragover', (e) => e.preventDefault());
-
-                            // Prevent selection
-                            document.addEventListener('selectstart', (e) => e.preventDefault());
-                            document.addEventListener('select', (e) => e.preventDefault());
-                            document.addEventListener('copy', (e) => e.preventDefault());
-                            document.addEventListener('cut', (e) => e.preventDefault());
-                            document.addEventListener('paste', (e) => e.preventDefault());
-
-                            // Prevent zoom
-                            document.addEventListener('wheel', (e) => {
-                              if (e.ctrlKey) {
-                                e.preventDefault();
-                              }
-                            }, { passive: false });
-
-                            // Prevent touch actions
-                            document.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
-                            document.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-                            document.addEventListener('touchend', (e) => e.preventDefault(), { passive: false });
-
-                            // Prevent dev tools
-                            setInterval(() => {
-                              const devtools = /./;
-                              devtools.toString = function() {
-                                window.close();
-                                return '';
-                              }
-                            }, 1000);
-
-                            // Prevent print dialog
-                            window.onbeforeprint = function() {
-                              window.close();
-                              return false;
-                            };
-
-                            // Prevent print through browser menu
-                            window.onprint = function() {
-                              window.close();
-                              return false;
-                            };
-
-                            // Additional print prevention
-                            window.addEventListener('beforeprint', function(e) {
-                              e.preventDefault();
-                              window.close();
-                              return false;
-                            });
-
-                            // Prevent print through browser menu
-                            window.addEventListener('print', function(e) {
-                              e.preventDefault();
-                              window.close();
-                              return false;
-                            });
-
-                            // Prevent print through browser menu
-                            window.addEventListener('afterprint', function(e) {
-                              e.preventDefault();
-                              window.close();
-                              return false;
-                            });
-
-                            // Prevent print through browser menu
-                            window.addEventListener('beforeunload', function(e) {
-                              e.preventDefault();
-                              window.close();
-                              return false;
-                            });
-
-                            // Prevent print through browser menu
-                            window.addEventListener('unload', function(e) {
-                              e.preventDefault();
-                              window.close();
-                              return false;
-                            });
-
-                            // Prevent print through browser menu
-                            window.addEventListener('load', function(e) {
-                              e.preventDefault();
-                              window.close();
-                              return false;
-                            });
-
-                            // Prevent print through browser menu
-                            window.addEventListener('DOMContentLoaded', function(e) {
-                              e.preventDefault();
-                              window.close();
-                              return false;
-                            });
-                          </script>
-                        </body>
-                      </html>
-                    `);
-                    newWindow.document.close();
-                  }
+                className="relative group cursor-pointer"
+                onClick={() => {
+                  window.open(message.content, '_blank');
                 }}
               >
                 <img
-                  src={isSecureMode ? message.content : 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'}
+                  src={message.content}
                   alt="Shared image"
-                  className="max-w-full h-auto rounded-lg secure-image"
+                  className="max-w-full h-auto rounded-lg"
                 />
-                <div className="secure-image-overlay" />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 rounded-lg flex items-center justify-center">
                   <svg
                     className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
@@ -833,6 +979,84 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
     <div className="flex flex-col h-full">
       {/* Header - Fixed */}
       <div className="shrink-0 p-4 border-b border-gray-200 flex items-center justify-between bg-white">
+        <div className={`flex items-center justify-between w-full${isMobile ? '' : ''}`}>
+          {isMobile ? (
+            <>
+              {/* Avatar and user info */}
+              <div className="flex items-center space-x-2">
+                <div className="relative">
+                  <img
+                    src={selectedUser.avatar}
+                    alt={selectedUser.username}
+                    className="w-12 h-12 rounded-full ring-2 ring-violet-500 ring-offset-2"
+                  />
+                  {selectedUser.isOnline && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-medium text-gray-900">{selectedUser.username}</h3>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-500">{selectedUser.gender}</span>
+                    <span className="text-gray-300">•</span>
+                    <span className="text-sm text-gray-500">{selectedUser.age} years</span>
+                  </div>
+                </div>
+              </div>
+              {/* Call icons and three dots menu tightly grouped on the right */}
+              <div className="flex items-center space-x-1 ml-auto">
+                {!isBlocked && (!callConsent ? (
+                  <button
+                    title={pendingCallRequest ? 'Call request pending...' : 'Request Call'}
+                    onClick={() => { if (!isBlocked) handleRequestCall('video'); }}
+                    className={`text-violet-600 hover:text-violet-800 p-2 rounded-full`}
+                    disabled={pendingCallRequest}
+                    style={{ pointerEvents: pendingCallRequest ? 'none' : 'auto' }}
+                  >
+                    <Phone size={22} />
+                  </button>
+                ) : (
+                  <>
+                    <button title="Audio Call" className="text-violet-600 hover:text-violet-800 p-2 rounded-full" onClick={() => handleStartCall('audio')}>
+                      <Phone size={22} />
+                    </button>
+                    <button title="Video Call" className="text-violet-600 hover:text-violet-800 p-2 rounded-full" onClick={() => handleStartCall('video')}>
+                      <Video size={22} />
+                    </button>
+                  </>
+                ))}
+                {/* Three dots menu at the rightmost position */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowMenu((prev) => !prev)}
+                    className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
+                    title="More options"
+                  >
+                    <MoreVertical size={22} />
+                  </button>
+                  {showMenu && (
+                    <>
+                      {/* Overlay for mobile: clicking closes menu */}
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowMenu(false)}
+                      />
+                      <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        <button
+                          onClick={handleBlockMenuClick}
+                          className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg"
+                        >
+                          {isBlocked ? 'Unblock' : 'Block'}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          ) : (
+            // Desktop layout (unchanged)
+            <>
         <div className="flex items-center space-x-4">
         {isMobile && (
           <button 
@@ -861,18 +1085,50 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
           </div>
         </div>
         </div>
+              <div className={`flex items-center${isMobile ? ' space-x-1' : ' space-x-2'}`}>
+                {!isBlocked && (!callConsent ? (
         <button
-          onClick={handleBlockToggle}
-          className={`${
-            isBlocked 
-              ? 'text-green-600 hover:text-green-700 hover:bg-green-50' 
-              : 'text-red-600 hover:text-red-700 hover:bg-red-50'
-          } transition duration-150 ease-in-out px-3 py-1 rounded-md ${
-            isMobile ? 'text-sm -mt-2 -mr-2' : ''
-          }`}
+                    title={pendingCallRequest ? 'Call request pending...' : 'Request Call'}
+                    onClick={() => { if (!isBlocked) handleRequestCall('video'); }}
+                    className={`ml-4 text-violet-600 hover:text-violet-800 p-2 rounded-full`}
+                    disabled={pendingCallRequest}
+                    style={{ pointerEvents: pendingCallRequest ? 'none' : 'auto' }}
+                  >
+                    <Phone size={22} />
+                  </button>
+                ) : (
+                  <div className={`flex items-center${isMobile ? ' space-x-1 ml-2' : ' space-x-2 ml-4'}`}>
+                    <button title="Audio Call" className="text-violet-600 hover:text-violet-800 p-2 rounded-full" onClick={() => handleStartCall('audio')}>
+                      <Phone size={22} />
+                    </button>
+                    <button title="Video Call" className="text-violet-600 hover:text-violet-800 p-2 rounded-full" onClick={() => handleStartCall('video')}>
+                      <Video size={22} />
+                    </button>
+                  </div>
+                ))}
+                <div className="relative ml-2">
+                  <button
+                    onClick={() => setShowMenu((prev) => !prev)}
+                    className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
+                    title="More options"
+                  >
+                    <MoreVertical size={22} />
+                  </button>
+                  {showMenu && (
+                    <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                      <button
+                        onClick={handleBlockMenuClick}
+                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-t-lg"
         >
           {isBlocked ? 'Unblock' : 'Block'}
         </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Block Confirmation Popup */}
@@ -895,6 +1151,32 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-150 ease-in-out"
               >
                 Block
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unblock Confirmation Popup */}
+      {showUnblockConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Unblock User</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to unblock {selectedUser.username}?
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowUnblockConfirm(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUnblockConfirm}
+                className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition duration-150 ease-in-out"
+              >
+                Unblock
               </button>
             </div>
           </div>
@@ -973,16 +1255,45 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
           </div>
         )}
         {showEmojiPicker && (
-          <div className="absolute bottom-20 right-4">
+          <div className="absolute bottom-20 right-4 z-50">
+            <div className="relative">
+              <button
+                onClick={() => setShowEmojiPicker(false)}
+                className="absolute bottom-2 right-2 text-gray-400 hover:text-gray-600 bg-white rounded-full p-1 shadow focus:outline-none z-50"
+                title="Close"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400 group-hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             <EmojiPicker
               onEmojiClick={(emojiData: EmojiClickData) => {
                 setMessage((prev) => prev + emojiData.emoji);
                 setShowEmojiPicker(false);
               }}
             />
+            </div>
           </div>
         )}
       </div>
+
+      {/* Call Modal */}
+      <CallModal
+        isOpen={isCallOpen}
+        onClose={handleCallClose}
+        isMobile={isMobile}
+        isFullDesktop={isFullDesktop}
+        setIsFullDesktop={setIsFullDesktop}
+        localStream={localStream}
+        remoteStream={remoteStream}
+        callType={callType}
+        caller={callerUser}
+        callee={calleeUser}
+        isIncoming={isIncoming}
+        onAccept={isIncoming ? handleAccept : undefined}
+        onDecline={isIncoming ? handleDecline : undefined}
+        onHangup={handleHangup}
+      />
     </div>
   );
 };
