@@ -254,6 +254,8 @@ io.on('connection', (socket: Socket) => {
     // Send to receiver if online
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('message:receive', { roomId, message: messageWithDelivery });
+      // Send delivery confirmation to sender
+      socket.emit('message:delivered', { messageId: message.id });
     }
 
     // Acknowledge to sender
