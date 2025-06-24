@@ -698,61 +698,68 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ isMobile }) => {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      try {
-        // Check file type
-        if (!file.type.startsWith('image/')) {
-          toast.error('Only image files are allowed');
-          return;
-        }
-
-        // Upload to Cloudinary
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', 'chatsafari_images');
-
-        const response = await fetch(`https://api.cloudinary.com/v1_1/duzw0d3lr/image/upload`, {
-          method: 'POST',
-          body: formData
-        });
-
-        const result = await response.json();
-
-        if (result.secure_url) {
-          const imageUrl = result.secure_url;
-          // Create and send image message with Cloudinary URL
-        const newMessage: Message = {
-          id: crypto.randomUUID(),
-          senderId: currentUser.id,
-          receiverId: selectedUser.id,
-            content: imageUrl,
-          type: 'image',
-          timestamp: Date.now(),
-          seen: false,
-          delivered: false,
-          reactions: [],
-        };
-
-        // Emit the message to the server
-        if (socket) {
-        socket.emit('message:send', newMessage, (error: any) => {
-          if (error) {
-            console.error('Error sending image:', error);
-            toast.error('Failed to send image. Please try again.');
-            return;
-          }
-          
-          // Add message to local state
-          addMessage(newMessage);
-          scrollToBottom();
-        });
-        } else {
-          toast.error('Connection lost. Please try again.');
-          }
-        }
-      } catch (error) {
-        console.error('Error in handleImageUpload:', error);
-        toast.error('Failed to process image. Please try again.');
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast.error('Only image files are allowed');
+        return;
       }
+
+      const uploadPromise = new Promise(async (resolve, reject) => {
+        try {
+          // Upload to Cloudinary
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('upload_preset', 'chatsafari_images');
+
+          const response = await fetch(`https://api.cloudinary.com/v1_1/duzw0d3lr/image/upload`, {
+            method: 'POST',
+            body: formData
+          });
+
+          const result = await response.json();
+
+          if (result.secure_url) {
+            const imageUrl = result.secure_url;
+            const newMessage: Message = {
+              id: crypto.randomUUID(),
+              senderId: currentUser.id,
+              receiverId: selectedUser.id,
+              content: imageUrl,
+              type: 'image',
+              timestamp: Date.now(),
+              seen: false,
+              delivered: false,
+              reactions: [],
+            };
+
+            if (socket) {
+              socket.emit('message:send', newMessage, (error: any) => {
+                if (error) {
+                  console.error('Error sending image:', error);
+                  reject('Failed to send image. Please try again.');
+                } else {
+                  addMessage(newMessage);
+                  scrollToBottom();
+                  resolve('Image sent successfully!');
+                }
+              });
+            } else {
+              reject('Connection lost. Please try again.');
+            }
+          } else {
+            reject('Failed to upload image. Please try again.');
+          }
+        } catch (error) {
+          console.error('Error in handleImageUpload:', error);
+          reject('Failed to process image. Please try again.');
+        }
+      });
+
+      toast.promise(uploadPromise, {
+        loading: 'Image Sending... Please wait!!',
+        success: (message) => `${message}`,
+        error: (err) => `${err}`,
+      });
     }
   };
 
