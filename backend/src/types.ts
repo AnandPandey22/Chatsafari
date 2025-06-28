@@ -17,6 +17,12 @@ export interface Message {
   seen: boolean;
   delivered: boolean;
   reactions: MessageReaction[];
+  replyTo?: {
+    id: string;
+    senderId: string;
+    content: string;
+    type: string;
+  };
 }
 
 export interface MessageReaction {
