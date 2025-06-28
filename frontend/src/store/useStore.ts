@@ -13,9 +13,19 @@ interface ChatStore {
   chatRooms: ChatRoom[];
   activeUsers: User[];
   notifications: { [userId: string]: number };
+  incomingCall: any | null;
+  showCallNotification: boolean;
+  isCallOpen: boolean;
+  isIncoming: boolean;
+  callFrom: string | null;
+  callTo: string | null;
+  callType: 'audio' | 'video';
+  lastOffer: any | null;
+  autoAcceptCall: boolean;
+  isJoiningGroup: boolean;
   setCurrentUser: (user: User) => void;
   setUsers: (users: User[]) => void;
-  addMessage: (message: Message) => void;
+  addMessage: (message: Message | { id: string; delivered: true }) => void;
   updateMessages: (messages: Message[]) => void;
   setSelectedUser: (user: User | null) => void;
   setChatRooms: (rooms: ChatRoom[]) => void;
@@ -27,6 +37,16 @@ interface ChatStore {
   clearNotifications: (userId: string) => void;
   sendMessage: (message: Message) => void;
   restoreSession: () => void;
+  setIncomingCall: (call: any) => void;
+  clearIncomingCall: () => void;
+  setIsCallOpen: (v: boolean) => void;
+  setIsIncoming: (v: boolean) => void;
+  setCallFrom: (v: string | null) => void;
+  setCallTo: (v: string | null) => void;
+  setCallType: (v: 'audio' | 'video') => void;
+  setLastOffer: (v: any | null) => void;
+  setAutoAcceptCall: (v: boolean) => void;
+  setIsJoiningGroup: (v: boolean) => void;
 }
 
 // Using a CDN-hosted notification sound
@@ -60,6 +80,16 @@ const initialState: ChatStore = {
   chatRooms: [],
   activeUsers: [],
   notifications: {},
+  incomingCall: null,
+  showCallNotification: false,
+  isCallOpen: false,
+  isIncoming: false,
+  callFrom: null,
+  callTo: null,
+  callType: 'video',
+  lastOffer: null,
+  autoAcceptCall: false,
+  isJoiningGroup: false,
   setCurrentUser: () => {},
   setUsers: () => {},
   addMessage: () => {},
@@ -73,7 +103,17 @@ const initialState: ChatStore = {
   logout: () => {},
   clearNotifications: () => {},
   sendMessage: () => {},
-  restoreSession: () => {}
+  restoreSession: () => {},
+  setIncomingCall: () => {},
+  clearIncomingCall: () => {},
+  setIsCallOpen: () => {},
+  setIsIncoming: () => {},
+  setCallFrom: () => {},
+  setCallTo: () => {},
+  setCallType: () => {},
+  setLastOffer: () => {},
+  setAutoAcceptCall: () => {},
+  setIsJoiningGroup: () => {}
 };
 
 // Load initial state from localStorage
@@ -91,6 +131,19 @@ const loadInitialState = () => {
   }
   return initialState;
 };
+
+// Static group definitions (should match backend)
+export const GROUPS = [
+  { id: 'group-flirty-vibes', name: 'Flirty Vibes', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=flirty', username: 'Flirty Vibes', gender: 'group' as const, age: 0, isOnline: true },
+  { id: 'group-midnight-chat', name: 'Midnight Chat', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=midnight', username: 'Midnight Chat', gender: 'group' as const, age: 0, isOnline: true },
+  { id: 'group-hot-topics', name: 'Hot Topics', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=hot', username: 'Hot Topics', gender: 'group' as const, age: 0, isOnline: true },
+  { id: 'group-healing-space', name: 'Healing Space', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=healing', username: 'Healing Space', gender: 'group' as const, age: 0, isOnline: true },
+  { id: 'group-naughty-corner', name: 'Naughty Corner', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=naughty', username: 'Naughty Corner', gender: 'group' as const, age: 0, isOnline: true },
+  { id: 'group-singles-room', name: 'Singles Room', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=singles', username: 'Singles Room', gender: 'group' as const, age: 0, isOnline: true },
+  { id: 'group-only-boys', name: 'Only Boys', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=boys', username: 'Only Boys', gender: 'group' as const, age: 0, isOnline: true },
+  { id: 'group-only-girls', name: 'Only Girls', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=girls', username: 'Only Girls', gender: 'group' as const, age: 0, isOnline: true },
+  { id: 'group-teen-zone', name: 'Teen Zone', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=teen', username: 'Teen Zone', gender: 'group' as const, age: 0, isOnline: true },
+];
 
 export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
   ...loadInitialState(),
@@ -146,191 +199,84 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
     }
   },
 
-  addMessage: (message: Message) => {
-    console.log('Adding message:', message);
+  addMessage: (message: Message | { id: string; delivered: true }) => {
     set((state: ChatStore) => {
-      const roomId = [message.senderId, message.receiverId].sort().join('-');
-      
+      // Type guard for delivery update
+      if ('delivered' in message && Object.keys(message).length === 2) {
+        // Only update delivered status in chatRooms and messages
+        const updatedRooms = state.chatRooms.map(room => ({
+          ...room,
+          messages: room.messages.map(msg =>
+            msg.id === message.id ? { ...msg, delivered: true } : msg
+          )
+        }));
+        const updatedMessages = state.messages.map(msg =>
+          msg.id === message.id ? { ...msg, delivered: true } : msg
+        );
+        return {
+          chatRooms: updatedRooms,
+          messages: updatedMessages
+        };
+      }
+      // Full Message object
+      const fullMsg = message as Message;
+      // Use group id as room id for groups, sorted pair for DMs
+      const isGroup = fullMsg.receiverId.startsWith('group-');
+      const roomId = isGroup ? fullMsg.receiverId : [fullMsg.senderId, fullMsg.receiverId].sort().join('-');
       // Find or create the chat room
       let updatedRooms = [...state.chatRooms];
       const roomIndex = updatedRooms.findIndex(room => room.id === roomId);
-      
       if (roomIndex === -1) {
-        // Room doesn't exist, create it
-        const sender = message.senderId.startsWith('bot-') 
-          ? allBotUsers.find(bot => bot.id === message.senderId)
-          : state.users.find(u => u.id === message.senderId);
-        
-        const receiver = message.receiverId.startsWith('bot-')
-          ? allBotUsers.find(bot => bot.id === message.receiverId)
-          : state.users.find(u => u.id === message.receiverId);
-        
-        if (sender && receiver) {
+        let participants;
+        if (isGroup) {
+          // Find group object by id
+          const groupObj = GROUPS.find(g => g.id === fullMsg.receiverId);
+          if (groupObj) {
+            participants = [groupObj];
+          } else {
+            participants = [{ id: fullMsg.receiverId, name: fullMsg.receiverId, avatar: '', username: fullMsg.receiverId, gender: 'group' as const, age: 0, isOnline: true }];
+          }
+        } else {
+          const sender = fullMsg.senderId.startsWith('bot-') 
+            ? allBotUsers.find(bot => bot.id === fullMsg.senderId)
+            : state.users.find(u => u.id === fullMsg.senderId);
+          const receiver = fullMsg.receiverId.startsWith('bot-')
+            ? allBotUsers.find(bot => bot.id === fullMsg.receiverId)
+            : state.users.find(u => u.id === fullMsg.receiverId);
+          participants = [sender, receiver];
+        }
+        if (participants.every(Boolean)) {
           updatedRooms.push({
             id: roomId,
-            participants: [sender, receiver],
-            messages: [message],
-            lastMessage: message
+            participants: participants as User[],
+            messages: [fullMsg],
+            lastMessage: fullMsg
           });
-
-          // If receiver is a bot and sender is not a bot, trigger bot response
-          if (receiver.id.startsWith('bot-') && !sender.id.startsWith('bot-')) {
-            // Check if user has already received a response from this bot
-            if (!hasUserReceivedResponse(sender.id, receiver.id)) {
-              const { sendMessage } = get();
-              const botUser = receiver;
-
-              // Update bot's online status and show them as active
-              set(state => ({
-                activeUsers: state.activeUsers.map(user => 
-                  user.id === botUser.id ? { ...user, isOnline: true } : user
-                )
-              }));
-
-              // Calculate reading time based on message length
-              const wordsPerMinute = 200; // Average reading speed
-              const wordCount = message.content.split(' ').length;
-              const readingTimeMs = (wordCount / wordsPerMinute) * 60 * 1000;
-              const minReadingTime = 1000; // Minimum 1 second to read
-              const actualReadingTime = Math.max(minReadingTime, Math.min(readingTimeMs, 5000));
-
-              // After reading time, show typing indicator
-              setTimeout(() => {
-                set(state => ({
-                  activeUsers: state.activeUsers.map(user => 
-                    user.id === botUser.id ? { ...user, isTyping: true } : user
-                  )
-                }));
-
-                // Calculate typing time based on response length
-                const typingSpeed = 40; // words per minute
-                const responseLength = 20; // Fixed length for greeting
-                const typingTimeMs = (responseLength / (typingSpeed * 5)) * 60 * 1000;
-                const minTypingTime = 1500;
-                const actualTypingTime = Math.max(minTypingTime, Math.min(typingTimeMs, 4000));
-
-                // After typing time, send response
-                setTimeout(() => {
-                  set(state => ({
-                    activeUsers: state.activeUsers.map(user => 
-                      user.id === botUser.id ? { ...user, isTyping: false } : user
-                    )
-                  }));
-
-                  const botResponse: Message = {
-                    id: crypto.randomUUID(),
-                    senderId: botUser.id,
-                    receiverId: sender.id,
-                    content: generateBotResponse(`${sender.id}|${message.content}`, botUser.id),
-                    timestamp: Date.now(),
-                    type: 'text',
-                    seen: false,
-                    delivered: true,
-                    reactions: []
-                  };
-
-                  sendMessage(botResponse);
-                }, actualTypingTime);
-              }, actualReadingTime);
-            }
-          }
         }
       } else {
         // Room exists, update its messages
         const existingMessages = updatedRooms[roomIndex].messages;
         // Check if message already exists to prevent duplicates
-        if (!existingMessages.some(m => m.id === message.id)) {
+        if (!existingMessages.some(m => m.id === fullMsg.id)) {
           updatedRooms[roomIndex] = {
             ...updatedRooms[roomIndex],
-            messages: [...existingMessages, message],
-            lastMessage: message
+            messages: [...existingMessages, fullMsg],
+            lastMessage: fullMsg
           };
-
-          // If this is a user message to a bot, trigger bot response
-          const receiver = updatedRooms[roomIndex].participants.find(p => p.id === message.receiverId);
-          const sender = updatedRooms[roomIndex].participants.find(p => p.id === message.senderId);
-          if (receiver && sender && receiver.id.startsWith('bot-') && !sender.id.startsWith('bot-')) {
-            // Check if user has already received a response from this bot
-            if (!hasUserReceivedResponse(sender.id, receiver.id)) {
-              const botUser = receiver;
-
-              // Update bot's online status and show them as active
-              set(state => ({
-                activeUsers: state.activeUsers.map(user => 
-                  user.id === botUser.id ? { ...user, isOnline: true } : user
-                )
-              }));
-
-              // Calculate reading time based on message length
-              const wordsPerMinute = 200; // Average reading speed
-              const wordCount = message.content.split(' ').length;
-              const readingTimeMs = (wordCount / wordsPerMinute) * 60 * 1000;
-              const minReadingTime = 1000; // Minimum 1 second to read
-              const actualReadingTime = Math.max(minReadingTime, Math.min(readingTimeMs, 5000));
-
-              // After reading time, show typing indicator
-              setTimeout(() => {
-                set(state => ({
-                  activeUsers: state.activeUsers.map(user => 
-                    user.id === botUser.id ? { ...user, isTyping: true } : user
-                  )
-                }));
-
-                // Calculate typing time based on response length
-                const typingSpeed = 40; // words per minute
-                const responseLength = 20; // Fixed length for greeting
-                const typingTimeMs = (responseLength / (typingSpeed * 5)) * 60 * 1000;
-                const minTypingTime = 1500;
-                const actualTypingTime = Math.max(minTypingTime, Math.min(typingTimeMs, 4000));
-
-                // After typing time, send response
-                setTimeout(() => {
-                  set(state => ({
-                    activeUsers: state.activeUsers.map(user => 
-                      user.id === botUser.id ? { ...user, isTyping: false } : user
-                    )
-                  }));
-
-                  const botResponse: Message = {
-                    id: crypto.randomUUID(),
-                    senderId: botUser.id,
-                    receiverId: sender.id,
-                    content: generateBotResponse(`${sender.id}|${message.content}`, botUser.id),
-                    timestamp: Date.now(),
-                    type: 'text',
-                    seen: false,
-                    delivered: true,
-                    reactions: []
-                  };
-
-                  const { sendMessage } = get();
-                  sendMessage(botResponse);
-                }, actualTypingTime);
-              }, actualReadingTime);
-            }
-          }
         }
       }
-
-      // Store chat rooms in localStorage
-      localStorage.setItem('chatRooms', JSON.stringify(updatedRooms));
-
-      // Check if this message belongs to the current chat
-      const selectedUser = state.selectedUser;
-      const currentUser = state.currentUser;
-      
-      if (selectedUser && currentUser) {
-        const currentRoomId = [currentUser.id, selectedUser.id].sort().join('-');
+      // If this is the current chat, update messages list
+      if (!state.selectedUser || !state.currentUser) return { chatRooms: updatedRooms };
+      const currentRoomId = state.selectedUser.isGroup
+        ? state.selectedUser.id
+        : [state.currentUser.id, state.selectedUser.id].sort().join('-');
         if (currentRoomId === roomId) {
-          console.log('Updating current chat messages');
-          const updatedMessages = [...state.messages, message];
+        const updatedMessages = [...state.messages, fullMsg];
           return {
             chatRooms: updatedRooms,
             messages: updatedMessages
           };
         }
-      }
-
       return { chatRooms: updatedRooms };
     });
   },
@@ -342,24 +288,46 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
   },
 
   setSelectedUser: (user: User | null) => {
+    const { socket, currentUser, selectedUser } = get();
+    // If leaving a group, emit group:leave for the previous group
+    if (selectedUser && selectedUser.isGroup && socket && currentUser && (!user || user.id !== selectedUser.id)) {
+      socket.emit('group:leave', { groupId: selectedUser.id, userId: currentUser.id });
+      // Fetch updated count for the group just left
+      socket.emit('group:getActiveMembers', selectedUser.id, (count: number) => {
+        // Optionally update groupCounts in UserList via a global event or state
+        // (handled by UserList socket listener)
+      });
+    }
     if (user) {
       // Store selected user in localStorage
       localStorage.setItem('selectedUser', JSON.stringify(user));
-      
       set(state => {
         const currentUser = state.currentUser;
         if (!currentUser) return { selectedUser: user };
-
-        // Get the room ID
-        const roomId = [currentUser.id, user.id].sort().join('-');
-        console.log('Setting selected user, room ID:', roomId);
-        
+        // Determine room id: group id for groups, sorted pair for DMs
+        const isGroup = user.isGroup;
+        const roomId = isGroup ? user.id : [currentUser.id, user.id].sort().join('-');
         // Find existing room and messages
-        const room = state.chatRooms.find(r => r.id === roomId);
-        const messages = room?.messages || [];
-        
-        // Only request message history from server if the selected user is not a bot
-        if (state.socket?.connected && !user.id.startsWith('bot-')) {
+        let room = state.chatRooms.find(r => r.id === roomId);
+        let messages = room?.messages || [];
+        if (isGroup && !room) {
+          // Create group chat room if missing
+          const groupObj = GROUPS.find(g => g.id === user.id);
+          if (groupObj) {
+            const newRoom: ChatRoom = {
+              id: roomId,
+              participants: [groupObj],
+              messages: [],
+              lastMessage: undefined
+            };
+            const updatedRooms = [...state.chatRooms, newRoom];
+            localStorage.setItem('chatRooms', JSON.stringify(updatedRooms));
+            set({ chatRooms: updatedRooms });
+            messages = [];
+          }
+        }
+        // Always request message history from server for groups and DMs (except bots)
+        if (state.socket?.connected && (!user.id.startsWith('bot-'))) {
           state.socket.emit('get:messages', roomId);
         } else if (user.id.startsWith('bot-')) {
           // For bot users, ensure we have a chat room
@@ -370,20 +338,17 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
               messages: [],
               lastMessage: undefined
             };
-            
             // Update chat rooms
             const updatedRooms = [...state.chatRooms, newRoom];
             localStorage.setItem('chatRooms', JSON.stringify(updatedRooms));
             set({ chatRooms: updatedRooms });
           }
         }
-        
         // Clear notifications for this user
         const updatedNotifications = {
           ...state.notifications,
           [user.id]: 0
         };
-        
         return {
           selectedUser: user,
           messages,
@@ -465,15 +430,26 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
     newSocket.on('users:update', (users: User[]) => {
       console.log('Received users update:', users);
       const { currentUser } = get();
-      
-      // Separate real users and bots
+      // Separate real users (excluding self)
       const realUsers = users.filter(u => !u.id.startsWith('bot-') && u.id !== currentUser?.id);
-      const botUsers = users.filter(u => u.id.startsWith('bot-'));
-      
+      // Always get the latest bot users (ensures they are present and online)
+      const updatedBotUsers = updateBotUsersStatus();
       // Update state with real users first, then bots
       set({ 
-        activeUsers: [...realUsers, ...botUsers],
+        activeUsers: [...realUsers, ...updatedBotUsers],
         users: users // Store all users for reference
+      });
+    });
+
+    // Listen for avatar updates
+    newSocket.on('user:avatarUpdated', ({ userId, avatar }: { userId: string, avatar: string }) => {
+      set(state => {
+        const updateAvatar = (arr: User[]) => arr.map(u => u.id === userId ? { ...u, avatar } : u);
+        return {
+          users: updateAvatar(state.users),
+          activeUsers: updateAvatar(state.activeUsers),
+          currentUser: state.currentUser && state.currentUser.id === userId ? { ...state.currentUser, avatar } : state.currentUser
+        };
       });
     });
 
@@ -526,7 +502,9 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
         const selectedUser = state.selectedUser;
         const currentUser = state.currentUser;
         if (selectedUser && currentUser) {
-          const currentRoomId = [currentUser.id, selectedUser.id].sort().join('-');
+          const currentRoomId = state.selectedUser.isGroup
+            ? state.selectedUser.id
+            : [currentUser.id, selectedUser.id].sort().join('-');
           if (currentRoomId === roomId) {
             console.log('Updating current chat with history');
             return {
@@ -581,7 +559,10 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
       if (message.senderId !== currentUser?.id && 
           selectedUser?.id !== message.senderId && 
           !blockedUsers.includes(message.senderId)) {
+        const soundEnabled = localStorage.getItem('notificationSoundEnabled');
+        if (soundEnabled === null || soundEnabled === 'true') {
         notificationSound.play().catch(console.error);
+        }
         // Update notification count
         set(state => ({
           notifications: {
@@ -590,6 +571,39 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
           }
         }));
       }
+    });
+
+    newSocket.on('groupMessage', ({ groupId, message }: { groupId: string, message: Message }) => {
+      const { selectedUser } = get();
+      console.log('Received group message', groupId, message);
+      // Only add message if currently viewing this group
+      if (selectedUser && selectedUser.isGroup && selectedUser.id === groupId) {
+        get().addMessage(message);
+      }
+    });
+
+    newSocket.on('group:removeUserMessages', ({ groupId, userId }: { groupId: string, userId: string }) => {
+      set(state => {
+        // Remove messages from the specified user in the specified group
+        const updatedRooms = state.chatRooms.map(room => {
+          if (room.id === groupId) {
+            return {
+              ...room,
+              messages: room.messages.filter(msg => msg.senderId !== userId)
+            };
+          }
+          return room;
+        });
+        // If this is the current chat, update messages list
+        let updatedMessages = state.messages;
+        if (state.selectedUser && state.selectedUser.isGroup && state.selectedUser.id === groupId) {
+          updatedMessages = state.messages.filter(msg => msg.senderId !== userId);
+        }
+        return {
+          chatRooms: updatedRooms,
+          messages: updatedMessages
+        };
+      });
     });
 
     // Connect the socket
@@ -617,7 +631,7 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
     localStorage.removeItem('chatRooms');
     localStorage.removeItem('messages');
     localStorage.removeItem('selectedUser');
-    
+    localStorage.removeItem('recentDMUserIds');
     set({
       socket: null,
       currentUser: null,
@@ -626,7 +640,17 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
       selectedUser: null,
       chatRooms: [],
       activeUsers: [],
-      notifications: {}
+      notifications: {},
+      incomingCall: null,
+      showCallNotification: false,
+      isCallOpen: false,
+      isIncoming: false,
+      callFrom: null,
+      callTo: null,
+      callType: 'video',
+      lastOffer: null,
+      autoAcceptCall: false,
+      isJoiningGroup: false
     });
     // Redirect to Chatsafari homepage
     window.location.href = 'https://chatsafari.com';
@@ -642,106 +666,21 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
   },
 
   sendMessage: (message: Message) => {
-    const { socket } = get();
-    if (socket) {
-      console.log('Sending message:', message);
-      
-      // Add message immediately to local state for instant feedback
+    const { socket, selectedUser } = get();
+    if (!socket || !selectedUser) return;
+    const isGroup = !!selectedUser && selectedUser.isGroup;
+    if (isGroup) {
+      socket.emit('groupMessage', { groupId: selectedUser.id, message }, (error: any) => {
+        if (!error) {
       get().addMessage(message);
-
-      // Check if recipient is a bot
-      const recipientId = message.receiverId;
-      if (recipientId.startsWith('bot-')) {
-        // Check if user has already received a response from this bot
-        if (hasUserReceivedResponse(message.senderId, recipientId)) {
-          // User has already received a response, do nothing
-          return;
         }
-
-        // Handle bot messages locally without server involvement
-        const botUser = allBotUsers.find(bot => bot.id === recipientId);
-        if (botUser) {
-          // Get bot response
-          const botResponseContent = generateBotResponse(`${message.senderId}|${message.content}`, recipientId);
-          
-          // Only proceed with typing animation and response if we have content
-          if (botResponseContent) {
-            // Calculate reading time based on message length and complexity
-            const wordsPerMinute = 200; // Average reading speed
-            const wordCount = message.content.split(' ').length;
-            const readingTimeMs = (wordCount / wordsPerMinute) * 60 * 1000;
-            const minReadingTime = 1000; // Minimum 1 second to read
-            const actualReadingTime = Math.max(minReadingTime, Math.min(readingTimeMs, 5000)); // Cap at 5 seconds
-
-            // Calculate typing speed (average 40 WPM)
-            const typingSpeed = 40; // words per minute
-            const responseLength = 20; // Fixed length for greeting
-            const typingTimeMs = (responseLength / (typingSpeed * 5)) * 60 * 1000; // 5 chars per word
-            const minTypingTime = 1500; // Minimum 1.5 seconds to type
-            const actualTypingTime = Math.max(minTypingTime, Math.min(typingTimeMs, 4000));
-
-            // First, bot reads the message (no typing indicator)
-            setTimeout(() => {
-              // After reading, show typing indicator
-              set(state => ({
-                activeUsers: state.activeUsers.map(user => 
-                  user.id === recipientId ? { ...user, isTyping: true } : user
-                )
-              }));
-
-              // Then bot types and sends response
-              setTimeout(() => {
-                // Stop typing indicator
-                set(state => ({
-                  activeUsers: state.activeUsers.map(user => 
-                    user.id === recipientId ? { ...user, isTyping: false } : user
-                  )
-                }));
-
-                // Create and send bot response
-                const botResponse: Message = {
-                  id: crypto.randomUUID(),
-                  senderId: recipientId,
-                  receiverId: message.senderId,
-                  content: botResponseContent,
-                  timestamp: Date.now(),
-                  type: 'text',
-                  seen: false,
-                  delivered: true,
-                  reactions: []
-                };
-
-                // Add bot response to local state and chat room
-                get().addMessage(botResponse);
-
-                // Store in localStorage
-                const roomId = [message.senderId, recipientId].sort().join('-');
-                const chatRooms = JSON.parse(localStorage.getItem('chatRooms') || '[]');
-                const roomIndex = chatRooms.findIndex((room: ChatRoom) => room.id === roomId);
-                
-                if (roomIndex !== -1) {
-                  chatRooms[roomIndex].messages.push(botResponse);
-                  chatRooms[roomIndex].lastMessage = botResponse;
+      });
                 } else {
-                  const currentUser = get().currentUser;
-                  if (currentUser) {
-                    chatRooms.push({
-                      id: roomId,
-                      participants: [currentUser, botUser],
-                      messages: [message, botResponse],
-                      lastMessage: botResponse
-                    });
-                  }
-                }
-                localStorage.setItem('chatRooms', JSON.stringify(chatRooms));
-              }, actualTypingTime);
-            }, actualReadingTime);
-          }
-        }
-      } else {
-        // For non-bot recipients, send message to server
-        socket.emit('message:send', message);
+      socket.emit('message:send', message, (error: any) => {
+        if (!error) {
+          get().addMessage(message);
       }
+      });
     }
   },
 
@@ -762,7 +701,7 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
         // If we have a selected user, get their messages from chat rooms
         let messages = [];
         if (selectedUser) {
-          const roomId = [user.id, selectedUser.id].sort().join('-');
+          const roomId = selectedUser.isGroup ? selectedUser.id : [user.id, selectedUser.id].sort().join('-');
           const room = chatRooms.find((r: ChatRoom) => r.id === roomId);
           if (room) {
             messages = room.messages;
@@ -813,5 +752,16 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
         localStorage.removeItem('selectedUser');
       }
     }
-  }
+  },
+
+  setIncomingCall: (call) => set({ incomingCall: call, showCallNotification: true }),
+  clearIncomingCall: () => set({ incomingCall: null, showCallNotification: false }),
+  setIsCallOpen: (v) => set({ isCallOpen: v }),
+  setIsIncoming: (v) => set({ isIncoming: v }),
+  setCallFrom: (v: string | null) => set({ callFrom: v }),
+  setCallTo: (v: string | null) => set({ callTo: v }),
+  setCallType: (v: 'audio' | 'video') => set({ callType: v }),
+  setLastOffer: (v) => set({ lastOffer: v }),
+  setAutoAcceptCall: (v: boolean) => set({ autoAcceptCall: v }),
+  setIsJoiningGroup: (v: boolean) => set({ isJoiningGroup: v })
 }));
