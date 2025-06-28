@@ -1,10 +1,11 @@
 export interface User {
   id: string;
   username: string;
-  gender: 'male' | 'female';
+  gender: 'male' | 'female' | 'group';
   age: number;
   isOnline: boolean;
   avatar: string;
+  isGroup?: boolean;
 }
 
 export interface Message {
@@ -12,12 +13,18 @@ export interface Message {
   senderId: string;
   receiverId: string;
   content: string;
- type: 'text' | 'image' | 'emoji' | 'call_request' | 'call_consent';
+  type: 'text' | 'image' | 'emoji' | 'call_request' | 'call_consent';
   timestamp: number;
   seen: boolean;
   delivered: boolean;
   reactions: MessageReaction[];
   sender?: User;
+  replyTo?: {
+    id: string;
+    senderId: string;
+    content: string;
+    type: string;
+  };
 }
 
 export interface MessageReaction {
