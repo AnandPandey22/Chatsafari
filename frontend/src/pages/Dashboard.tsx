@@ -5,6 +5,7 @@ import ChatWindow from '../components/ChatWindow';
 import { LogOut, Menu, X, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import { toast } from 'react-hot-toast';
 
 
 const Dashboard: React.FC = () => {
@@ -15,9 +16,23 @@ const Dashboard: React.FC = () => {
   const hasOpenedFirstChat = useRef(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession } = useStore();
+  const { currentUser, logout, selectedUser, notifications, setSelectedUser, activeUsers, restoreSession, socket } = useStore();
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
 
-
+  // Use genderFilter as a state variable, sync with localStorage and UserList
+  const [genderFilter, setGenderFilter] = useState(() => localStorage.getItem('genderFilter') || 'all');
+  useEffect(() => {
+    const onStorage = () => {
+      setGenderFilter(localStorage.getItem('genderFilter') || 'all');
+    };
+    window.addEventListener('storage', onStorage);
+    // Also update on mount in case UserList changed it in same tab
+    const interval = setInterval(onStorage, 200);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      clearInterval(interval);
+    };
+  }, []);
   
   // Restore session on mount
   useEffect(() => {
@@ -295,11 +310,107 @@ const Dashboard: React.FC = () => {
       )}
       
       {/* Fixed Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm flex-none z-10">
+      <header className="bg-white border-b border-gray-200 shadow-sm flex-none z-10 relative">
+        {/* Absolutely positioned user profile at top left */}
+        {currentUser && (
+          <div className="absolute top-0 left-0 h-16 flex items-center space-x-3 pl-[15px] md:pl-[30px] z-20 cursor-pointer" onClick={() => setShowProfilePopup(true)}>
+            <img
+              src={currentUser.avatar}
+              alt={currentUser.username}
+              className="w-8 h-8 rounded-full ring-2 ring-violet-500 ring-offset-2"
+            />
+            <div className="hidden sm:block">
+              <p className="text-sm font-medium text-gray-900">
+                Hi, {currentUser.username}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Profile Popup */}
+        {showProfilePopup && currentUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-lg shadow-lg p-8 max-w-xs w-full relative">
+              <button
+                className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                onClick={() => setShowProfilePopup(false)}
+              >
+                <X size={22} />
+              </button>
+              <div className="flex flex-col items-center space-y-4">
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.username}
+                  className="w-24 h-24 rounded-full ring-2 ring-violet-500 ring-offset-2 object-cover"
+                />
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-gray-900">{currentUser.username}</h3>
+                  <div className="flex items-center justify-center space-x-2 mt-1">
+                    <span className="text-sm text-gray-500">{currentUser.gender}</span>
+                    <span className="text-gray-300">•</span>
+                    <span className="text-sm text-gray-500">{currentUser.age} years</span>
+                  </div>
+                </div>
+                <label className="block w-full">
+                  <span className="sr-only">Change Profile Picture</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    id="profile-pic-upload"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (!file.type.startsWith('image/')) {
+                        toast.error('Only image files are allowed');
+                        return;
+                      }
+                      let toastId;
+                      try {
+                        toastId = toast.loading('Uploading...');
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('upload_preset', 'chatsafari_images');
+                        const response = await fetch('https://api.cloudinary.com/v1_1/duzw0d3lr/image/upload', {
+                          method: 'POST',
+                          body: formData
+                        });
+                        const result = await response.json();
+                        if (result.secure_url) {
+                          // Update avatar in frontend
+                          if (currentUser && socket) {
+                            socket.emit('user:updateAvatar', { userId: currentUser.id, avatar: result.secure_url });
+                            // Update localStorage
+                            const updatedUser = { ...currentUser, avatar: result.secure_url };
+                            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                          }
+                          toast.success('Profile picture updated!', { id: toastId });
+                          setShowProfilePopup(false);
+                        } else {
+                          toast.error('Failed to upload image', { id: toastId });
+                        }
+                      } catch (err) {
+                        toast.error('Failed to upload image', { id: toastId });
+                      }
+                    }}
+                  />
+                  <button
+                    className="mt-2 w-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-2 px-4 rounded-lg transition"
+                    type="button"
+                    onClick={() => document.querySelector<HTMLInputElement>('#profile-pic-upload')?.click()}
+                  >
+                    Change Profile Picture
+                  </button>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Left section - Empty to help with centering */}
-            <div className="w-20"></div>
+            {/* Left section - Empty for centering */}
+            <div className="w-8"></div>
 
             {/* Center section - Brand */}
             <div className="flex-1 flex justify-center">
@@ -420,6 +531,28 @@ const Dashboard: React.FC = () => {
          <div className={`${isMobile ? 'h-[410px]' : 'h-[530px]'} overflow-hidden ${isMobile ? 'pt-[30px] bg-violet-50' : ''}`}>
             {selectedUser ? (
               <ChatWindow isMobile={isMobile} />
+            ) : genderFilter === 'groups' ? (
+              <div className="h-full flex items-center justify-center bg-gray-50 rounded-xl">
+                <div className="text-center">
+                  <div className="text-gray-400 mb-4">
+                    <svg
+                      className="mx-auto h-12 w-12"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900">Select a group to start chatting</h3>
+                  <p className="mt-1 text-sm text-gray-500">Choose any group from the list to begin a conversation</p>
+                </div>
+              </div>
             ) : (
               <div className="h-full flex items-center justify-center bg-gray-50 rounded-xl">
                 <div className="text-center">
