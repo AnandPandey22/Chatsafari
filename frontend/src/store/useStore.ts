@@ -266,17 +266,20 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
         }
       }
       // If this is the current chat, update messages list
-      if (!state.selectedUser || !state.currentUser) return { chatRooms: updatedRooms };
-      const currentRoomId = state.selectedUser.isGroup
-        ? state.selectedUser.id
-        : [state.currentUser.id, state.selectedUser.id].sort().join('-');
+      const selectedUser = state.selectedUser;
+      const currentUser = state.currentUser;
+      if (selectedUser && currentUser) {
+        const currentRoomId = selectedUser.isGroup
+          ? selectedUser.id
+          : [currentUser.id, selectedUser.id].sort().join('-');
         if (currentRoomId === roomId) {
-        const updatedMessages = [...state.messages, fullMsg];
+          const updatedMessages = [...state.messages, fullMsg];
           return {
             chatRooms: updatedRooms,
             messages: updatedMessages
           };
         }
+      }
       return { chatRooms: updatedRooms };
     });
   },
@@ -502,8 +505,8 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
         const selectedUser = state.selectedUser;
         const currentUser = state.currentUser;
         if (selectedUser && currentUser) {
-          const currentRoomId = state.selectedUser.isGroup
-            ? state.selectedUser.id
+          const currentRoomId = selectedUser.isGroup
+            ? selectedUser.id
             : [currentUser.id, selectedUser.id].sort().join('-');
           if (currentRoomId === roomId) {
             console.log('Updating current chat with history');
@@ -596,7 +599,8 @@ export const useStore = create<ChatStore>((set: SetState, get: GetState) => ({
         });
         // If this is the current chat, update messages list
         let updatedMessages = state.messages;
-        if (state.selectedUser && state.selectedUser.isGroup && state.selectedUser.id === groupId) {
+        const selectedUser = state.selectedUser;
+        if (selectedUser && selectedUser.isGroup && selectedUser.id === groupId) {
           updatedMessages = state.messages.filter(msg => msg.senderId !== userId);
         }
         return {
