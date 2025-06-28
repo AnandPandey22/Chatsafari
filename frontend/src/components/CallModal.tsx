@@ -38,7 +38,7 @@ const CallModal: React.FC<CallModalProps> = ({
   // Color scheme (declare only once)
   const bgColor = 'bg-[#f3e8ff]'; // light violet
   const btnViolet = 'bg-violet-700 hover:bg-violet-800';
-  const btnVioletInactive = 'bg-violet-200 hover:bg-violet-300 text-violet-500';
+  const btnVioletInactive = 'bg-violet-300 hover:bg-violet-400 text-violet-700';
   const btnRed = 'bg-red-500 hover:bg-red-600';
   const textViolet = 'text-violet-700';
 
@@ -263,18 +263,19 @@ const CallModal: React.FC<CallModalProps> = ({
               <>
                 {/* Mute (left) */}
                 <button
-                  className={(isMuted ? btnVioletInactive : btnViolet) + " text-white w-12 h-12 rounded-full flex items-center justify-center text-xl shadow focus:outline-none"}
+                  className={(isMuted ? btnVioletInactive : btnViolet) + " text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow focus:outline-none"}
                   title={isMuted ? 'Unmute' : 'Mute'}
                   onClick={() => setIsMuted(m => !m)}
                 >
                   {isMuted ? (
-                    // Mic off icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-6-6m0 0l-6 6m6-6V5a3 3 0 016 0v8m0 0l6 6" />
+                    // Mic off icon with larger/thicker slash
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19v2m0 0a7 7 0 01-7-7h2a5 5 0 0010 0h2a7 7 0 01-7 7zm0-7a3 3 0 003-3V5a3 3 0 00-6 0v4a3 3 0 003 3z" />
+                      <line x1="2" y1="22" x2="22" y2="2" stroke="currentColor" strokeWidth="3" />
                     </svg>
                   ) : (
-                    // Mic icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                    // Normal mic icon
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19v2m0 0a7 7 0 01-7-7h2a5 5 0 0010 0h2a7 7 0 01-7 7zm0-7a3 3 0 003-3V5a3 3 0 00-6 0v4a3 3 0 003 3z" />
                     </svg>
                   )}
@@ -286,23 +287,26 @@ const CallModal: React.FC<CallModalProps> = ({
                   </svg>
                 </button>
                 {/* Video toggle (right) */}
+                {callType === 'video' && (
                 <button
-                  className={(isVideoOff ? btnVioletInactive : btnViolet) + " text-white w-12 h-12 rounded-full flex items-center justify-center text-xl shadow focus:outline-none"}
+                    className={(isVideoOff ? btnVioletInactive : btnViolet) + " text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow focus:outline-none"}
                   title={isVideoOff ? 'Enable Video' : 'Disable Video'}
                   onClick={() => setIsVideoOff(v => !v)}
                 >
                   {isVideoOff ? (
-                    // Video off icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                      // Video off icon with larger/thicker slash
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z" />
+                        <line x1="2" y1="22" x2="22" y2="2" stroke="currentColor" strokeWidth="3" />
                     </svg>
                   ) : (
-                    // Video icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                      // Normal video icon
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z" />
                     </svg>
                   )}
                 </button>
+                )}
               </>
             )}
           </div>
@@ -385,12 +389,13 @@ const CallModal: React.FC<CallModalProps> = ({
                   onClick={() => setIsMuted(m => !m)}
                 >
                   {isMuted ? (
-                    // Mic off icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-6-6m0 0l-6 6m6-6V5a3 3 0 016 0v8m0 0l6 6" />
+                    // Mic off icon with larger/thicker slash
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19v2m0 0a7 7 0 01-7-7h2a5 5 0 0010 0h2a7 7 0 01-7 7zm0-7a3 3 0 003-3V5a3 3 0 00-6 0v4a3 3 0 003 3z" />
+                      <line x1="2" y1="22" x2="22" y2="2" stroke="currentColor" strokeWidth="3" />
                     </svg>
                   ) : (
-                    // Mic icon
+                    // Normal mic icon
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19v2m0 0a7 7 0 01-7-7h2a5 5 0 0010 0h2a7 7 0 01-7 7zm0-7a3 3 0 003-3V5a3 3 0 00-6 0v4a3 3 0 003 3z" />
                     </svg>
@@ -403,24 +408,26 @@ const CallModal: React.FC<CallModalProps> = ({
                   </svg>
                 </button>
                 {/* Video toggle (right) */}
+                {callType === 'video' && (
                 <button
                   className={(isVideoOff ? btnVioletInactive : btnViolet) + " text-white w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow focus:outline-none"}
                   title={isVideoOff ? 'Enable Video' : 'Disable Video'}
                   onClick={() => setIsVideoOff(v => !v)}
                 >
                   {isVideoOff ? (
-                    // Video off icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
+                      // Video off icon with larger/thicker slash
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z" />
-                      <line x1="4" y1="20" x2="20" y2="4" stroke="currentColor" strokeWidth="2" />
+                        <line x1="2" y1="22" x2="22" y2="2" stroke="currentColor" strokeWidth="3" />
                     </svg>
                   ) : (
-                    // Video icon
+                      // Normal video icon
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z" />
                     </svg>
                   )}
                 </button>
+                )}
               </>
             )}
           </div>
@@ -507,12 +514,13 @@ const CallModal: React.FC<CallModalProps> = ({
                   onClick={() => setIsMuted(m => !m)}
                 >
                   {isMuted ? (
-                    // Mic off icon
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-6-6m0 0l-6 6m6-6V5a3 3 0 016 0v8m0 0l6 6" />
+                    // Mic off icon with larger/thicker slash
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19v2m0 0a7 7 0 01-7-7h2a5 5 0 0010 0h2a7 7 0 01-7 7zm0-7a3 3 0 003-3V5a3 3 0 00-6 0v4a3 3 0 003 3z" />
+                      <line x1="2" y1="22" x2="22" y2="2" stroke="currentColor" strokeWidth="3" />
                     </svg>
                   ) : (
-                    // Mic icon
+                    // Normal mic icon
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19v2m0 0a7 7 0 01-7-7h2a5 5 0 0010 0h2a7 7 0 01-7 7zm0-7a3 3 0 003-3V5a3 3 0 00-6 0v4a3 3 0 003 3z" />
                     </svg>
@@ -532,13 +540,13 @@ const CallModal: React.FC<CallModalProps> = ({
                     onClick={() => setIsVideoOff(v => !v)}
                   >
                     {isVideoOff ? (
-                      // Video off icon
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
+                      // Video off icon with larger/thicker slash
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z" />
-                        <line x1="4" y1="20" x2="20" y2="4" stroke="currentColor" strokeWidth="2" />
+                        <line x1="2" y1="22" x2="22" y2="2" stroke="currentColor" strokeWidth="3" />
                       </svg>
                     ) : (
-                      // Video icon
+                      // Normal video icon
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-7 h-7">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2z" />
                       </svg>
