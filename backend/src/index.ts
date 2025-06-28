@@ -39,6 +39,9 @@ const typingUsers = new Map<string, Set<string>>(); // Track who is typing to wh
 // In-memory map to store mutual call consent between user pairs
 const callConsents = new Map<string, boolean>(); // key: sorted userId-userId, value: true if consented
 
+// Store group messages per group id
+const groupMessages = new Map<string, Message[]>();
+
 // Helper to get consent key
 function getConsentKey(userId1: string, userId2: string): string {
   return [userId1, userId2].sort().join('-');
@@ -53,6 +56,7 @@ function clearAllData() {
   userChatRooms.clear();
   typingUsers.clear();
   callConsents.clear();
+  groupMessages.clear();
 
   // Force disconnect all sockets
   io.sockets.sockets.forEach((socket) => {
@@ -64,19 +68,6 @@ function clearAllData() {
 
 // Clear all data when server starts
 clearAllData();
-
-// Schedule periodic cleanup of stale connections
-setInterval(() => {
-  const connectedSockets = Array.from(io.sockets.sockets.keys());
-  
-  // Clean up any users with stale socket connections
-  Array.from(users.entries()).forEach(([socketId, user]) => {
-    if (!connectedSockets.includes(socketId)) {
-      console.log('Cleaning up stale connection for:', user.username);
-      handleUserDisconnect(socketId);
-    }
-  });
-}, 30000); // Run every 30 seconds
 
 // Helper function to get or create a chat room
 function getOrCreateChatRoom(userId1: string, userId2: string): string {
@@ -117,6 +108,24 @@ function cleanupUserData(userId: string) {
       users.delete(sid);
     }
   });
+
+  // --- Remove user's messages from all groups ---
+  for (const [groupId, msgs] of groupMessages.entries()) {
+    const filtered = msgs.filter(m => m.senderId !== userId);
+    if (filtered.length !== msgs.length) {
+      groupMessages.set(groupId, filtered);
+      // Notify all clients to remove this user's messages from their UI
+      io.emit('group:removeUserMessages', { groupId, userId });
+    }
+  }
+
+  // --- Remove user from all groupActiveMembers and emit updated counts ---
+  for (const [groupId, set] of groupActiveMembers.entries()) {
+    if (set.has(userId)) {
+      set.delete(userId);
+      io.emit('group:activeMembers', groupId, set.size);
+    }
+  }
 }
 
 // Helper function to handle user disconnection
@@ -173,6 +182,22 @@ process.on('SIGTERM', () => {
   clearAllData();
   process.exit(0);
 });
+
+// Static group definitions (can be moved to DB later)
+const groups = [
+  { id: 'group-flirty-vibes', name: 'Flirty Vibes', members: [] },
+  { id: 'group-midnight-chat', name: 'Midnight Chat', members: [] },
+  { id: 'group-hot-topics', name: 'Hot Topics', members: [] },
+  { id: 'group-healing-space', name: 'Healing Space', members: [] },
+  { id: 'group-naughty-corner', name: 'Naughty Corner', members: [] },
+  { id: 'group-singles-room', name: 'Singles Room', members: [] },
+  { id: 'group-only-boys', name: 'Only Boys', members: [] },
+  { id: 'group-only-girls', name: 'Only Girls', members: [] },
+  { id: 'group-teen-zone', name: 'Teen Zone', members: [] },
+];
+
+// Map groupId to Set of active userIds
+const groupActiveMembers = new Map(groups.map(g => [g.id, new Set()]))
 
 io.on('connection', (socket: Socket) => {
   console.log('Socket connected:', socket.id);
@@ -240,35 +265,66 @@ io.on('connection', (socket: Socket) => {
       return;
     }
 
-    console.log('Message from:', sender.username);
+    // --- GROUP CHAT MESSAGE LOGIC ---
+    if (message.receiverId.startsWith('group-')) {
+      // Group message
+      const groupId = message.receiverId;
+      const msgWithDelivery = { ...message, delivered: true };
+      const msgs = groupMessages.get(groupId) || [];
+      groupMessages.set(groupId, [...msgs, msgWithDelivery]);
+      // Broadcast to all group members (including sender)
+      io.to(groupId).emit('message:receive', { roomId: groupId, message: msgWithDelivery });
+      // Acknowledge to sender
+      if (callback) callback();
+      return;
+    }
+    // --- END GROUP CHAT MESSAGE LOGIC ---
+
+    // ... existing DM logic ...
     const roomId = getOrCreateChatRoom(message.senderId, message.receiverId);
-    
-    // Store message in chat room
+    // Store message in chat room, delivered: false initially
     const roomMessages = chatRooms.get(roomId) || [];
-    const messageWithDelivery = { ...message, delivered: true };
+    const messageWithDelivery = { ...message, delivered: false };
     chatRooms.set(roomId, [...roomMessages, messageWithDelivery]);
-
-    // Send to both sender and receiver with delivery status
-    const receiverSocketId = userSocketMap.get(message.receiverId);
-
     // Send to receiver if online
+    const receiverSocketId = userSocketMap.get(message.receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('message:receive', { roomId, message: messageWithDelivery });
-      // Send delivery confirmation to sender
-      socket.emit('message:delivered', { messageId: message.id });
     }
-
     // Acknowledge to sender
     if (callback) {
       callback(); // Acknowledge success
     }
   });
 
-  // Handle get messages
-  socket.on('get:messages', (roomId: string) => {
-    console.log('Getting messages for room:', roomId);
+  // Handle message delivered acknowledgment
+  socket.on('message:delivered', ({ messageId, roomId, senderId }) => {
+    // Find and update the message in chatRooms
     const roomMessages = chatRooms.get(roomId) || [];
-    console.log('Found messages:', roomMessages.length);
+    const idx = roomMessages.findIndex(m => m.id === messageId);
+    if (idx !== -1) {
+      roomMessages[idx].delivered = true;
+      chatRooms.set(roomId, roomMessages);
+      // Notify sender if online
+      const senderSocketId = userSocketMap.get(senderId);
+      if (senderSocketId) {
+        io.to(senderSocketId).emit('message:delivered', { messageId, roomId });
+      }
+    }
+  });
+
+  // Handle get messages
+  socket.on('get:messages', (roomIdRaw: string | number) => {
+    const roomId = String(roomIdRaw);
+    // --- GROUP CHAT HISTORY LOGIC ---
+    if (roomId.startsWith('group-')) {
+      const msgs = groupMessages.get(roomId) || [];
+      socket.emit('messages:history', { roomId, messages: msgs });
+      return;
+    }
+    // --- END GROUP CHAT HISTORY LOGIC ---
+    // ... existing DM logic ...
+    const roomMessages = chatRooms.get(roomId) || [];
     socket.emit('messages:history', { roomId, messages: roomMessages });
   });
 
@@ -424,7 +480,7 @@ io.on('connection', (socket: Socket) => {
     if (approved) {
       // Store consent
       callConsents.set(getConsentKey(senderId, receiverId), true);
-      // Send consent message ONLY to the original sender (not the one who approved)
+      // Send consent message to both users
       const consentMessage = {
         id: `consent-${Date.now()}`,
         senderId: receiverId, // the one who approved
@@ -438,7 +494,7 @@ io.on('connection', (socket: Socket) => {
       };
       const roomMessages = chatRooms.get(roomId) || [];
       chatRooms.set(roomId, [...roomMessages, consentMessage]);
-      // Notify ONLY the original sender
+      // Notify BOTH the original sender and the acceptor
       const senderSocketId = userSocketMap.get(senderId);
       if (senderSocketId) {
         const senderSocket = io.sockets.sockets.get(senderSocketId);
@@ -446,7 +502,13 @@ io.on('connection', (socket: Socket) => {
           senderSocket.emit('message:receive', { roomId, message: consentMessage });
         }
       }
-      // Do NOT send consent message to the user who approved
+      const receiverSocketId = userSocketMap.get(receiverId);
+      if (receiverSocketId) {
+        const receiverSocket = io.sockets.sockets.get(receiverSocketId);
+        if (receiverSocket) {
+          receiverSocket.emit('message:receive', { roomId, message: consentMessage });
+        }
+      }
     } else {
       // Send decline message to sender
       const declineMessage = {
@@ -474,7 +536,16 @@ io.on('connection', (socket: Socket) => {
   socket.on('call:consent:check', (data, callback) => {
     // data: { userId1, userId2 }
     const { userId1, userId2 } = data;
-    const consent = callConsents.get(getConsentKey(userId1, userId2)) || false;
+    let consent = callConsents.get(getConsentKey(userId1, userId2)) || false;
+    if (!consent) {
+      // Check chat history for call_consent message
+      const roomId = getOrCreateChatRoom(userId1, userId2);
+      const roomMessages = chatRooms.get(roomId) || [];
+      consent = roomMessages.some(
+        m => m.type === 'call_consent' &&
+          ((m.senderId === userId1 && m.receiverId === userId2) || (m.senderId === userId2 && m.receiverId === userId1))
+      );
+    }
     callback(consent);
   });
 
@@ -526,6 +597,106 @@ io.on('connection', (socket: Socket) => {
   // Handle message seen
   socket.on('message:seen', ({ roomId, messageId }: { roomId: string; messageId: string }) => {
     // Implementation of message:seen event
+  });
+
+  // Handle messages:viewed event
+  socket.on('messages:viewed', ({ roomId, viewerId }) => {
+    const roomMessages = chatRooms.get(roomId) || [];
+    let updated = false;
+    roomMessages.forEach(msg => {
+      if (msg.receiverId === viewerId && !msg.delivered) {
+        msg.delivered = true;
+        updated = true;
+        // Notify sender if online
+        const senderSocketId = userSocketMap.get(msg.senderId);
+        if (senderSocketId) {
+          io.to(senderSocketId).emit('message:delivered', { messageId: msg.id, roomId });
+        }
+      }
+    });
+    if (updated) {
+      chatRooms.set(roomId, roomMessages);
+    }
+  });
+
+  // --- GROUP CHAT SOCKET EVENTS START ---
+
+  // Join a group
+  socket.on('group:join', ({ groupId, userId }) => {
+    const set = groupActiveMembers.get(groupId);
+    if (set) {
+      set.add(userId);
+      socket.join(groupId); // Join the group room
+      // Emit updated count to all clients
+      io.emit('group:activeMembers', groupId, set.size);
+      // Emit confirmation to the joining socket
+      socket.emit('group:joined', { groupId });
+    }
+  });
+
+  // Leave a group
+  socket.on('group:leave', ({ groupId, userId }) => {
+    const set = groupActiveMembers.get(groupId);
+    if (set) {
+      set.delete(userId);
+      socket.leave(groupId); // Leave the group room
+      // Emit updated count to all clients
+      io.emit('group:activeMembers', groupId, set.size);
+    }
+  });
+
+  // Handle group message send (dedicated event)
+  socket.on('groupMessage', ({ groupId, message }, callback) => {
+    const msgWithDelivery = { ...message, delivered: true };
+    const msgs = groupMessages.get(groupId) || [];
+    groupMessages.set(groupId, [...msgs, msgWithDelivery]);
+    io.to(groupId).emit('groupMessage', { groupId, message: msgWithDelivery });
+    console.log(`User ${socket.id} sent message to group ${groupId}`);
+    if (callback) callback();
+  });
+
+  // Get number of active members in a group
+  socket.on('group:getActiveMembers', (groupId, callback) => {
+    const set = groupActiveMembers.get(groupId);
+    if (set) {
+      callback(Array.from(set).length);
+    } else {
+      callback(0);
+    }
+  });
+
+  // Get actual member IDs in a group
+  socket.on('group:getMembers', (groupId, callback) => {
+    const set = groupActiveMembers.get(groupId);
+    if (set) {
+      callback(Array.from(set));
+    } else {
+      callback([]);
+    }
+  });
+
+  // On disconnecting, remove user from all groups
+  socket.on('disconnecting', () => {
+    const userId = socketUserMap.get(socket.id);
+    if (userId) {
+      for (const set of groupActiveMembers.values()) {
+        set.delete(userId);
+      }
+    }
+  });
+
+  // --- GROUP CHAT SOCKET EVENTS END ---
+
+  // Update user avatar and broadcast to all users
+  socket.on('user:updateAvatar', ({ userId, avatar }) => {
+    // Update in users map
+    for (const [sid, user] of users.entries()) {
+      if (user.id === userId) {
+        users.set(sid, { ...user, avatar });
+      }
+    }
+    // Broadcast to all clients
+    io.emit('user:avatarUpdated', { userId, avatar });
   });
 });
 
