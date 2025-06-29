@@ -239,15 +239,24 @@ const BlogPost: React.FC = () => {
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center text-violet-600 hover:text-violet-700"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-             <span className="text-2xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
-              ChatSafari
-            </span>
+           {/* Left section - Back button */}
+            <div className="w-20 flex items-center">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center text-violet-600 hover:text-violet-700"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Center section - Brand */}
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+              <span className="text-2xl font-bold text-violet-600" style={{ fontFamily: 'Pacifico, cursive' }}>
+                ChatSafari
+              </span>
+            </div>
+
+            {/* Right section - Empty for balance */}
             <div className="w-20"></div>
           </div>
         </div>
