@@ -410,7 +410,7 @@ const Dashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Left section - Empty for centering */}
-            <div className="w-8"></div>
+            <div className="w-20"></div>
 
             {/* Center section - Brand */}
             <div className="flex-1 flex justify-center">
